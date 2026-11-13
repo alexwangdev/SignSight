@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "templates": [
+    { "intent": "HELLO",     "phrase": "Hello",          "curl": [0.2, 0.0, 0.0, 0.0, 0.0], "palm": { "x": 0.0,  "y": 0.0,  "z": 1.0 }, "palmLabel": "Forward",  "tolerance": 0.35, "samples": [] },
+    { "intent": "COFFEE",    "phrase": "Coffee, please", "curl": [0.5, 0.5, 0.5, 0.5, 0.5], "palm": { "x": -1.0, "y": 0.0,  "z": 0.0 }, "palmLabel": "Sideways", "tolerance": 0.35, "samples": [] },
+    { "intent": "HOT",       "phrase": "Hot, thanks",    "curl": [0.7, 0.9, 0.9, 0.9, 0.9], "palm": { "x": 0.0,  "y": 0.0,  "z": 1.0 }, "palmLabel": "Forward",  "tolerance": 0.35, "samples": [] },
+    { "intent": "ICED",      "phrase": "Iced, thanks",   "curl": [0.0, 0.0, 1.0, 1.0, 1.0], "palm": { "x": 0.0,  "y": 0.0,  "z": 1.0 }, "palmLabel": "Forward",  "tolerance": 0.35, "samples": [] },
+    { "intent": "YES",       "phrase": "Yes",            "curl": [1.0, 1.0, 1.0, 1.0, 1.0], "palm": { "x": 0.0,  "y": 0.0,  "z": 1.0 }, "palmLabel": "Forward",  "tolerance": 0.35, "samples": [] },
+    { "intent": "NO",        "phrase": "No",             "curl": [1.0, 0.0, 0.0, 1.0, 1.0], "palm": { "x": 0.0,  "y": 0.0,  "z": 1.0 }, "palmLabel": "Forward",  "tolerance": 0.35, "samples": [] },
+    { "intent": "THANK-YOU", "phrase": "Thank you",      "curl": [0.0, 0.0, 0.0, 0.0, 0.0], "palm": { "x": 0.0,  "y": -1.0, "z": 0.0 }, "palmLabel": "Down",     "tolerance": 0.35, "samples": [] },
+    { "intent": "HELP",      "phrase": "I need help",    "curl": [0.0, 1.0, 1.0, 1.0, 0.0], "palm": { "x": 0.0,  "y": 0.0,  "z": 1.0 }, "palmLabel": "Forward",  "tolerance": 0.35, "samples": [] }
+  ]
+}

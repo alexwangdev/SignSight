@@ -1,0 +1,24 @@
+{
+  "lessons": [
+    {
+      "id": 1,
+      "title": "Lesson 1 · Greetings",
+      "words": [
+        { "intent": "HELLO",     "meaning": "Hello" },
+        { "intent": "YES",       "meaning": "Yes" },
+        { "intent": "NO",        "meaning": "No" },
+        { "intent": "THANK-YOU", "meaning": "Thank you" }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Lesson 2 · Café",
+      "words": [
+        { "intent": "COFFEE", "meaning": "Coffee, please" },
+        { "intent": "HOT",    "meaning": "Hot, thanks" },
+        { "intent": "ICED",   "meaning": "Iced, thanks" },
+        { "intent": "HELP",   "meaning": "I need help" }
+      ]
+    }
+  ]
+}

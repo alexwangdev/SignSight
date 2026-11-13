@@ -1,0 +1,26 @@
+# Unity
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+*.csproj
+*.sln
+*.user
+*.pidb
+*.booproj
+*.apk
+*.aab
+/.utmp/
+
+# Kept local, not in the repo
+/Archive_v1/
+/Submission/
+
+# Secrets (never committed)
+.env
+/Assets/StreamingAssets/config.json
+/Assets/StreamingAssets/config.json.meta
