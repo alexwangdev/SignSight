@@ -21,9 +21,10 @@ No image-recognition model and no third-party sign-language API: recognition is 
 
 ## Third-party assets
 
-- **Teacher character:** a free character from **Adobe Mixamo** (mesh `Ch33`), downloaded as FBX for Unity, T-pose,
-  imported as a Unity Humanoid. Per Adobe, Mixamo characters are royalty-free for commercial projects including games.
-  We did not model it. File: `Assets/Models/Teacher.fbx`.
+- **Teacher character:** **Microsoft Rocketbox** avatar `Male_Adult_01` (facial version with 52 ARKit blendshapes),
+  MIT License — https://github.com/microsoft/Microsoft-Rocketbox. Imported as a Unity Humanoid. We did not model it.
+  Files: `Assets/Models/Rocketbox/`. `Assets/Editor/FixRocketboxMaxImport.cs` is a modified copy of the MIT import
+  script from the same repository (scoped to that folder, Humanoid import; changes listed in its header).
 - Meta XR All-in-One SDK v207, Unity OpenXR 1.18.0, Unity XR Hands 1.9.0, TextMeshPro.
 
 ## Honest notes

@@ -31,7 +31,7 @@ namespace SignSight.UI
 
         [SerializeField] private ScoreManager score;
 
-        [Header("Hold ring (SPEC §6: blue ring fills over 0.6 s while holding)")]
+        [Header("Progress ring (SPEC v3 §6: blue ring fills over the 3 s attempt window)")]
         [SerializeField] private SignSight.Hand.SignRecognizer recognizer;
         [SerializeField] private UnityEngine.UI.Image holdRing;
         [SerializeField] private GameObject holdRingRoot;
@@ -108,14 +108,14 @@ namespace SignSight.UI
                     SetInstruction("Pinch a lesson to start");
                     break;
                 case LessonManager.Phase.Demonstrate:
-                    wordCard?.Show(word.intent, word.meaning);
+                    wordCard?.Show(word.intent, word.meaning, word.cue);
                     SetInstruction("Watch the teacher");
                     break;
                 case LessonManager.Phase.Copy:
-                    wordCard?.Show(word.intent, word.meaning);
+                    wordCard?.Show(word.intent, word.meaning, word.cue);
                     SetInstruction(lessons.LastAttempt.HasValue
                         ? $"You signed <b>{lessons.LastAttempt.Value.Top1.intent}</b>"
-                        : "Your turn: copy the sign and hold it");
+                        : "Your turn: copy the sign — the ring shows your 3 seconds");
                     break;
                 case LessonManager.Phase.Feedback:
                     wordCard?.Hide(); // the comparison hands use the space; the word is in the feedback title

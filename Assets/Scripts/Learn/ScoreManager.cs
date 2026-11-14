@@ -14,7 +14,7 @@ namespace SignSight.Learn
     public class ScoreManager : MonoBehaviour
     {
         public const int FirstTryPoints = 10, SecondTryPoints = 5, StreakBonus = 5, StreakLength = 3, MaxAttempts = 2;
-        public const float MinConfidence = 0.7f, MaxDistance = 0.35f;
+        public const float MaxDistance = 0.35f;
 
         public enum Outcome { CorrectFirstTry, CorrectSecondTry, WrongCanRetry, WrongMovedOn }
 
@@ -66,9 +66,13 @@ namespace SignSight.Learn
 
         public static int Stars(int total) => total >= 70 ? 3 : total >= 50 ? 2 : total >= 30 ? 1 : 0;
 
-        /// <summary>The §7 rule.</summary>
+        /// <summary>
+        /// v3 rule (SPEC v3 §4.7): Top1 is the target, its movement was completed inside the 3 s window, and the total
+        /// distance (0.4 handshape + 0.2 location + 0.4 movement) is within tolerance (0.35). Points are unchanged.
+        /// </summary>
         public static bool IsCorrect(LessonManager.Word target, RecognitionResult r) =>
-            r.Top1 != null && r.Top1.intent == target.intent && r.Confidence >= MinConfidence && r.Distance <= MaxDistance;
+            r.Top1 != null && r.Top1.intent == target.intent && r.MovementCompleted &&
+            r.Distance <= Mathf.Min(MaxDistance, r.Top1.tolerance > 0f ? r.Top1.tolerance : MaxDistance);
 
         public void ResetAll()
         {

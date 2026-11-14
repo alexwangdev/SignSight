@@ -4,20 +4,20 @@
       "id": 1,
       "title": "Lesson 1 · Greetings",
       "words": [
-        { "intent": "HELLO",     "meaning": "Hello" },
-        { "intent": "YES",       "meaning": "Yes" },
-        { "intent": "NO",        "meaning": "No" },
-        { "intent": "THANK-YOU", "meaning": "Thank you" }
+        { "intent": "HELLO",     "meaning": "Hello",     "cue": "Flat hand by your forehead — wave side to side" },
+        { "intent": "YES",       "meaning": "Yes",       "cue": "Fist — nod your wrist up and down, twice" },
+        { "intent": "NO",        "meaning": "No",        "cue": "Index + middle snap down onto your thumb" },
+        { "intent": "THANK-YOU", "meaning": "Thank you", "cue": "Flat hand from your chin — push forward" }
       ]
     },
     {
       "id": 2,
       "title": "Lesson 2 · Café",
       "words": [
-        { "intent": "COFFEE", "meaning": "Coffee, please" },
-        { "intent": "HOT",    "meaning": "Hot, thanks" },
-        { "intent": "ICED",   "meaning": "Iced, thanks" },
-        { "intent": "HELP",   "meaning": "I need help" }
+        { "intent": "COFFEE", "meaning": "Coffee, please", "cue": "Both fists — only the top hand cranks" },
+        { "intent": "HOT",    "meaning": "Hot, thanks",    "cue": "Claw at your mouth — flick out and down, fast" },
+        { "intent": "COLD",   "meaning": "Cold, thanks",   "cue": "Both fists — shiver side to side" },
+        { "intent": "HELP",   "meaning": "I need help",    "cue": "Fist on your flat palm — lift both hands" }
       ]
     }
   ]

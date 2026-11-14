@@ -1,13 +1,90 @@
-{
-  "version": 1,
+﻿{
+  "version": 2,
   "templates": [
-    { "intent": "HELLO",     "phrase": "Hello",          "curl": [0.2, 0.0, 0.0, 0.0, 0.0], "palm": { "x": 0.0,  "y": 0.0,  "z": 1.0 }, "palmLabel": "Forward",  "tolerance": 0.35, "samples": [] },
-    { "intent": "COFFEE",    "phrase": "Coffee, please", "curl": [0.5, 0.5, 0.5, 0.5, 0.5], "palm": { "x": -1.0, "y": 0.0,  "z": 0.0 }, "palmLabel": "Sideways", "tolerance": 0.35, "samples": [] },
-    { "intent": "HOT",       "phrase": "Hot, thanks",    "curl": [0.7, 0.9, 0.9, 0.9, 0.9], "palm": { "x": 0.0,  "y": 0.0,  "z": 1.0 }, "palmLabel": "Forward",  "tolerance": 0.35, "samples": [] },
-    { "intent": "ICED",      "phrase": "Iced, thanks",   "curl": [0.0, 0.0, 1.0, 1.0, 1.0], "palm": { "x": 0.0,  "y": 0.0,  "z": 1.0 }, "palmLabel": "Forward",  "tolerance": 0.35, "samples": [] },
-    { "intent": "YES",       "phrase": "Yes",            "curl": [1.0, 1.0, 1.0, 1.0, 1.0], "palm": { "x": 0.0,  "y": 0.0,  "z": 1.0 }, "palmLabel": "Forward",  "tolerance": 0.35, "samples": [] },
-    { "intent": "NO",        "phrase": "No",             "curl": [1.0, 0.0, 0.0, 1.0, 1.0], "palm": { "x": 0.0,  "y": 0.0,  "z": 1.0 }, "palmLabel": "Forward",  "tolerance": 0.35, "samples": [] },
-    { "intent": "THANK-YOU", "phrase": "Thank you",      "curl": [0.0, 0.0, 0.0, 0.0, 0.0], "palm": { "x": 0.0,  "y": -1.0, "z": 0.0 }, "palmLabel": "Down",     "tolerance": 0.35, "samples": [] },
-    { "intent": "HELP",      "phrase": "I need help",    "curl": [0.0, 1.0, 1.0, 1.0, 0.0], "palm": { "x": 0.0,  "y": 0.0,  "z": 1.0 }, "palmLabel": "Forward",  "tolerance": 0.35, "samples": [] }
+    {
+      "intent": "HELLO", "phrase": "Hello", "hands": "right",
+      "curlRight": [0.2, 0.0, 0.0, 0.0, 0.0], "spread": 0.1,
+      "palm": { "x": 0.0, "y": 0.0, "z": 1.0 }, "palmLabel": "Forward",
+      "startLocation": "beside the temple / forehead, <20cm from the head",
+      "movement": { "type": "wave", "axis": "wrist-yaw", "amplitude": 25, "unit": "deg", "repeats": 2, "durationSec": 1.2, "movingHand": "" },
+      "head": { "type": "none", "amplitudeDeg": 0, "repeats": 0 },
+      "face": { "smile": 0, "jawOpen": 0 },
+      "tolerance": 0.35, "samples": []
+    },
+    {
+      "intent": "YES", "phrase": "Yes", "hands": "right",
+      "curlRight": [1.0, 1.0, 1.0, 1.0, 1.0], "spread": 0.0,
+      "palm": { "x": 0.0, "y": 0.0, "z": 1.0 }, "palmLabel": "Forward",
+      "startLocation": "chest height",
+      "movement": { "type": "wrist-nod", "axis": "wrist-pitch", "amplitude": 20, "unit": "deg", "repeats": 2, "durationSec": 1.0, "movingHand": "" },
+      "head": { "type": "nod", "amplitudeDeg": 10, "repeats": 2 },
+      "face": { "smile": 0, "jawOpen": 0 },
+      "tolerance": 0.35, "samples": []
+    },
+    {
+      "intent": "NO", "phrase": "No", "hands": "right",
+      "curlRight": [0.3, 0.0, 0.0, 1.0, 1.0], "spread": 0.0,
+      "palm": { "x": 0.0, "y": 0.0, "z": 1.0 }, "palmLabel": "Forward",
+      "startLocation": "chest height",
+      "movement": { "type": "snap", "axis": "index-middle-to-thumb", "amplitude": 40, "unit": "pct", "repeats": 1, "durationSec": 0.4, "movingHand": "" },
+      "endCurlRight": [0.45, 0.55, 0.55, 1.0, 1.0],
+      "head": { "type": "shake", "amplitudeDeg": 12, "repeats": 2 },
+      "face": { "smile": 0, "jawOpen": 0 },
+      "tolerance": 0.35, "samples": []
+    },
+    {
+      "intent": "THANK-YOU", "phrase": "Thank you", "hands": "right",
+      "curlRight": [0.0, 0.0, 0.0, 0.0, 0.0], "spread": 0.1,
+      "palm": { "x": 0.0, "y": 0.0, "z": -1.0 }, "palmLabel": "TowardSelf",
+      "startLocation": "fingers at the chin / lips, <15cm from the chin",
+      "movement": { "type": "push-forward", "axis": "forward-down", "amplitude": 18, "unit": "cm", "repeats": 1, "durationSec": 0.8, "movingHand": "" },
+      "head": { "type": "none", "amplitudeDeg": 0, "repeats": 0 },
+      "face": { "smile": 60, "jawOpen": 10 },
+      "tolerance": 0.35, "samples": []
+    },
+    {
+      "intent": "COFFEE", "phrase": "Coffee, please", "hands": "both",
+      "curlRight": [1.0, 1.0, 1.0, 1.0, 1.0],
+      "curlLeft":  [1.0, 1.0, 1.0, 1.0, 1.0], "spread": 0.0,
+      "palm": { "x": 0.0, "y": -1.0, "z": 0.0 }, "palmLabel": "Down",
+      "startLocation": "chest, dominant hand on top of non-dominant, hands <12cm apart",
+      "movement": { "type": "crank", "axis": "wrist-roll", "amplitude": 30, "unit": "deg", "repeats": 2, "durationSec": 1.2, "movingHand": "dominant-only" },
+      "endCurlRight": [1.0, 1.0, 1.0, 1.0, 1.0],
+      "head": { "type": "none", "amplitudeDeg": 0, "repeats": 0 },
+      "face": { "smile": 0, "jawOpen": 0 },
+      "tolerance": 0.35, "samples": []
+    },
+    {
+      "intent": "HOT", "phrase": "Hot, thanks", "hands": "right",
+      "curlRight": [0.6, 0.6, 0.6, 0.6, 0.6], "spread": 0.7,
+      "palm": { "x": 0.0, "y": 0.0, "z": -1.0 }, "palmLabel": "TowardSelf",
+      "startLocation": "at the mouth, <12cm from the mouth",
+      "movement": { "type": "flick-out", "axis": "outward-down", "amplitude": 15, "unit": "cm", "repeats": 1, "durationSec": 0.5, "movingHand": "" },
+      "head": { "type": "none", "amplitudeDeg": 0, "repeats": 0 },
+      "face": { "smile": 0, "jawOpen": 20 },
+      "tolerance": 0.35, "samples": []
+    },
+    {
+      "intent": "COLD", "phrase": "Cold, thanks", "hands": "both",
+      "curlRight": [1.0, 1.0, 1.0, 1.0, 1.0],
+      "curlLeft":  [1.0, 1.0, 1.0, 1.0, 1.0], "spread": 0.0,
+      "palm": { "x": -1.0, "y": 0.0, "z": 0.0 }, "palmLabel": "Sideways",
+      "startLocation": "chest height, hands ~15cm apart",
+      "movement": { "type": "shake", "axis": "side-to-side", "amplitude": 4, "unit": "cm", "repeats": 5, "durationSec": 1.0, "movingHand": "" },
+      "head": { "type": "none", "amplitudeDeg": 0, "repeats": 0 },
+      "face": { "smile": 0, "jawOpen": 0 },
+      "tolerance": 0.35, "samples": []
+    },
+    {
+      "intent": "HELP", "phrase": "I need help", "hands": "both",
+      "curlRight": [0.9, 1.0, 1.0, 1.0, 1.0],
+      "curlLeft":  [0.0, 0.0, 0.0, 0.0, 0.0], "spread": 0.0,
+      "palm": { "x": 0.0, "y": -1.0, "z": 0.0 }, "palmLabel": "Down",
+      "startLocation": "dominant hand resting on the non-dominant palm, chest height",
+      "movement": { "type": "lift", "axis": "up-forward-arc", "amplitude": 11, "unit": "cm", "repeats": 1, "durationSec": 0.8, "movingHand": "" },
+      "head": { "type": "none", "amplitudeDeg": 0, "repeats": 0 },
+      "face": { "smile": 0, "jawOpen": 0 },
+      "tolerance": 0.35, "samples": []
+    }
   ]
 }

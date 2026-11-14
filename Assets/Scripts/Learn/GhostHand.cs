@@ -3,9 +3,11 @@ using UnityEngine;
 namespace SignSight.Learn
 {
     /// <summary>
-    /// A simple right hand built from capsules (palm + 3 segments per finger), posed from curl[5] (SPEC §8.1).
-    /// Used twice in the feedback panel: the semi-transparent target hand and the learner's hand, same size and
+    /// A simple hand built from capsules (palm + 3 segments per finger), posed from curl[5] (SPEC v3 §8.1).
+    /// Used in the feedback panel for the semi-transparent target hand(s) and the learner's hand(s), same size and
     /// orientation, so they can be compared side by side. Each finger can be coloured on its own (§8.2).
+    /// A left hand is the right hand mirrored (one implementation, SPEC v3 §8.1). It can replay a sign's movement
+    /// through SetMotion (offsets in the signer's space, which is this transform's local space).
     /// Local space: fingers point +Y, the palm faces +Z (toward the viewer), thumb on -X.
     /// </summary>
     public class GhostHand : MonoBehaviour
@@ -30,6 +32,8 @@ namespace SignSight.Learn
         private static readonly float[] BaseX = { -0.040f, -0.027f, -0.009f, 0.009f, 0.026f };
         private const float Radius = 0.0085f;
 
+        private Transform _motionRoot, _handRoot;
+        private bool _left;
         private Transform[][] _joints;
         private Renderer[][] _fingerRenderers;
         private Renderer _palmRenderer;
@@ -44,9 +48,13 @@ namespace SignSight.Learn
             if (_built) return;
             _built = true;
             _block = new MaterialPropertyBlock();
+            // MotionRoot carries the movement (unmirrored); HandRoot carries the size and the left/right mirror.
+            _motionRoot = new GameObject("MotionRoot").transform;
+            _motionRoot.SetParent(transform, false);
             var root = new GameObject("HandRoot").transform;
-            root.SetParent(transform, false);
-            root.localScale = Vector3.one * scale;
+            root.SetParent(_motionRoot, false);
+            _handRoot = root;
+            ApplyScale();
 
             var palm = GameObject.CreatePrimitive(PrimitiveType.Cube);
             palm.name = "Palm";
@@ -99,6 +107,48 @@ namespace SignSight.Learn
             r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             return r;
         }
+
+        /// <summary>Left hand = the right hand mirrored across its local X.</summary>
+        public bool IsLeft
+        {
+            get => _left;
+            set
+            {
+                _left = value;
+                if (_built) ApplyScale();
+            }
+        }
+
+        /// <summary>Extra size factor (e.g. smaller when two hands share the panel).</summary>
+        public float SizeMultiplier
+        {
+            get => _size;
+            set
+            {
+                _size = value;
+                if (_built) ApplyScale();
+            }
+        }
+        private float _size = 1f;
+
+        /// <summary>How much bigger than a real hand this one is drawn; movement offsets are scaled by the same factor.</summary>
+        public float DrawScale => scale * _size;
+
+        private void ApplyScale()
+        {
+            float s = DrawScale;
+            _handRoot.localScale = new Vector3(_left ? -s : s, s, s);
+        }
+
+        /// <summary>Moves the hand from its start pose (metres / rotation in the signer's space = local space).</summary>
+        public void SetMotion(Vector3 offset, Quaternion rotation)
+        {
+            if (!_built) Build();
+            _motionRoot.localPosition = offset;
+            _motionRoot.localRotation = rotation;
+        }
+
+        public void ClearMotion() => SetMotion(Vector3.zero, Quaternion.identity);
 
         /// <summary>Poses the hand. curl: 0 = straight, 1 = fully curled.</summary>
         public void Pose(float[] curl)

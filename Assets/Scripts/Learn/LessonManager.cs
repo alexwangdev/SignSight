@@ -18,7 +18,8 @@ namespace SignSight.Learn
 
         public enum Phase { Loading, Menu, Demonstrate, Copy, Feedback, LessonSummary, Complete }
 
-        [Serializable] public class Word { public string intent; public string meaning; }
+        /// <summary>cue: one-line movement cue for the word card (SPEC v3 §6), e.g. "Both fists — only the top hand cranks".</summary>
+        [Serializable] public class Word { public string intent; public string meaning; public string cue; }
         [Serializable] public class Lesson { public int id; public string title; public Word[] words; }
         [Serializable] public class LessonFile { public Lesson[] lessons; }
 
@@ -188,7 +189,8 @@ namespace SignSight.Learn
                 return;
             }
             SetPhase(Phase.Demonstrate);
-            teacher.Demonstrate(t.curl, t.palm);
+            // The teacher always shows the §4.3 definition; recordings only tune recognition.
+            teacher.Demonstrate(TemplateStore.Canonical(t.intent) ?? t);
         }
 
         private void OnDemonstrationFinished()

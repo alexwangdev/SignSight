@@ -287,6 +287,11 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!137 &136476920 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3306046335107235602, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+  m_PrefabInstance: {fileID: 3362038296222486585}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &233227051
 GameObject:
   m_ObjectHideFlags: 0
@@ -785,7 +790,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -3577,14 +3582,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SignSight.Hand.SignRecognizer
   handProvider: {fileID: 706792516}
-  signingHand: 1
   listening: 1
   onlyFireWithinTolerance: 0
-  holdSeconds: 0.6
+  attemptWindowSeconds: 3
   lockoutSeconds: 1
-  trackingLossClearSeconds: 0.5
-  smoothingFrames: 5
-  rearmSeconds: 0.3
+  settleMinSeconds: 0.25
+  settleMaxSeconds: 1
+  stillSpeed: 0.15
+  bufferSeconds: 3
+  rearmStillSeconds: 0.3
+  editorDepthWeight: 0.4
+  editorSmoothSeconds: 0.3
+  editorStillAllowance: 0.1
   pauseWhilePointingAtUi: 1
 --- !u!4 &1377632453
 Transform:
@@ -4000,7 +4009,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43719cd4f9940df48a84882a6460f6cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SignSight.Learn.LessonManager
-  teacher: {fileID: 4707070948111801393}
+  teacher: {fileID: 3362038296222486587}
   recognizer: {fileID: 1377632452}
 --- !u!4 &1822268960
 Transform:
@@ -4432,6 +4441,11 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1984044883}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1991186022 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6906890704673546437, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+  m_PrefabInstance: {fileID: 3362038296222486585}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2025316347
 GameObject:
   m_ObjectHideFlags: 0
@@ -4462,13 +4476,13 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 4707070948111801392}
   - {fileID: 1313470967593580081}
   - {fileID: 2041272824}
   - {fileID: 961254379}
   - {fileID: 450790220}
   - {fileID: 4948553861548291723}
   - {fileID: 2029533779}
+  - {fileID: 3362038296222486586}
   m_Father: {fileID: 52917186}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2025316349
@@ -5107,7 +5121,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2f807ebe67183e468a9fa7d0f395894, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SignSight.UI.WordCard
---- !u!1001 &4707070948111801391
+--- !u!1001 &3362038296222486585
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -5115,13 +5129,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2025316348}
     m_Modifications:
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: face
+      value: 
+      objectReference: {fileID: 3362038296222486589}
     - target: {fileID: 6093902652468623999, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.32
       objectReference: {fileID: 0}
     - target: {fileID: 6093902652468623999, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.6298589
+      value: -1.6670574
       objectReference: {fileID: 0}
     - target: {fileID: 6093902652468623999, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
       propertyPath: m_LocalPosition.z
@@ -5162,24 +5180,44 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6906890704673546437, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3362038296222486589}
   m_SourcePrefab: {fileID: 100100000, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
---- !u!4 &4707070948111801392 stripped
+--- !u!4 &3362038296222486586 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6093902652468623999, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
-  m_PrefabInstance: {fileID: 4707070948111801391}
+  m_PrefabInstance: {fileID: 3362038296222486585}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &4707070948111801393 stripped
+--- !u!114 &3362038296222486587 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
-  m_PrefabInstance: {fileID: 4707070948111801391}
+  m_PrefabInstance: {fileID: 3362038296222486585}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1991186022}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 762cd56697dd12f45bd4cd5dda626053, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SignSight.Learn.TeacherAvatarDriver
+--- !u!114 &3362038296222486589
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1991186022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c2129aee06b2be4dac1156f1428ac26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SignSight.Learn.FaceDriver
+  face: {fileID: 136476920}
+  fadeSeconds: 0.3
+  idleBlink: 1
+  blinkIntervalSeconds: {x: 4, y: 6}
+  blinkSeconds: 0.2
 --- !u!4 &4948553861548291723 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 44769882831494674, guid: d4bdfe5ad3786584f90ba92e17ad87f0, type: 3}
@@ -5245,6 +5283,10 @@ PrefabInstance:
       propertyPath: lessons
       value: 
       objectReference: {fileID: 1822268959}
+    - target: {fileID: 9138438538647848227, guid: d4bdfe5ad3786584f90ba92e17ad87f0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.06
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
