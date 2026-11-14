@@ -83,19 +83,33 @@ namespace SignSight.Learn
             if (_targetLeft != null) return;
             _targetPos = targetHand.transform.localPosition;
             _userPos = userHand.transform.localPosition;
-            // Left hands are mirrored copies of the right ones (one implementation).
-            _targetLeft = Instantiate(targetHand.gameObject, targetHand.transform.parent).GetComponent<GhostHand>();
-            _targetLeft.name = "TargetHandLeft";
-            _targetLeft.IsLeft = true;
-            _userLeft = Instantiate(userHand.gameObject, userHand.transform.parent).GetComponent<GhostHand>();
-            _userLeft.name = "YourHandLeft";
-            _userLeft.IsLeft = true;
+            // Left hands are mirrored right hands (one implementation).
+            _targetLeft = NewLeftHand(targetHand, "TargetHandLeft");
+            _userLeft = NewLeftHand(userHand, "YourHandLeft");
             if (movementHint == null && looksLike != null)
             {
                 movementHint = Instantiate(looksLike, looksLike.transform.parent);
                 movementHint.name = "MovementHint";
-                movementHint.transform.localPosition = looksLike.transform.localPosition + new Vector3(0f, -0.023f, 0f);
+                movementHint.transform.localPosition = looksLike.transform.localPosition + new Vector3(0f, -0.045f, 0f);
             }
+        }
+
+        /// <summary>
+        /// A fresh GhostHand with the same settings as the right one, mirrored. (Instantiating the built right hand
+        /// would also copy its already-built geometry, leaving a stale, unposed hand inside the copy.)
+        /// </summary>
+        private static GhostHand NewLeftHand(GhostHand right, string name)
+        {
+            var go = new GameObject(name);
+            go.SetActive(false); // so Awake (Build) waits until the settings are copied
+            go.transform.SetParent(right.transform.parent, false);
+            go.transform.localPosition = right.transform.localPosition;
+            go.transform.localRotation = right.transform.localRotation;
+            var g = go.AddComponent<GhostHand>();
+            JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(right), g);
+            g.IsLeft = true;
+            go.SetActive(true);
+            return g;
         }
 
         private void OnPhase(LessonManager.Phase p)
@@ -127,6 +141,7 @@ namespace SignSight.Learn
                     SetText(hint, v.StreakBonusAwarded ? $"<color=#4CD964>Streak ×{score.Streak} +{ScoreManager.StreakBonus}</color>" : "");
                     SetText(looksLike, "");
                     SetText(movementHint, "");
+                    StackText();
                     return;
             }
             // Compare against what the learner did for the word being learned: the target's own start pose,
@@ -178,9 +193,41 @@ namespace SignSight.Learn
             LastMovementHint = MovementHint(attempt, target);
             SetText(movementHint, string.IsNullOrEmpty(LastMovementHint) ? "" : $"<color=#7FC8FF>Movement:</color> {LastMovementHint}");
 
+            StackText();
             StopReplay();
             _replay = StartCoroutine(Replay(target));
         }
+
+        /// <summary>Lays the text lines out top-down by their real (wrapped) height, so they never overlap.</summary>
+        private void StackText()
+        {
+            if (title == null) return;
+            if (!_textTopCaptured)
+            {
+                var rt = (RectTransform)title.transform;
+                _textTop = rt.localPosition.y + rt.sizeDelta.y * 0.5f; // top edge of the title box (top-left aligned)
+                _textTopCaptured = true;
+            }
+            float cursor = _textTop;
+            foreach (var t in new[] { title, hint, looksLike, movementHint })
+            {
+                if (t == null) continue;
+                var rt = (RectTransform)t.transform;
+                if (string.IsNullOrEmpty(t.text))
+                {
+                    continue;
+                }
+                t.ForceMeshUpdate();
+                float h = Mathf.Max(t.preferredHeight, 0.01f);
+                rt.sizeDelta = new Vector2(rt.sizeDelta.x, h);
+                var p = rt.localPosition;
+                rt.localPosition = new Vector3(p.x, cursor - h * 0.5f, p.z);
+                cursor -= h + 0.006f;
+            }
+        }
+
+        private float _textTop;
+        private bool _textTopCaptured;
 
         /// <summary>The movement line (§8.3): what was wrong with the movement for the word being learned.</summary>
         public static string MovementHint(RecognitionResult attempt, SignTemplate target)

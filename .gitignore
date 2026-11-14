@@ -24,3 +24,8 @@
 .env
 /Assets/StreamingAssets/config.json
 /Assets/StreamingAssets/config.json.meta
+/Builds/
+
+# Meta Immersive Debugger dev-agent pairing token + LAN address (generated per machine)
+/Assets/Resources/DevAgentSettings.asset
+/Assets/Resources/DevAgentSettings.asset.meta

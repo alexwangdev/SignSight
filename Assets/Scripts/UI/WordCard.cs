@@ -22,7 +22,7 @@ namespace SignSight.UI
             {
                 meaningText.text = string.IsNullOrEmpty(cue)
                     ? meaning
-                    : $"{meaning}\n<size=62%><color=#BFD4FF>{cue}</color></size>";
+                    : $"{meaning}\n<size=80%><color=#BFD4FF>{cue}</color></size>";
             }
         }
 

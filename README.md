@@ -1,23 +1,41 @@
 # SignSight Learn
 
-Learn 8 useful ASL handshapes in mixed reality on Meta Quest 3 / 3S. A 3D teacher sitting opposite you shows each
-sign, you copy it with your own hands, hold for 0.6 s, and get scored. When you are wrong, a ghost-hand comparison
-shows which finger is off, by how much, and how to fix it.
+Learn 8 **real ASL signs** in mixed reality on Meta Quest 3 / 3S. A 3D teacher sitting opposite you performs each
+sign — handshape, location, movement, head and face — you copy it with your own hands within 3 seconds, and get
+scored on handshape, start location and movement. When you are wrong, ghost hands show the target next to yours,
+replay the movement at half speed, mark the fingers that are off, and say what to change in the movement.
 
 Hands only, seated, no controllers. Built for the Meta VR Start Developer Competition 2026 (Productivity, New Experience).
+
+## The 8 signs (definitions from Lifeprint / ASL University)
+
+| Lesson | Sign | How it is made |
+|---|---|---|
+| 1 | HELLO | Flat hand by the forehead, wave side to side |
+| 1 | YES | S-fist nodding at the wrist, with a head nod |
+| 1 | NO | Index + middle snap down onto the thumb, with a head shake |
+| 1 | THANK-YOU | Flat hand from the chin, pushed forward, with a smile |
+| 2 | COFFEE | Two S-fists, top hand cranks a grinder, bottom hand still |
+| 2 | HOT | Claw hand at the mouth, flicked out and down, fast |
+| 2 | COLD | Two S-fists shivering side to side |
+| 2 | HELP | Fist resting on the flat palm, both hands lift together |
+
+ICED is not taught: in ASL iced coffee is fingerspelled I-C-E + COFFEE, so COLD replaces it. Definitions follow
+Lifeprint (lifeprint.com, Dr. Bill Vicars); they have not been reviewed by Deaf signers yet — corrections welcome.
 
 ## How it works
 
 | Piece | Where |
 |---|---|
-| Hand features: curl per finger (bend angles between XR Hands joints, 0 = straight, 1 = curled) + palm direction | `Assets/Scripts/Hand/CurlCalculator.cs` |
-| Templates (8 signs) and the recorder that tunes them | `Assets/Scripts/Hand/TemplateStore.cs`, `TemplateRecorder.cs`, `Assets/Scenes/TemplateRecorder.unity` |
-| Recognition: weighted distance to templates, 5-frame smoothing, 0.6 s hold, 1 s lockout, Top1 / Top2 | `Assets/Scripts/Hand/SignRecognizer.cs` |
-| Teacher: a humanoid driven directly from the same template numbers the recognizer checks | `Assets/Scripts/Learn/TeacherAvatarDriver.cs` |
-| Lessons (2 × 4 words), scoring (+10 / +5 / streaks / stars), per-finger feedback | `Assets/Scripts/Learn/` |
-| Lesson data | `Assets/StreamingAssets/lessons.json`, default templates `Assets/Resources/templates.json` |
+| Hand features: curl per finger (bend angles between XR Hands joints) + palm direction | `Assets/Scripts/Hand/CurlCalculator.cs` |
+| Both hands buffered in the signer's body frame; one movement detector per sign (wave, wrist nod, snap, push, crank, flick, shake, lift) | `Assets/Scripts/Hand/TrajectoryTracker.cs` |
+| Recognition: 0.4 handshape + 0.2 start location + 0.4 movement, 3 s attempt window, settle, 1 s lockout, Top1 / Top2 | `Assets/Scripts/Hand/SignRecognizer.cs` |
+| Sign definitions (v2 schema: hands, curls, palm, movement, head, face) and the recorder that tunes them from your own hands | `Assets/Resources/templates.json`, `TemplateStore.cs`, `TemplateRecorder.cs`, `Assets/Scenes/TemplateRecorder.unity` |
+| Teacher: both arms, fingers, head nod / shake and face (smile, blink) driven from the same definitions | `Assets/Scripts/Learn/TeacherAvatarDriver.cs`, `SignMotion.cs`, `FaceDriver.cs` |
+| Lessons (2 × 4 signs), scoring (+10 / +5 / streaks / stars), ghost-hand + movement feedback | `Assets/Scripts/Learn/` |
+| Lesson data | `Assets/StreamingAssets/lessons.json` |
 
-No image-recognition model and no third-party sign-language API: recognition is computed from Quest's 26 hand joints.
+No image-recognition model and no third-party sign-language API: recognition is computed from Quest's hand joints.
 
 ## Third-party assets
 
@@ -29,18 +47,16 @@ No image-recognition model and no third-party sign-language API: recognition is 
 
 ## Honest notes
 
-- **Static handshapes, not full ASL signs.** Several of these words are signed with movement in real ASL (for example
-  COFFEE, HOT and THANK-YOU). v1 recognises one held handshape per word: COFFEE = C hand, HOT = A hand, ICED = L hand,
-  YES = S fist, NO = index + middle, THANK-YOU = flat hand palm down, HELP = Y hand, HELLO = B hand. Treat them as
-  handshape practice, not a complete ASL vocabulary.
 - **Not tested on a real Quest.** Development and testing used Meta XR Simulator v207 with laptop-webcam hand tracking.
-  Recognition thresholds (0.35 distance, 0.6 s hold) are untuned for real Quest tracking.
-- Quest 3 / 3S has no face tracking, so nothing here depends on facial expressions.
-- Not in v1: J / Z, R / U, M / N / T, the A–Z alphabet, continuous signing, two-way conversation.
+  Thresholds (0.35 total distance, 3 s window, per-movement thresholds) are tuned in the simulator only. Two-handed
+  signs suffer most from a single webcam (touching fists merge into one hand; ~30 cm depth jitter), so the editor uses
+  a jitter allowance for COFFEE's "bottom hand still" check; device builds use the spec values.
+- Quest 3 / 3S has no face tracking: the learner's face is never scored. The teacher's face is display only.
+- Not in this version: J / Z, R / U, M / N / T, the A–Z alphabet, continuous signing, two-way conversation.
 
 ## Running it
 
-- Unity `6000.3.28f1`, URP, Android build target.
+- Unity `6000.3.28f1`, URP, Android build target. Build: menu **SignSight → Build Quest APK** (`Builds/SignSightLearn.apk`).
 - Simulator: activate Meta XR Simulator (Window → Meta → Meta XR Simulator → Activate), open `Assets/Scenes/Main.unity`,
   press Play, set Simulator inputs to Hand.
 - Webcam hand tracking on this dev machine: the Simulator's built-in webcam service opens camera 0, which is a

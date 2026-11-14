@@ -44,6 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c38e28d6d48025f488bd5535ce9f9ef8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SignSight.Learn.GhostHand
-  material: {fileID: 2100000, guid: 7632b94a550e7634286bc0b815017297, type: 2}
+  material: {fileID: 2100000, guid: c7ff72c1e1eef2a449720c0c0e3aebe4, type: 2}
   baseColor: {r: 0.85, g: 0.9, b: 1, a: 0.45}
   scale: 1

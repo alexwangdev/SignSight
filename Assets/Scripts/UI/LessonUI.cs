@@ -82,7 +82,8 @@ namespace SignSight.UI
             var lesson = lessons.CurrentLesson;
             var word = lessons.CurrentWord;
 
-            // Top bar
+            // Top bar (hidden during feedback: the feedback column shows the points and sits in front of it)
+            if (topBar != null) topBar.gameObject.SetActive(phase != LessonManager.Phase.Feedback);
             if (topBar != null)
             {
                 int n = lesson != null ? lesson.words.Length : 0;
@@ -115,7 +116,7 @@ namespace SignSight.UI
                     wordCard?.Show(word.intent, word.meaning, word.cue);
                     SetInstruction(lessons.LastAttempt.HasValue
                         ? $"You signed <b>{lessons.LastAttempt.Value.Top1.intent}</b>"
-                        : "Your turn: copy the sign — the ring shows your 3 seconds");
+                        : "Your turn — copy the sign");
                     break;
                 case LessonManager.Phase.Feedback:
                     wordCard?.Hide(); // the comparison hands use the space; the word is in the feedback title
