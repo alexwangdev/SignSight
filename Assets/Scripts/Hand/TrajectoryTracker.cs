@@ -131,7 +131,7 @@ namespace SignSight.Hand
     }
 
     /// <summary>Movement features (SPEC v3 §4.6 step 2) and the total distance.</summary>
-    public static class SignScorer
+    public static partial class SignScorer
     {
         public const float HandshapeWeight = 0.4f, LocationWeight = 0.2f, MovementWeight = 0.4f;
         public const float LocationScale = 0.20f; // location distance = error / 20 cm, capped at 1
@@ -288,6 +288,7 @@ namespace SignSight.Hand
                 }
                 return Mathf.Clamp01(err / LocationScale);
             }
+            if (!string.IsNullOrEmpty(t.anchor)) return AnchorLocationError(t, f); // v3.1 words (SignScorerV31.cs)
             switch (t.movement.type)
             {
                 case MovementTypes.Wave: err = Mathf.Max(0f, NearDistance(f.Right, Temple) - 0.20f); break;
@@ -348,7 +349,7 @@ namespace SignSight.Hand
                 case MovementTypes.FlickOut: return FlickOut(t, f, from);
                 case MovementTypes.Shake: return Shake(t, f, from);
                 case MovementTypes.Lift: return Lift(t, f, from);
-                default: return new MoveResult { Completed = false, Ratio = 1f, Start = from };
+                default: return DetectV31(t, f, from); // v3.1 types (SignScorerV31.cs)
             }
         }
 

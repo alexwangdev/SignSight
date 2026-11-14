@@ -1,0 +1,144 @@
+clip	word	correct	completed	top1	top2	rank	total	H	L	M	top1Total	mirrored	hint
+APPLE_02999.mp4	APPLE	Y	True	APPLE	DRINK	1	0.16	0.22	0.35	0.00	0.16	False	
+APPLE_03000.mp4	APPLE	N	True	DRINK	APPLE	2	0.17	0.28	0.32	0.00	0.15	False	
+APPLE_03001.mp4	APPLE	N	True	DRINK	SORRY	3	0.19	0.27	0.40	0.00	0.12	False	
+BABY_04507.mp4	BABY	N	True	HAPPY	PLEASE	9	0.43	0.58	0.50	0.26	0.16	False	
+BABY_04508.mp4	BABY	N	False	PLEASE	HAPPY	3	0.40	0.38	0.25	0.50	0.38	False	Rock both arms side to side, twice
+BABY_04509.mp4	BABY	N	False	HAPPY	PLEASE	24	1.00	1.00	1.00	1.00	0.19	False	Rock both arms side to side, twice
+BAD_04709.mp4	BAD	N	False	DRINK	HOT	15	0.44	0.34	0.00	0.75	0.08	False	Move down and forward more — 4 cm of about 15 cm
+BAD_04712.mp4	BAD	N	False	HOT	WOMAN	6	0.31	0.33	0.00	0.44	0.17	False	Move down and forward more — 8 cm of about 15 cm
+BAD_04715.mp4	BAD	N	False	HELLO	YES	8	1.00	1.00	1.00	1.00	1.00	True	Start at your mouth — pause there, then move
+BOY_07452.mp4	BOY	N	False	BOY	GOODBYE	1	0.27	0.27	0.00	0.41	0.27	False	Fingers: close them further
+BOY_07453.mp4	BOY	N	False	BOY	GOODBYE	1	0.32	0.25	0.00	0.57	0.32	False	Fingers: close them further
+BOY_07454.mp4	BOY	N	False	DRINK	NO	4	0.40	0.26	0.00	0.75	0.21	False	Fingers: close and open twice
+BREAD_07595.mp4	BREAD	N	False	NEED	PAIN	36	1.00	1.00	1.00	1.00	0.18	False	Start at your back of your left hand — pause there, then move
+BREAD_07596.mp4	BREAD	N	False	HOT	HAPPY	38	0.73	0.33	1.00	1.00	0.05	False	Start at your back of your left hand — pause there, then move
+BREAD_07597.mp4	BREAD	N	False	HELP	NEED	37	0.72	0.51	0.58	1.00	0.20	False	Start at your back of your left hand — pause there, then move
+COFFEE_11558.mp4	COFFEE	N	False	SORRY	WHEN	10	0.54	0.32	0.06	1.00	0.32	False	Bottom hand: keep it still (moved 7 cm, should be < 4 cm)
+COFFEE_11559.mp4	COFFEE	N	False	WHEN	SORRY	5	0.38	0.29	0.00	0.67	0.23	False	Bottom hand: keep it still (moved 5 cm, should be < 4 cm)
+COFFEE_11561.mp4	COFFEE	N	False	HELP	WHEN	14	0.52	0.31	0.00	1.00	0.29	False	Bottom hand: keep it still (moved 18 cm, should be < 4 cm)
+COLD_11622.mp4	COLD	N	False	HAPPY	APPLE	7	0.38	0.44	0.00	0.50	0.25	False	Shake faster — 4–6 times per second (yours: 2 Hz)
+COLD_11625.mp4	COLD	N	False	COLD	SORRY	1	0.15	0.20	0.00	0.17	0.15	True	Shake both fists together
+COLD_11628.mp4	COLD	N	False	HELP	APPLE	4	0.38	0.26	0.00	0.68	0.21	False	Shake faster — 4–6 times per second (yours: 2 Hz)
+DOCTOR_17015.mp4	DOCTOR	N	False	GOODBYE	NEED	17	0.84	1.00	1.00	0.61	0.17	False	Touch your left wrist with your fingertips
+DOCTOR_17016.mp4	DOCTOR	N	False	NEED	HELP	23	0.73	0.77	0.99	0.55	0.15	False	Touch your left wrist with your fingertips
+DOCTOR_17017.mp4	DOCTOR	N	False	HELP	WHEN	13	0.53	0.49	0.49	0.60	0.26	True	Tap twice — you tapped once
+DRINK_17710.mp4	DRINK	N	False	DRINK	MOTHER	1	0.26	0.21	0.00	0.44	0.26	False	Turn your hand further — 28° of about 50°
+DRINK_17711.mp4	DRINK	N	False	BOY	APPLE	7	0.45	0.18	0.00	0.95	0.20	False	Turn your hand further — 2° of about 50°
+DRINK_17713.mp4	DRINK	N	False	GOODBYE	BOY	9	0.43	0.23	0.00	0.85	0.16	False	Turn your hand further — 8° of about 50°
+EAT_18323.mp4	EAT	N	False	SORRY	MILK	13	0.59	0.49	0.85	0.55	0.42	False	Touch your mouth with your fingertips
+EAT_18324.mp4	EAT	N	False	APPLE	MILK	10	0.53	0.33	0.65	0.68	0.33	False	Touch your mouth with your fingertips
+EAT_18325.mp4	EAT	N	False	APPLE	HAPPY	17	0.84	1.00	1.00	0.61	0.29	False	Touch your mouth with your fingertips
+FATHER_21204.mp4	FATHER	N	False	GOODBYE	HAPPY	20	1.00	1.00	1.00	1.00	0.44	False	Touch your forehead with your thumb tip
+FATHER_21205.mp4	FATHER	N	False	APPLE	GOODBYE	16	0.89	1.00	1.00	0.72	0.29	False	Touch your forehead with your thumb tip
+FATHER_21207.mp4	FATHER	N	False	MAN	HOT	3	0.33	0.22	0.00	0.60	0.09	False	Tap twice — you tapped once
+FRIEND_23568.mp4	FRIEND	N	False	NEED	HOW	5	0.37	0.28	0.11	0.60	0.17	False	Bring your index fingers together twice — you did once
+FRIEND_23569.mp4	FRIEND	Y	True	FRIEND	PAIN	1	0.09	0.21	0.04	0.00	0.09	False	
+FRIEND_23570.mp4	FRIEND	N	False	NEED	NO	5	0.35	0.26	0.00	0.60	0.15	False	Bring your index fingers together twice — you did once
+GIRL_24606.mp4	GIRL	N	False	NEED	DRINK	30	1.00	1.00	1.00	1.00	0.15	False	Start at your jaw — pause there, then move
+GIRL_24607.mp4	GIRL	N	False	APPLE	HOT	10	0.53	0.17	0.31	1.00	0.21	False	Start at your jaw — pause there, then move
+GIRL_24608.mp4	GIRL	N	False	APPLE	SORRY	6	0.41	0.06	0.01	0.95	0.21	False	Move forward and down more — 0 cm of about 6 cm
+GO_24941.mp4	GO	N	False	GOODBYE	MILK	40	0.81	0.84	0.37	1.00	0.21	False	Start at your chest — pause there, then move
+GO_24943.mp4	GO	N	False	NO	WHEN	13	0.57	0.26	0.33	1.00	0.18	False	Start at your chest — pause there, then move
+GO_24946.mp4	GO	N	False	YES	WHEN	15	0.58	0.37	0.14	1.00	0.22	False	Start at your chest — pause there, then move
+GOOD_25066.mp4	GOOD	N	False	HELP	APPLE	38	0.70	0.49	0.54	1.00	0.16	False	Start at your mouth — pause there, then move
+GOOD_25067.mp4	GOOD	N	False	HUNGRY	HOT	18	0.47	0.31	0.48	0.63	0.06	False	Move forward and down more — 8 cm of about 22 cm
+GOOD_25070.mp4	GOOD	N	False	TIRED	HOW	10	0.93	0.83	1.00	1.00	0.86	True	Start at your mouth — pause there, then move
+GOODBYE_25044.mp4	GOODBYE	N	False	HELLO	WHERE	6	0.42	0.19	0.00	0.85	0.19	False	Fingers: close them further
+HAPPY_26524.mp4	HAPPY	N	True	SORRY	COLD	6	0.29	0.62	0.00	0.09	0.18	False	
+HAPPY_26525.mp4	HAPPY	N	False	HAPPY	PLEASE	1	0.25	0.22	0.00	0.40	0.25	False	Make 2 circles — you made 1.2
+HAPPY_26526.mp4	HAPPY	N	False	MILK	GOODBYE	18	0.68	0.67	0.54	0.76	0.21	False	Make 2 circles — you made 0.5
+HELLO_27172.mp4	HELLO	N	False	APPLE	BOY	24	0.72	0.64	0.30	1.00	0.20	False	Wave it — side to side, twice
+HELLO_27173.mp4	HELLO	N	False	NO	THANK-YOU	4	0.40	0.28	0.00	0.72	0.20	False	Wave it — side to side, twice
+HELP_27206.mp4	HELP	N	False	HOT	TIRED	28	0.65	0.33	0.60	1.00	0.15	False	Lift both hands up together
+HELP_27207.mp4	HELP	N	False	GIRL	MILK	19	0.62	0.36	0.38	1.00	0.11	False	Rest your fist on your flat palm, then lift both
+HELP_27209.mp4	HELP	N	True	TIRED	WHO	5	0.31	0.59	0.00	0.19	0.13	False	
+HOT_28108.mp4	HOT	Y	True	HOT	NEED	1	0.11	0.26	0.00	0.00	0.11	False	
+HOT_28109.mp4	HOT	N	True	DRINK	HOT	2	0.10	0.26	0.00	0.00	0.04	False	
+HOT_28112.mp4	HOT	N	False	APPLE	GOODBYE	14	0.50	0.25	0.00	1.00	0.23	False	Start at your mouth
+HOW_28201.mp4	HOW	N	False	TIRED	WHEN	20	0.60	0.41	0.24	0.98	0.15	False	Turn your hands further — 3° of about 140°
+HOW_28203.mp4	HOW	N	False	TIRED	FRIEND	6	0.28	0.20	0.19	0.40	0.09	False	Turn your hands further — 88° of about 140°
+HOW_28205.mp4	HOW	N	False	NEED	HELP	18	0.54	0.27	0.18	0.98	0.21	True	Turn your hands further — 2° of about 140°
+HUNGRY_28376.mp4	HUNGRY	Y	True	HUNGRY	NEED	1	0.06	0.12	0.00	0.03	0.06	False	
+HUNGRY_28377.mp4	HUNGRY	N	False	NEED	YES	13	0.51	0.38	0.00	0.89	0.13	False	Move down more — 2 cm of about 15 cm
+HUNGRY_28379.mp4	HUNGRY	N	False	MILK	NO	4	0.26	0.25	0.00	0.41	0.14	False	Move down more — 9 cm of about 15 cm
+LIKE_33266.mp4	LIKE	N	False	NEED	WHERE	18	0.55	0.45	0.08	0.89	0.14	False	Move forward more — 2 cm of about 15 cm
+LIKE_33268.mp4	LIKE	N	False	TIRED	HOW	42	1.00	1.00	1.00	1.00	0.83	True	Start at your chest — pause there, then move
+LIKE_33270.mp4	LIKE	N	False	SORRY	PLEASE	13	0.67	0.56	0.25	1.00	0.28	False	Start at your chest — pause there, then move
+LOVE_34121.mp4	LOVE	N	False	YES	WHEN	3	0.32	0.34	0.00	0.47	0.19	False	Hold it on your chest for half a second
+LOVE_34123.mp4	LOVE	N	False	HELP	LOVE	2	0.31	0.23	0.10	0.50	0.29	False	Hold it on your chest for half a second
+LOVE_34124.mp4	LOVE	N	False	HELP	APPLE	4	0.46	0.36	0.12	0.73	0.26	False	Hold it on your chest for half a second
+MAN_34733.mp4	MAN	N	False	APPLE	YES	26	0.72	0.30	1.00	1.00	0.22	False	Start at your forehead — pause there, then move
+MAN_34734.mp4	MAN	N	False	GOODBYE	APPLE	25	1.00	1.00	1.00	1.00	0.37	False	Start at your forehead — pause there, then move
+MAN_34736.mp4	MAN	N	True	APPLE	MAN	2	0.28	0.67	0.04	0.00	0.15	False	
+MILK_36046.mp4	MILK	Y	True	MILK	GOODBYE	1	0.19	0.24	0.00	0.24	0.19	False	
+MILK_36047.mp4	MILK	Y	True	MILK	WHO	1	0.21	0.23	0.00	0.29	0.21	False	
+MILK_36048.mp4	MILK	N	False	WHO	MILK	2	0.42	0.17	0.17	0.79	0.38	False	Whole hand: close and open twice
+MOTHER_36930.mp4	MOTHER	N	False	MILK	HELLO	19	0.71	0.68	0.75	0.71	0.44	False	Touch your chin with your thumb tip
+MOTHER_36931.mp4	MOTHER	Y	True	MOTHER	EAT	1	0.11	0.27	0.00	0.00	0.11	False	
+MOTHER_36932.mp4	MOTHER	N	True	WOMAN	MOTHER	2	0.07	0.18	0.00	0.00	0.06	False	
+NEED_37881.mp4	NEED	N	False	APPLE	SORRY	3	0.35	0.23	0.02	0.62	0.25	False	Turn your hand further — 17° of about 45°
+NEED_37882.mp4	NEED	Y	True	NEED	YES	1	0.09	0.14	0.19	0.00	0.09	False	
+NEED_37883.mp4	NEED	Y	True	NEED	APPLE	1	0.17	0.23	0.09	0.16	0.17	False	
+NO_38525.mp4	NO	Y	True	NO	APPLE	1	0.12	0.29	0.00	0.00	0.12	False	
+NO_38527.mp4	NO	Y	True	NO	APPLE	1	0.12	0.30	0.00	0.00	0.12	False	
+NO_38529.mp4	NO	Y	True	NO	MILK	1	0.11	0.29	0.00	0.00	0.11	False	
+PAIN_28440.mp4	PAIN	N	False	NEED	WHERE	20	0.71	0.69	1.00	0.59	0.15	False	Bring your index fingers together twice — you did 0 times
+PAIN_28441.mp4	PAIN	N	False	NEED	HELP	6	0.36	0.40	0.00	0.50	0.18	True	Bring your index fingers together twice — you did 0 times
+PLEASE_43217.mp4	PLEASE	N	False	HAPPY	PLEASE	2	0.34	0.38	0.13	0.40	0.25	False	Make 2 circles — you made 1.3
+PLEASE_43219.mp4	PLEASE	N	False	PLEASE	MILK	1	0.28	0.25	0.00	0.46	0.28	False	Make 2 circles — you made 1.1
+PLEASE_43220.mp4	PLEASE	N	False	HAPPY	PLEASE	2	0.41	0.26	0.00	0.76	0.31	False	Make 2 circles — you made 0.5
+SAD_48971.mp4	SAD	N	False	BOY	WHEN	36	1.00	1.00	1.00	1.00	0.29	False	Start at your face — pause there, then move
+SAD_48972.mp4	SAD	N	False	THANK-YOU	BOY	16	0.63	0.26	0.64	0.98	0.34	False	Move down more with both hands — 0 cm of about 18 cm
+SAD_48976.mp4	SAD	N	False	HELP	APPLE	21	0.59	0.25	0.49	0.98	0.24	False	Move down more with both hands — 0 cm of about 18 cm
+SICK_51502.mp4	SICK	N	False	MILK	BOY	19	0.88	1.00	1.00	0.70	0.27	False	Touch your forehead with your middle finger
+SICK_51503.mp4	SICK	N	False	GOODBYE	BOY	11	0.41	0.43	0.36	0.40	0.13	False	Tap once — you tapped twice
+SICK_51504.mp4	SICK	N	False	APPLE	BOY	6	0.46	0.41	0.48	0.50	0.26	False	Touch your forehead with your middle finger
+SORRY_53365.mp4	SORRY	N	False	SORRY	HELP	1	0.37	0.22	0.00	0.70	0.37	False	Make 2 circles — you made 0.6
+SORRY_53366.mp4	SORRY	N	False	BREAD	SORRY	2	0.44	0.29	0.15	0.73	0.32	True	Make 2 circles — you made 0.5
+SORRY_53367.mp4	SORRY	Y	True	SORRY	YES	1	0.17	0.27	0.00	0.17	0.17	False	
+TEACHER_57039.mp4	TEACHER	N	False	YES	GOODBYE	0	0.73	0.33	1.00	1.00	0.28	False	Start at your temple — pause there, then move
+TEACHER_57040.mp4	TEACHER	N	False	YES	APPLE	0	0.66	0.32	0.68	1.00	0.22	False	Start at your temple — pause there, then move
+TEACHER_57041.mp4	TEACHER	N	False	MAN	WHY	0	0.51	0.19	0.29	0.95	0.18	False	Move forward more with both hands — 1 cm of about 15 cm
+THANK-YOU_57655.mp4	THANK-YOU	N	False	HOT	HUNGRY	13	0.42	0.30	0.00	0.74	0.10	False	Push forward from your chin
+THANK-YOU_57656.mp4	THANK-YOU	N	False	SORRY	APPLE	5	0.37	0.35	0.00	0.57	0.30	False	Push forward from your chin
+THANK-YOU_57657.mp4	THANK-YOU	N	False	APPLE	WHO	7	0.38	0.25	0.00	0.71	0.28	False	Push forward from your chin
+THIRSTY_58024.mp4	THIRSTY	N	False	NEED	APPLE	18	0.76	0.53	0.73	1.00	0.16	False	Start at your throat — pause there, then move
+THIRSTY_58025.mp4	THIRSTY	N	False	NEED	NO	40	0.84	0.59	1.00	1.00	0.23	False	Start at your throat — pause there, then move
+THIRSTY_58027.mp4	THIRSTY	N	False	SORRY	APPLE	23	0.65	0.41	0.40	1.00	0.25	False	Start at your throat — pause there, then move
+TIRED_58589.mp4	TIRED	Y	True	TIRED	YES	1	0.11	0.25	0.04	0.00	0.11	False	
+TIRED_58590.mp4	TIRED	Y	True	TIRED	NEED	1	0.11	0.22	0.11	0.00	0.11	False	
+TIRED_58594.mp4	TIRED	N	True	YES	TIRED	2	0.19	0.30	0.33	0.00	0.06	False	
+TODAY_58677.mp4	TODAY	N	False	HOT	SORRY	0	0.88	1.00	0.38	1.00	0.07	False	Start at your chest — pause there, then move
+TODAY_58678.mp4	TODAY	N	True	HAPPY	NEED	0	0.15	0.31	0.14	0.00	0.28	False	
+TODAY_58679.mp4	TODAY	N	False	SORRY	NEED	0	0.65	0.35	0.55	1.00	0.33	False	Start at your chest — pause there, then move
+TOMORROW_58805.mp4	TOMORROW	N	False	GIRL	HOT	10	0.33	0.17	0.18	0.58	0.08	False	Move forward more — 4 cm of about 10 cm
+TOMORROW_58806.mp4	TOMORROW	N	False	DRINK	APPLE	46	1.00	1.00	1.00	1.00	0.12	False	Start at your cheek, by the side of your head — pause there, then move
+TOMORROW_58808.mp4	TOMORROW	N	False	DRINK	GIRL	4	0.28	0.11	0.11	0.54	0.17	False	Move forward more — 5 cm of about 10 cm
+WANT_62244.mp4	WANT	N	False	NEED	WHERE	44	1.00	1.00	1.00	1.00	0.14	False	Start at your chest — pause there, then move
+WANT_62246.mp4	WANT	N	False	TIRED	NEED	15	0.56	0.42	0.05	0.94	0.15	False	Move back toward you more with both hands — 1 cm of about 15 cm
+WANT_62247.mp4	WANT	N	False	HELP	TIRED	35	0.69	0.53	0.40	1.00	0.26	False	Start at your chest — pause there, then move
+WATER_62500.mp4	WATER	N	False	HAPPY	PLEASE	13	0.82	1.00	1.00	0.55	0.44	False	Touch your mouth with your index finger
+WATER_62501.mp4	WATER	N	False	MILK	WHO	15	0.55	0.58	0.38	0.61	0.25	False	Touch your mouth with your index finger
+WATER_62502.mp4	WATER	Y	True	WATER	MOTHER	1	0.10	0.24	0.00	0.00	0.10	False	
+WHAT_62965.mp4	WHAT	N	False	PLEASE	WHERE	44	1.00	1.00	1.00	1.00	0.31	False	Start at your chest — pause there, then move
+WHAT_62967.mp4	WHAT	N	False	TIRED	NEED	35	0.65	0.37	0.52	1.00	0.13	False	Start at your chest — pause there, then move
+WHAT_62968.mp4	WHAT	N	False	NO	MILK	20	0.74	0.36	0.96	1.00	0.32	True	Start at your chest — pause there, then move
+WHEN_63066.mp4	WHEN	N	True	PAIN	FRIEND	9	0.24	0.27	0.68	0.00	0.10	False	
+WHEN_63067.mp4	WHEN	N	True	NO	APPLE	4	0.30	0.47	0.55	0.00	0.16	False	
+WHEN_63069.mp4	WHEN	N	True	APPLE	WHEN	2	0.30	0.49	0.53	0.00	0.23	True	
+WHERE_63081.mp4	WHERE	N	False	MILK	WHEN	43	1.00	1.00	1.00	1.00	0.44	False	Wave it — side to side, twice
+WHERE_63082.mp4	WHERE	N	False	WHERE	MILK	1	0.35	0.24	0.00	0.64	0.35	False	Wave it — side to side, twice
+WHERE_63083.mp4	WHERE	Y	True	WHERE	HELLO	1	0.11	0.26	0.00	0.00	0.11	False	
+WHO_63226.mp4	WHO	Y	True	WHO	HAPPY	1	0.34	0.34	0.40	0.31	0.34	False	
+WHO_63229.mp4	WHO	N	True	EAT	APPLE	7	0.29	0.38	0.00	0.33	0.10	False	
+WHO_63230.mp4	WHO	Y	True	WHO	SORRY	1	0.22	0.24	0.00	0.32	0.22	False	
+WHY_63283.mp4	WHY	N	False	GOODBYE	MILK	28	0.73	0.50	0.66	1.00	0.38	False	Start at your forehead — pause there, then move
+WHY_63284.mp4	WHY	N	False	HOT	THANK-YOU	14	0.56	0.43	0.00	0.97	0.09	False	Move forward and down more — 1 cm of about 15 cm
+WHY_63285.mp4	WHY	N	False	THANK-YOU	WHO	40	0.96	1.00	0.82	1.00	0.36	False	Start at your forehead — pause there, then move
+WOMAN_63664.mp4	WOMAN	N	True	HOT	WOMAN	2	0.16	0.26	0.11	0.09	0.13	False	
+WOMAN_63665.mp4	WOMAN	N	False	GOODBYE	MILK	19	0.67	0.36	0.62	1.00	0.34	False	Start at your chin — pause there, then move
+WOMAN_63669.mp4	WOMAN	N	False	HELLO	YES	15	1.00	1.00	1.00	1.00	1.00	True	Start at your chin — pause there, then move
+YES_64280.mp4	YES	N	False	APPLE	NEED	3	0.32	0.30	0.00	0.50	0.24	False	Nod your wrist — up and down, twice
+YES_64284.mp4	YES	N	True	NEED	YES	2	0.11	0.26	0.00	0.01	0.10	False	
+YES_64287.mp4	YES	Y	True	YES	APPLE	1	0.08	0.21	0.00	0.00	0.08	False	

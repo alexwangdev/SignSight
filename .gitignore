@@ -29,3 +29,15 @@
 # Meta Immersive Debugger dev-agent pairing token + LAN address (generated per machine)
 /Assets/Resources/DevAgentSettings.asset
 /Assets/Resources/DevAgentSettings.asset.meta
+
+# v3.1 teacher verification: large / third-party / dataset-derived files stay local (WLASL is C-UDA, research only)
+/workspace/goals/meta-vr-start-sign-language-entry/files/teacher-verification/data/
+/workspace/goals/meta-vr-start-sign-language-entry/files/teacher-verification/models/
+/workspace/goals/meta-vr-start-sign-language-entry/files/teacher-verification/calib/
+/workspace/goals/meta-vr-start-sign-language-entry/files/teacher-verification/teacher_frames/
+/workspace/goals/meta-vr-start-sign-language-entry/files/teacher-verification/teacher_videos*/
+/workspace/goals/meta-vr-start-sign-language-entry/files/teacher-verification/third_party/
+**/__pycache__/
+/workspace/goals/meta-vr-start-sign-language-entry/files/teacher-verification/human_clips/
+/workspace/goals/meta-vr-start-sign-language-entry/files/teacher-verification/human_hands/
+/workspace/goals/meta-vr-start-sign-language-entry/files/teacher-verification/human_hands_flat/

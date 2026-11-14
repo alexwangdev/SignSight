@@ -1,0 +1,505 @@
+{
+ "source": "Lifeprint / ASL University (Dr. Bill Vicars), lifeprint.com. Not reviewed by Deaf signers yet.",
+ "words": [
+  {
+   "word": "HELLO",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/h/hello.htm",
+   "handshape": "B (flat)",
+   "location": "beside the forehead",
+   "movement": "wave side to side",
+   "palm": "forward",
+   "non_manual": "",
+   "notes": "v3 word"
+  },
+  {
+   "word": "YES",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/y/yes.htm",
+   "handshape": "S (fist)",
+   "location": "chest height",
+   "movement": "nod at the wrist",
+   "palm": "forward",
+   "non_manual": "head nod",
+   "notes": "v3 word"
+  },
+  {
+   "word": "NO",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/n/no.htm",
+   "handshape": "index+middle with thumb",
+   "location": "chest height",
+   "movement": "snap onto the thumb",
+   "palm": "forward",
+   "non_manual": "head shake",
+   "notes": "v3 word"
+  },
+  {
+   "word": "THANK-YOU",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/t/thankyou.htm",
+   "handshape": "B (flat)",
+   "location": "chin / lips",
+   "movement": "forward and down",
+   "palm": "toward self",
+   "non_manual": "smile",
+   "notes": "v3 word"
+  },
+  {
+   "word": "PLEASE",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/p/please.htm",
+   "handshape": "B (flat)",
+   "location": "centre of the chest",
+   "movement": "circle (clockwise from the observer)",
+   "palm": "toward self",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "SORRY",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/s/sorry.htm",
+   "handshape": "A",
+   "location": "chest",
+   "movement": "a couple of circles",
+   "palm": "toward self",
+   "non_manual": "",
+   "notes": "S-hand also seen; Lifeprint recommends A"
+  },
+  {
+   "word": "GOOD",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/g/good.htm",
+   "handshape": "B (flat), base hand palm up",
+   "location": "lips, then into the left palm",
+   "movement": "forward and down",
+   "palm": "toward self",
+   "non_manual": "",
+   "notes": "Lifeprint: one-handed GOOD overlaps THANK-YOU; the two-handed form is taught"
+  },
+  {
+   "word": "BAD",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/b/bad.htm",
+   "handshape": "B (flat)",
+   "location": "lips",
+   "movement": "down and away, ending palm down",
+   "palm": "toward self",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "GOODBYE",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/b/bye.htm",
+   "handshape": "open hand",
+   "location": "shoulder height",
+   "movement": "fingers bend at the large knuckles (open-close)",
+   "palm": "forward",
+   "non_manual": "",
+   "notes": "Lifeprint page is video only; description from the video label WAVE-goodbye and the page Q&A. Needs a human check."
+  },
+  {
+   "word": "GOOD-MORNING",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/g/good-morning.htm",
+   "handshape": "B then B (MORNING)",
+   "location": "lips, then forearm",
+   "movement": "GOOD forward; MORNING forearm rises",
+   "palm": "toward self",
+   "non_manual": "",
+   "notes": "Compound GOOD + MORNING (lifeprint m/morning.htm). Page is video only."
+  },
+  {
+   "word": "MOTHER",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/m/momdad.htm",
+   "handshape": "5",
+   "location": "chin (thumb)",
+   "movement": "touch; double tap common",
+   "palm": "sideways",
+   "non_manual": "",
+   "notes": "Also m/mother.htm (video). Same handshape as FATHER, different location."
+  },
+  {
+   "word": "FATHER",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/m/momdad.htm",
+   "handshape": "5",
+   "location": "forehead (thumb)",
+   "movement": "touch; double tap common",
+   "palm": "sideways",
+   "non_manual": "",
+   "notes": "Also f/father.htm (video)."
+  },
+  {
+   "word": "FRIEND",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/f/friend.htm",
+   "handshape": "X (hooked index), both",
+   "location": "in front of the body",
+   "movement": "index fingers interlock twice",
+   "palm": "right down / left up",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "BABY",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/b/baby.htm",
+   "handshape": "flat hands, arms cradled",
+   "location": "in front of the body",
+   "movement": "rock the arms back and forth",
+   "palm": "up",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "MAN",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/m/man.htm",
+   "handshape": "5",
+   "location": "forehead (thumb) to chest",
+   "movement": "from FATHER position down to the chest",
+   "palm": "sideways",
+   "non_manual": "",
+   "notes": "Several versions; the FATHER-to-chest version is taught."
+  },
+  {
+   "word": "WOMAN",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/w/woman.htm",
+   "handshape": "5",
+   "location": "chin (thumb) to chest",
+   "movement": "down to the chest",
+   "palm": "sideways",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "BOY",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/b/boygirl.htm",
+   "handshape": "flat hand closing (cap brim)",
+   "location": "forehead",
+   "movement": "grab the brim of a cap (close), repeated",
+   "palm": "down",
+   "non_manual": "",
+   "notes": "b/boy.htm is images only; description from b/boygirl.htm. Needs a human check of the handshape."
+  },
+  {
+   "word": "GIRL",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/g/girl.htm",
+   "handshape": "A",
+   "location": "cheek / jaw (thumb)",
+   "movement": "slide forward and down along the cheek",
+   "palm": "sideways",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "TEACHER",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/t/teacher.htm",
+   "handshape": "flat-O both, then flat hands",
+   "location": "near the head, then chest",
+   "movement": "forward ~15 cm, then down (PERSON)",
+   "palm": "forward",
+   "non_manual": "",
+   "notes": "Compound TEACH + PERSON"
+  },
+  {
+   "word": "DOCTOR",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/d/doctor.htm",
+   "handshape": "bent hand (or M / D)",
+   "location": "inside of the upturned left wrist",
+   "movement": "tap twice",
+   "palm": "down",
+   "non_manual": "",
+   "notes": "Base hand shape does not matter (Lifeprint)."
+  },
+  {
+   "word": "WATER",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/w/water.htm",
+   "handshape": "W",
+   "location": "mouth (index finger)",
+   "movement": "tap twice",
+   "palm": "sideways",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "MILK",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/m/milk.htm",
+   "handshape": "C closing to S",
+   "location": "in front of the body",
+   "movement": "squeeze twice",
+   "palm": "sideways",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "EAT",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/e/eat.htm",
+   "handshape": "flat-O",
+   "location": "mouth",
+   "movement": "fingertips to the mouth, repeated",
+   "palm": "down",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "DRINK",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/d/drink.htm",
+   "handshape": "C",
+   "location": "mouth",
+   "movement": "short arc to the mouth (tilt)",
+   "palm": "sideways",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "BREAD",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/b/bread.htm",
+   "handshape": "bent hand on flat base",
+   "location": "back of the left hand",
+   "movement": "slice down a couple of times",
+   "palm": "down",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "APPLE",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/a/apple.htm",
+   "handshape": "X",
+   "location": "cheek (index knuckle)",
+   "movement": "pivot back and forth",
+   "palm": "down",
+   "non_manual": "",
+   "notes": "A-hand version is not recommended by Lifeprint."
+  },
+  {
+   "word": "HUNGRY",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/h/hungry.htm",
+   "handshape": "C",
+   "location": "top of the chest",
+   "movement": "down the middle of the chest",
+   "palm": "toward self",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "THIRSTY",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/t/thirsty.htm",
+   "handshape": "index finger",
+   "location": "throat",
+   "movement": "run the fingertip down the throat",
+   "palm": "toward self",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "COFFEE",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/c/coffee.htm",
+   "handshape": "S both",
+   "location": "chest, stacked fists",
+   "movement": "top hand cranks",
+   "palm": "down",
+   "non_manual": "",
+   "notes": "v3 word"
+  },
+  {
+   "word": "HOT",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/h/hot.htm",
+   "handshape": "claw",
+   "location": "mouth",
+   "movement": "flick out and down, fast",
+   "palm": "toward self",
+   "non_manual": "",
+   "notes": "v3 word"
+  },
+  {
+   "word": "COLD",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/c/cold.htm",
+   "handshape": "S both",
+   "location": "chest",
+   "movement": "shiver side to side",
+   "palm": "sideways",
+   "non_manual": "",
+   "notes": "v3 word"
+  },
+  {
+   "word": "HELP",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/h/help.htm",
+   "handshape": "A on flat palm",
+   "location": "chest",
+   "movement": "both hands lift",
+   "palm": "down",
+   "non_manual": "",
+   "notes": "v3 word"
+  },
+  {
+   "word": "HAPPY",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/h/happy.htm",
+   "handshape": "flat hand(s)",
+   "location": "chest",
+   "movement": "forward circles, brushing up the chest",
+   "palm": "toward self",
+   "non_manual": "happy face",
+   "notes": "One or both hands; one is taught."
+  },
+  {
+   "word": "SAD",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/s/sad.htm",
+   "handshape": "5 both",
+   "location": "in front of the face",
+   "movement": "down the length of the face",
+   "palm": "toward self",
+   "non_manual": "sad face, head tilts forward",
+   "notes": ""
+  },
+  {
+   "word": "TIRED",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/t/tired.htm",
+   "handshape": "bent hands",
+   "location": "chest",
+   "movement": "hands slump (change orientation, do not slide)",
+   "palm": "toward self",
+   "non_manual": "tired face",
+   "notes": ""
+  },
+  {
+   "word": "SICK",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/s/sick.htm",
+   "handshape": "middle-finger-bent 5, both",
+   "location": "forehead and stomach",
+   "movement": "both hands move in to touch",
+   "palm": "toward self",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "PAIN",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/h/hurt.htm",
+   "handshape": "index fingers, both",
+   "location": "in front of the body (or where it hurts)",
+   "movement": "tips toward each other twice, with a twist",
+   "palm": "toward self",
+   "non_manual": "pained face",
+   "notes": "Lifeprint HURT = PAIN (p/pain.htm shows the same sign)."
+  },
+  {
+   "word": "LOVE",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/l/love.htm",
+   "handshape": "S / fists crossed",
+   "location": "chest",
+   "movement": "cross over the chest (hold)",
+   "palm": "toward self",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "LIKE",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/l/like.htm",
+   "handshape": "open-8 to 8",
+   "location": "just in front of the chest",
+   "movement": "forward while the middle finger and thumb close",
+   "palm": "toward self",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "WANT",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/w/want.htm",
+   "handshape": "5 to claw, both",
+   "location": "in front of the body",
+   "movement": "pull back toward you",
+   "palm": "up",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "NEED",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/n/need.htm",
+   "handshape": "X",
+   "location": "in front of the body",
+   "movement": "bend down from the wrist",
+   "palm": "forward to down",
+   "non_manual": "",
+   "notes": ""
+  },
+  {
+   "word": "WHAT",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/w/what.htm",
+   "handshape": "relaxed 5, both",
+   "location": "in front of the body",
+   "movement": "slightly forward and to the sides",
+   "palm": "up",
+   "non_manual": "WH-question eyebrows (furrowed)",
+   "notes": "Lifeprint: facial expression carries much of WHAT."
+  },
+  {
+   "word": "WHERE",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/w/where.htm",
+   "handshape": "index finger",
+   "location": "in front of the shoulder",
+   "movement": "pivot side to side (wrist and elbow)",
+   "palm": "forward",
+   "non_manual": "WH-question eyebrows",
+   "notes": ""
+  },
+  {
+   "word": "WHEN",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/w/when.htm",
+   "handshape": "index fingers, both",
+   "location": "in front of the body",
+   "movement": "right index circles the left index tip, then touches",
+   "palm": "down / sideways",
+   "non_manual": "WH-question eyebrows",
+   "notes": ""
+  },
+  {
+   "word": "WHO",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/w/who.htm",
+   "handshape": "L (thumb on chin)",
+   "location": "chin",
+   "movement": "index finger bends twice",
+   "palm": "sideways",
+   "non_manual": "WH-question eyebrows",
+   "notes": "Lifeprint names this the good general variation."
+  },
+  {
+   "word": "WHY",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/w/why.htm",
+   "handshape": "flat hand to Y",
+   "location": "forehead",
+   "movement": "forward and down, changing to Y",
+   "palm": "toward self",
+   "non_manual": "WH-question eyebrows",
+   "notes": ""
+  },
+  {
+   "word": "HOW",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/h/how.htm",
+   "handshape": "curved hands, both",
+   "location": "in front of the chest, knuckles together",
+   "movement": "roll forward to palms up",
+   "palm": "down",
+   "non_manual": "WH-question eyebrows",
+   "notes": ""
+  },
+  {
+   "word": "TODAY",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/t/today.htm",
+   "handshape": "Y both (NOW), then index (DAY)",
+   "location": "in front of the body",
+   "movement": "NOW drop, then DAY arc",
+   "palm": "up",
+   "non_manual": "",
+   "notes": "Compound NOW + DAY (n/now.htm, d/day.htm)."
+  },
+  {
+   "word": "TOMORROW",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/t/tomorrow.htm",
+   "handshape": "open-A",
+   "location": "side of the head / cheek (thumb)",
+   "movement": "forward pivot: thumb points back, ends up",
+   "palm": "sideways",
+   "non_manual": "",
+   "notes": "Description from lifeprint topics/parameters-asl.htm and lessons/lesson06.htm (sign page is images only)."
+  },
+  {
+   "word": "GO",
+   "lifeprint_url": "https://www.lifeprint.com/asl101/pages-signs/g/go.htm",
+   "handshape": "index fingers, both",
+   "location": "in front of the body",
+   "movement": "throw the index fingers forward",
+   "palm": "forward",
+   "non_manual": "",
+   "notes": ""
+  }
+ ]
+}

@@ -1,0 +1,54 @@
+WLASL file: data/WLASL_v0.3.json (2000 glosses)
+word	matched_gloss	class_index	asl100	asl300	asl1000	asl2000
+HELLO	hello	402	N	N	Y	Y
+YES	yes	17	Y	Y	Y	Y
+NO	no	13	Y	Y	Y	Y
+THANK-YOU	thank you	333	N	N	Y	Y
+PLEASE	please	234	N	Y	Y	Y
+SORRY	sorry	327	N	N	Y	Y
+GOOD	good	156	N	Y	Y	Y
+BAD	bad	140	N	Y	Y	Y
+GOODBYE	goodbye	891	N	N	Y	Y
+GOOD-MORNING	-	-	N	N	N	N
+MOTHER	mother	25	Y	Y	Y	Y
+FATHER	father	280	N	Y	Y	Y
+FRIEND	friend	155	N	Y	Y	Y
+BABY	baby	259	N	Y	Y	Y
+MAN	man	45	Y	Y	Y	Y
+WOMAN	woman	31	Y	Y	Y	Y
+BOY	boy	187	N	Y	Y	Y
+GIRL	girl	209	N	Y	Y	Y
+TEACHER	teacher	133	N	Y	Y	Y
+DOCTOR	doctor	60	Y	Y	Y	Y
+WATER	water	102	N	Y	Y	Y
+MILK	milk	298	N	Y	Y	Y
+EAT	eat	61	Y	Y	Y	Y
+DRINK	drink	1	Y	Y	Y	Y
+BREAD	bread	366	N	N	Y	Y
+APPLE	apple	52	Y	Y	Y	Y
+HUNGRY	hungry	553	N	N	Y	Y
+THIRSTY	thirsty	615	N	N	Y	Y
+COFFEE	coffee	146	N	Y	Y	Y
+HOT	hot	22	Y	Y	Y	Y
+COLD	cold	147	N	Y	Y	Y
+HELP	help	12	Y	Y	Y	Y
+HAPPY	happy	157	N	Y	Y	Y
+SAD	sad	317	N	N	Y	Y
+TIRED	tired	175	N	Y	Y	Y
+SICK	sick	129	N	Y	Y	Y
+PAIN	hurt	554	N	N	Y	Y
+LOVE	love	561	N	N	Y	Y
+LIKE	like	23	Y	Y	Y	Y
+WANT	want	74	Y	Y	Y	Y
+NEED	need	90	Y	Y	Y	Y
+WHAT	what	30	Y	Y	Y	Y
+WHERE	where	254	N	Y	Y	Y
+WHEN	when	346	N	N	Y	Y
+WHO	who	7	Y	Y	Y	Y
+WHY	why	135	N	Y	Y	Y
+HOW	how	86	Y	Y	Y	Y
+TODAY	today	336	N	N	Y	Y
+TOMORROW	tomorrow	462	N	N	Y	Y
+GO	go	5	Y	Y	Y	Y
+TOTAL			18/50	36/50	49/50	49/50
+Aliases used: THANK-YOU -> ['thank you', 'thanks']; GOODBYE -> ['bye', 'goodbye']; GOOD-MORNING -> ['good morning']; PAIN -> ['hurt', 'pain']; MOTHER -> ['mother', 'mom']; FATHER -> ['father', 'dad']

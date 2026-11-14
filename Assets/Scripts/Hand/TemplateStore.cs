@@ -80,9 +80,61 @@ namespace SignSight.Hand
         public bool hasRecordedStart;
         public Vector3 recordedStartRight, recordedStartLeft;
 
+        // ---- v3.1 (50 words) ----
+        /// <summary>false = TEACH-ONLY: the teacher demonstrates it, the learner practises, nothing is scored.</summary>
+        public bool scored = true;
+        /// <summary>Why the word is not scored (shown nowhere in the app; kept for the report).</summary>
+        public string teachOnlyReason = "";
+        /// <summary>
+        /// Named start location (SignAnchors). Empty for the 8 v3 signs, which keep their v3 location rules.
+        /// When set, location is judged as the distance of the contact point to this anchor.
+        /// </summary>
+        public string anchor = "";
+        /// <summary>Part of the dominant hand at the anchor: thumb | index | middle | fingers | palm | knuckle.</summary>
+        public string contact = "palm";
+        /// <summary>Allowed slack around the anchor (metres) before location starts to cost.</summary>
+        public float anchorRadius = 0.08f;
+        /// <summary>Direction the dominant hand's fingers point at the start (signer space).</summary>
+        public Vector3 fingerDir = Vector3.up;
+        /// <summary>Non-dominant hand start (two-handed signs): anchor, contact, palm, finger direction.</summary>
+        public string leftAnchor = "";
+        public string leftContact = "palm";
+        /// <summary>Metres added to the anchor (right hand) and to the left anchor; leftAnchor "mirror" = the right start mirrored.</summary>
+        public Vector3 anchorOffset = Vector3.zero;
+        public Vector3 leftOffset = Vector3.zero;
+        public Vector3 leftPalm = Vector3.zero;
+        public Vector3 leftFingerDir = Vector3.zero;
+        /// <summary>Movement direction for stroke (signer space; the left hand mirrors x when both hands move).</summary>
+        public Vector3 direction = Vector3.zero;
+        /// <summary>Stroke only: the palm must end facing this way (within 50 deg), e.g. BAD ends palm down. Zero = no check.</summary>
+        public Vector3 endPalm = Vector3.zero;
+        /// <summary>Caption for non-manual markers the app does not score (e.g. WH-question eyebrows).</summary>
+        public string nonManual = "";
+        /// <summary>Second beat of a compound sign (teacher only; compounds are TEACH-ONLY).</summary>
+        public SignBeat beat2 = new SignBeat();
+
         public bool TwoHanded => hands == "both";
         public bool HasLeftCurl => curlLeft != null && curlLeft.Length == 5;
         public float[] EndCurlRight => endCurlRight != null && endCurlRight.Length == 5 ? endCurlRight : curlRight;
+    }
+
+    /// <summary>Second part of a compound sign (e.g. GOOD + MORNING). Teacher display only.</summary>
+    [Serializable]
+    public class SignBeat
+    {
+        public string anchor = "";
+        public string contact = "palm";
+        public Vector3 palm = Vector3.zero;
+        public Vector3 fingerDir = Vector3.zero;
+        public float[] curlRight = new float[0];
+        public float[] curlLeft = new float[0];
+        public string leftAnchor = "";
+        public Vector3 leftPalm = Vector3.zero;
+        public Vector3 leftFingerDir = Vector3.zero;
+        public SignMovement movement = new SignMovement();
+        public Vector3 direction = Vector3.zero;
+
+        public bool Present => !string.IsNullOrEmpty(anchor);
     }
 
     public static class MovementTypes
@@ -96,6 +148,21 @@ namespace SignSight.Hand
         public const string FlickOut = "flick-out";
         public const string Shake = "shake";
         public const string Lift = "lift";
+
+        // v3.1: added so the 42 new words can be scored (each needs the anchor field for location).
+        public const string Tap = "tap";           // contact point touches the anchor and leaves, 'repeats' times
+        public const string Stroke = "stroke";     // contact point travels 'amplitude' cm along 'direction' from the anchor
+        public const string Circle = "circle";     // palm circles in a plane (axis: frontal | sagittal | horizontal)
+        public const string Twist = "twist";       // wrist roll back and forth about the hand axis
+        public const string Turn = "turn";         // the palm turns once by 'amplitude' degrees (e.g. HOW, TIRED)
+        public const string Squeeze = "squeeze";   // fingers in 'axis' close and open, 'repeats' times
+        public const string Converge = "converge"; // the two hands' contact points come together, 'repeats' times
+        public const string Hold = "hold";         // both hands held still at the anchor (LOVE)
+        public const string Rock = "rock";         // both forearms sway side to side, slowly (BABY)
+
+        public static bool IsV3(string type) =>
+            type == Wave || type == WristNod || type == Snap || type == PushForward || type == Crank || type == FlickOut ||
+            type == Shake || type == Lift;
     }
 
     [Serializable]
@@ -209,7 +276,12 @@ namespace SignSight.Hand
         private static TemplateFile Parse(string json, string source, bool migrateAgainstDefaults = true)
         {
             int version = JsonUtility.FromJson<VersionProbe>(json).version;
-            if (version >= CurrentVersion) return JsonUtility.FromJson<TemplateFile>(json);
+            if (version >= CurrentVersion)
+            {
+                var file2 = JsonUtility.FromJson<TemplateFile>(json);
+                if (migrateAgainstDefaults) MergeDefinitions(file2, LoadDefaults(), source);
+                return file2;
+            }
 
             var v1 = JsonUtility.FromJson<TemplateFileV1>(json);
             var defaults = migrateAgainstDefaults ? LoadDefaults() : null;
@@ -261,6 +333,46 @@ namespace SignSight.Hand
                       (notInV3.Count > 0 ? $"; not v3 words, kept but unused by lessons: {string.Join(", ", notInV3)}" : "") +
                       ". Old recordings predate the v3 handshapes: re-record in TemplateRecorder (or Reset).");
             return file;
+        }
+
+        /// <summary>
+        /// A learner's saved file keeps its recordings (handshape, amplitude, start location), but the definition of
+        /// each word comes from the shipped file: new words are added and the v3.1 fields are refreshed.
+        /// </summary>
+        private static void MergeDefinitions(TemplateFile file, TemplateFile defaults, string source)
+        {
+            var added = new List<string>();
+            foreach (var d in defaults.templates)
+            {
+                var t = file.templates.Find(x => x.intent == d.intent);
+                if (t == null)
+                {
+                    file.templates.Add(d);
+                    added.Add(d.intent);
+                    continue;
+                }
+                t.scored = d.scored;
+                t.teachOnlyReason = d.teachOnlyReason;
+                t.anchor = d.anchor;
+                t.contact = d.contact;
+                t.anchorRadius = d.anchorRadius;
+                t.fingerDir = d.fingerDir;
+                t.leftAnchor = d.leftAnchor;
+                t.leftContact = d.leftContact;
+                t.anchorOffset = d.anchorOffset;
+                t.leftOffset = d.leftOffset;
+                t.leftPalm = d.leftPalm;
+                t.leftFingerDir = d.leftFingerDir;
+                t.direction = d.direction;
+                t.endPalm = d.endPalm;
+                t.nonManual = d.nonManual;
+                t.beat2 = d.beat2;
+                if (!MovementTypes.IsV3(d.movement.type)) t.movement = d.movement;
+            }
+            // Keep the shipped order (lessons and reports follow it).
+            file.templates.Sort((a, b) => defaults.templates.FindIndex(x => x.intent == a.intent)
+                                          .CompareTo(defaults.templates.FindIndex(x => x.intent == b.intent)));
+            if (added.Count > 0) Debug.Log($"[TemplateStore] {source}: added {added.Count} new words from the shipped definitions.");
         }
 
         public void Save()

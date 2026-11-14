@@ -240,7 +240,10 @@ namespace SignSight.Hand
                 SetPreview(null, "");
                 return;
             }
-            foreach (var t in Store.Templates) _evals.Add(SignScorer.Evaluate(t, frames, from));
+            foreach (var t in Store.Templates)
+            {
+                if (t.scored) _evals.Add(SignScorer.Evaluate(t, frames, from)); // TEACH-ONLY words are never candidates
+            }
             _evals.Sort((a, b) => a.Total.CompareTo(b.Total));
             SetPreview(new TemplateScore { Template = _evals[0].Template, Distance = _evals[0].Total }, _evals[0].Hint);
 

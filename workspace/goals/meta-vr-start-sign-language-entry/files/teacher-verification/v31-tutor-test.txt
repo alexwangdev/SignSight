@@ -1,0 +1,65 @@
+Profile: C:/Users/Alex/AppData/LocalLow/DefaultCompany/SignSight Learn\learner_profile.json
+Run 1, Lesson 1: fail YES twice (index finger off both times), everything else right first try
+  show HELLO: Demonstrate word=HELLO rule=Next reason="next new word in this lesson" focus=-1
+  show YES: Demonstrate word=YES rule=Next reason="next new word in this lesson" focus=-1
+    try 1 wrong -> WrongCanRetry; hint: Index: bend more — yours is 5% bent, target is 100% | Looks more like NO — check your index finger — bent in YES
+    try 2 wrong -> WrongMovedOn; hint: Index: bend more — yours is 5% bent, target is 100% | Looks more like NO — check your index finger — bent in YES | Nod your wrist — up and down, twice
+  show YES: Demonstrate word=YES rule=RepeatFailed reason="you missed it twice (your index finger both times)" focus=1
+  show NO: Demonstrate word=NO rule=Next reason="next new word in this lesson" focus=-1
+  show THANK-YOU: Demonstrate word=THANK-YOU rule=Next reason="next new word in this lesson" focus=-1
+  show PLEASE: Demonstrate word=PLEASE rule=Next reason="next new word in this lesson" focus=-1
+  show SORRY: Demonstrate word=SORRY rule=Next reason="next new word in this lesson" focus=-1
+  show GOOD: Demonstrate word=GOOD rule=Next reason="next new word in this lesson" focus=-1
+  show BAD: Demonstrate word=BAD rule=Next reason="next new word in this lesson" focus=-1
+  show GOODBYE: Demonstrate word=GOODBYE rule=Next reason="next new word in this lesson" focus=-1
+  show GOOD-MORNING: Demonstrate word=GOOD-MORNING rule=Next reason="next new word in this lesson" focus=-1
+    practice only (not scored): instruction shown, Next
+  end: LessonSummary, score 100
+CHECK repeat-after-two-fails: PASS (order: HELLO, YES, YES, NO, THANK-YOU, PLEASE, SORRY, GOOD, BAD, GOODBYE, GOOD-MORNING)
+Run 2, Lesson 1: everything right first try
+  show HELLO: Demonstrate word=HELLO rule=Next reason="next word in this lesson" focus=-1
+  show YES: Demonstrate word=YES rule=Next reason="next word in this lesson" focus=-1
+  show NO: Demonstrate word=NO rule=Next reason="next word in this lesson" focus=-1
+  show THANK-YOU: Demonstrate word=THANK-YOU rule=Next reason="next word in this lesson" focus=-1
+  show PLEASE: Demonstrate word=PLEASE rule=Next reason="next word in this lesson" focus=-1
+  show SORRY: Demonstrate word=SORRY rule=Next reason="next word in this lesson" focus=-1
+  show GOOD: Demonstrate word=GOOD rule=Next reason="next word in this lesson" focus=-1
+  show BAD: Demonstrate word=BAD rule=Next reason="next word in this lesson" focus=-1
+  show GOODBYE: Demonstrate word=GOODBYE rule=Next reason="next word in this lesson" focus=-1
+  show GOOD-MORNING: Demonstrate word=GOOD-MORNING rule=Next reason="next word in this lesson" focus=-1
+    practice only (not scored): instruction shown, Next
+  end: LessonSummary, score 205
+Run 3, Lesson 1: words right first try twice in a row should be shown less often (skipped)
+  show GOOD-MORNING: Demonstrate word=GOOD-MORNING rule=Next reason="next word in this lesson" focus=-1
+    practice only (not scored): instruction shown, Next
+  end: LessonSummary, score 205
+CHECK demote-after-two-first-try: PASS (run 3 order: GOOD-MORNING; skipped: HELLO, YES, NO, THANK-YOU, PLEASE, SORRY, GOOD, BAD, GOODBYE)
+YES state: attempts 4, wrongVisits 1, worstFingers [1,1], consecutiveFirstTry 2
+Run 4, Lesson 3
+  show WATER: Demonstrate word=WATER rule=Next reason="next new word in this lesson" focus=-1
+  show MILK: Demonstrate word=MILK rule=Next reason="next new word in this lesson" focus=-1
+  show EAT: Demonstrate word=EAT rule=Next reason="next new word in this lesson" focus=-1
+  show HELLO: Demonstrate word=HELLO rule=Review reason="review — last practised 2 lessons ago" focus=-1
+  show DRINK: Demonstrate word=DRINK rule=Next reason="next new word in this lesson" focus=-1
+  show BREAD: Demonstrate word=BREAD rule=Next reason="next new word in this lesson" focus=-1
+  show APPLE: Demonstrate word=APPLE rule=Next reason="next new word in this lesson" focus=-1
+  show HUNGRY: Demonstrate word=HUNGRY rule=Next reason="next new word in this lesson" focus=-1
+  show THIRSTY: Demonstrate word=THIRSTY rule=Next reason="next new word in this lesson" focus=-1
+  show COFFEE: Demonstrate word=COFFEE rule=Next reason="next new word in this lesson" focus=-1
+  show HOT: Demonstrate word=HOT rule=Next reason="next new word in this lesson" focus=-1
+  end: LessonSummary, score 335
+Run 5, Lesson 4 (two lessons after Lesson 1): a review word from Lesson 1 should appear
+  show COLD: Demonstrate word=COLD rule=Next reason="next word in this lesson" focus=-1
+  show HELP: Demonstrate word=HELP rule=Next reason="next new word in this lesson" focus=-1
+  show HAPPY: Demonstrate word=HAPPY rule=Next reason="next new word in this lesson" focus=-1
+  show YES: Demonstrate word=YES rule=Review reason="review — last practised 4 lessons ago" focus=-1
+  show SAD: Demonstrate word=SAD rule=Next reason="next new word in this lesson" focus=-1
+  show TIRED: Demonstrate word=TIRED rule=Next reason="next new word in this lesson" focus=-1
+  show SICK: Demonstrate word=SICK rule=Next reason="next new word in this lesson" focus=-1
+  show PAIN: Demonstrate word=PAIN rule=Next reason="next new word in this lesson" focus=-1
+  show LOVE: Demonstrate word=LOVE rule=Next reason="next new word in this lesson" focus=-1
+  show LIKE: Demonstrate word=LIKE rule=Next reason="next new word in this lesson" focus=-1
+  show WANT: Demonstrate word=WANT rule=Next reason="next new word in this lesson" focus=-1
+  end: LessonSummary, score 465
+CHECK review: PASS (order: COLD, HELP, HAPPY, YES, SAD, TIRED, SICK, PAIN, LOVE, LIKE, WANT)
+CHECK persistence across Play Mode restart: PASS (lessonsStarted 8, words 32; YES wrongVisits 1, HELLO consecutiveFirstTry 3)

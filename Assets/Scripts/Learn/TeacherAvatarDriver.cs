@@ -41,6 +41,14 @@ namespace SignSight.Learn
         [SerializeField] private bool seated = true;
 
         /// <summary>Raised when a demonstration has fully returned to rest.</summary>
+        /// <summary>Demo speed: 1 = normal, 0.5 = half speed (v3.1, learner-selectable). Timing only; shapes are unchanged.</summary>
+        public float Speed
+        {
+            get => _speed;
+            set => _speed = Mathf.Clamp(value, 0.25f, 1f);
+        }
+        private float _speed = 1f;
+
         public event Action DemonstrationFinished;
         public bool IsDemonstrating { get; private set; }
         public FaceDriver Face => face;
@@ -257,14 +265,15 @@ namespace SignSight.Learn
         {
             IsDemonstrating = true;
             var plan = Plan(t);
-            float dur = Mathf.Max(0.05f, t.movement.durationSec);
+            float slow = 1f / _speed;
+            float dur = Mathf.Max(0.05f, t.movement.durationSec) * slow;
             float headDur = t.head.type == "none" ? 0f : Mathf.Max(dur, minHeadSeconds);
             ApplyHead(t, 0f);
 
             // 1) Move to the start location, fingers to the start curl, palm to the start orientation.
-            for (float s = 0f; s < toStartSeconds; s += Time.deltaTime)
+            for (float s = 0f; s < toStartSeconds * slow; s += Time.deltaTime)
             {
-                ApplyMovement(t, plan, 0f, Smooth(s / toStartSeconds));
+                ApplyMovement(t, plan, 0f, Smooth(s / (toStartSeconds * slow)));
                 yield return null;
             }
 
@@ -279,7 +288,9 @@ namespace SignSight.Learn
             }
 
             // 3) Hold the end pose so the learner sees the end point (the head finishes its nod / shake).
-            for (float h = 0f; h < holdEndSeconds; h += Time.deltaTime, tau += Time.deltaTime)
+            var beat = SignMotion.BeatTemplate(t);
+            float hold = beat != null ? 0.25f : holdEndSeconds;
+            for (float h = 0f; h < hold * slow; h += Time.deltaTime, tau += Time.deltaTime)
             {
                 ApplyMovement(t, plan, 1f, 1f);
                 ApplyHead(t, headDur > 0f ? tau / headDur : 0f);
@@ -287,11 +298,39 @@ namespace SignSight.Learn
             }
             ApplyHead(t, 1f);
 
+            // 3b) Compound signs (GOOD-MORNING, TEACHER, TODAY): move into the second beat and perform it.
+            if (beat != null)
+            {
+                var plan2 = Plan(beat);
+                Poses(t, plan, 1f, out var r1, out var l1);
+                Poses(beat, plan2, 0f, out var r2, out var l2);
+                for (float s = 0f; s < toStartSeconds * slow; s += Time.deltaTime)
+                {
+                    float w = Smooth(s / (toStartSeconds * slow));
+                    ApplyArm(_right, Blend(r1, r2, w));
+                    ApplyArm(_left, Blend(l1, l2, w));
+                    yield return null;
+                }
+                float dur2 = Mathf.Max(0.05f, beat.movement.durationSec) * slow;
+                for (float b = 0f; b < dur2; b += Time.deltaTime)
+                {
+                    ApplyMovement(beat, plan2, b / dur2, 1f);
+                    yield return null;
+                }
+                for (float h = 0f; h < holdEndSeconds * slow; h += Time.deltaTime)
+                {
+                    ApplyMovement(beat, plan2, 1f, 1f);
+                    yield return null;
+                }
+                t = beat;
+                plan = plan2;
+            }
+
             // 4) Back to rest; face fades out.
             if (face != null) face.Neutral();
-            for (float r = 0f; r < returnSeconds; r += Time.deltaTime)
+            for (float r = 0f; r < returnSeconds * slow; r += Time.deltaTime)
             {
-                ApplyMovement(t, plan, 1f, 1f - Smooth(r / returnSeconds));
+                ApplyMovement(t, plan, 1f, 1f - Smooth(r / (returnSeconds * slow)));
                 yield return null;
             }
             ApplyRest();
@@ -342,6 +381,7 @@ namespace SignSight.Learn
 
         private SignPlan Plan(SignTemplate t)
         {
+            if (!string.IsNullOrEmpty(t.anchor)) return PlanAnchored(t);
             var plan = new SignPlan();
             float[] curlR = t.curlRight;
             float[] curlL = t.HasLeftCurl ? t.curlLeft : restCurl;
@@ -417,6 +457,99 @@ namespace SignSight.Learn
             return plan;
         }
 
+        // ---------------- v3.1: start pose from a named anchor (SignAnchors) ----------------
+
+        private Vector3 AnchorPoint(string name, Vector3 offset)
+        {
+            SignAnchors.TryGet(name, out var p);
+            return _eyes + p + offset;
+        }
+
+        private SignPlan PlanAnchored(SignTemplate t)
+        {
+            var plan = new SignPlan();
+            float[] curlR = t.curlRight;
+            Vector3 palmR = t.palm.sqrMagnitude > 1e-4f ? t.palm.normalized : Vector3.forward;
+            Vector3 fdR = t.fingerDir.sqrMagnitude > 1e-4f ? t.fingerDir.normalized : Vector3.up;
+            var r = Pose(_right, ChestSpot(_right), fdR, palmR, curlR, t.spread);
+
+            if (t.TwoHanded)
+            {
+                Vector3 palmL = t.leftPalm.sqrMagnitude > 1e-4f ? t.leftPalm.normalized : Mirror(palmR);
+                Vector3 fdL = t.leftFingerDir.sqrMagnitude > 1e-4f ? t.leftFingerDir.normalized : Mirror(fdR);
+                float[] curlL = t.HasLeftCurl ? t.curlLeft : curlR;
+                var l = Pose(_left, ChestSpot(_left), fdL, palmL, curlL, t.spread);
+                Vector3 lTarget;
+                if (t.leftAnchor == "mirror") lTarget = Mirror(AnchorPoint(t.anchor, t.anchorOffset) - _eyes) + _eyes;
+                else if (SignAnchors.TryGet(t.leftAnchor, out _)) lTarget = AnchorPoint(t.leftAnchor, t.leftOffset);
+                else lTarget = Mirror(ChestSpot(_right) - _eyes) + _eyes;
+                l.Pos = PlaceContact(_left, l, t.leftContact, lTarget);
+                plan.LeftStart = l;
+                plan.LeftActive = true;
+            }
+
+            Vector3 rTarget = SignAnchors.IsOnLeftHand(t.anchor) && plan.LeftActive
+                ? LeftHandPoint(plan.LeftStart, t.anchor)
+                : AnchorPoint(t.anchor, t.anchorOffset);
+            r.Pos = PlaceContact(_right, r, t.contact, rTarget);
+            plan.RightStart = r;
+            if (!plan.LeftActive) plan.LeftStart = RestPose(_left);
+            return plan;
+        }
+
+        /// <summary>Wrist position that puts the hand's contact point on the target (measured on the posed rig).</summary>
+        private Vector3 PlaceContact(Arm a, HandPose p, string contact, Vector3 target)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                ApplyArm(a, p);
+                p.Pos += target - ContactPoint(a, contact);
+            }
+            return p.Pos;
+        }
+
+        private Vector3 Local(Vector3 world) => transform.InverseTransformPoint(world);
+
+        private Vector3 TipOf(Arm a, int finger, float extra)
+        {
+            var d = a.Fingers[finger][2];
+            var m = a.Fingers[finger][1];
+            if (d == null || m == null) return Local(a.Hand.position);
+            return Local(d.position + (d.position - m.position).normalized * extra);
+        }
+
+        /// <summary>Same points as SignAnchors.Contact on the learner's hand (AvatarHandProvider uses the same bones).</summary>
+        private Vector3 ContactPoint(Arm a, string contact)
+        {
+            Vector3 wrist = Local(a.Hand.position);
+            Vector3 palm = (wrist + Local(a.Fingers[2][0].position)) * 0.5f;
+            switch (contact)
+            {
+                case "thumb": return TipOf(a, 0, 0.025f);
+                case "index": return TipOf(a, 1, 0.022f);
+                case "middle": return TipOf(a, 2, 0.022f);
+                case "fingers": return (TipOf(a, 1, 0.022f) + TipOf(a, 2, 0.022f)) * 0.5f;
+                case "knuckle": return Vector3.Lerp(palm, TipOf(a, 1, 0.022f), 0.6f);
+                default: return palm;
+            }
+        }
+
+        /// <summary>A point on the posed left hand (left-palm | left-wrist | left-index | left-back).</summary>
+        private Vector3 LeftHandPoint(HandPose left, string name)
+        {
+            ApplyArm(_left, left);
+            Vector3 wrist = Local(_left.Hand.position);
+            Vector3 palm = (wrist + Local(_left.Fingers[2][0].position)) * 0.5f;
+            Vector3 n = Vector3.Cross(Local(_left.Fingers[1][0].position) - wrist, Local(_left.Fingers[4][0].position) - wrist).normalized;
+            switch (name)
+            {
+                case "left-wrist": return wrist;
+                case "left-index": return TipOf(_left, 1, 0.022f);
+                case "left-back": return palm - n * 0.02f;
+                default: return palm + n * 0.02f;
+            }
+        }
+
         private HandPose RestPose(Arm a) => new HandPose { Pos = a.RestPos, BoneRot = a.RestRot, Curl = restCurl, Spread = 0f };
 
         // ================= Movement (§4.3) =================
@@ -424,16 +557,24 @@ namespace SignSight.Learn
         /// <summary>Poses both arms at movement phase u (0..1), blended from rest by weight w.</summary>
         private void ApplyMovement(SignTemplate t, SignPlan plan, float u, float w)
         {
-            HandPose r = plan.RightStart, l = plan.LeftStart;
+            Poses(t, plan, u, out var r, out var l);
+            ApplyArm(_right, Blend(RestPose(_right), r, w));
+            ApplyArm(_left, plan.LeftActive ? Blend(RestPose(_left), l, w) : RestPose(_left));
+        }
+
+        private void Poses(SignTemplate t, SignPlan plan, float u, out HandPose r, out HandPose l)
+        {
+            r = plan.RightStart;
+            l = plan.LeftStart;
             // Same movement numbers as the feedback ghost hands (SignMotion).
             var s = SignMotion.Sample(t, u, FingerDirOf(r.BoneRot, _right));
             r.Pos += s.RightOffset;
             r.BoneRot = s.RightRotation * r.BoneRot;
             if (s.RightCurl != null) r.Curl = s.RightCurl;
+            if (!plan.LeftActive) return;
             l.Pos += s.LeftOffset;
-
-            ApplyArm(_right, Blend(RestPose(_right), r, w));
-            ApplyArm(_left, plan.LeftActive ? Blend(RestPose(_left), l, w) : RestPose(_left));
+            l.BoneRot = s.LeftRotation * l.BoneRot;
+            if (s.LeftCurl != null) l.Curl = s.LeftCurl;
         }
 
         private static void RotateAboutWrist(ref HandPose p, Quaternion q) => p.BoneRot = q * p.BoneRot;

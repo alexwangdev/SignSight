@@ -162,6 +162,10 @@ namespace SignSight.Learn
         {
             EnsureParts();
             var report = Compare(attempt, target);
+            // v3.1 Tutor Agent: hints chosen for this learner (named finger + numbers, distinguishing feature,
+            // movement), and only the focus finger marked when the agent is working on one.
+            string personalMovement = MovementHint(attempt, target);
+            if (TutorAgent.Instance != null) TutorAgent.Instance.Personalise(ref report, attempt, target, ref personalMovement);
             LastReport = report;
             if (handsRoot != null) handsRoot.SetActive(true);
 
@@ -190,7 +194,7 @@ namespace SignSight.Learn
                 : $"<color=#FF5A4A>+0</color> {target.intent}  <size=70%>here is the correct sign — moving on</size>");
             SetText(hint, report.Hint);
             SetText(looksLike, report.LooksLike);
-            LastMovementHint = MovementHint(attempt, target);
+            LastMovementHint = personalMovement;
             SetText(movementHint, string.IsNullOrEmpty(LastMovementHint) ? "" : $"<color=#7FC8FF>Movement:</color> {LastMovementHint}");
 
             StackText();
@@ -257,6 +261,8 @@ namespace SignSight.Learn
 
         private static string StartHint(SignTemplate t)
         {
+            if (!string.IsNullOrEmpty(t.anchor))
+                return $"Start with your {SignScorer.ContactWord(t.contact)} at your {SignScorer.AnchorWord(t.anchor)}";
             switch (t.movement.type)
             {
                 case MovementTypes.PushForward: return "Start at your chin";
@@ -271,6 +277,17 @@ namespace SignSight.Learn
         /// <summary>Where the non-dominant hand sits relative to the dominant one (signer's space, real-hand metres).</summary>
         private static Vector3 LeftOffset(SignTemplate t)
         {
+            if (!string.IsNullOrEmpty(t.anchor))
+            {
+                // v3.1: from the two start points; a right hand resting on the left hand sits just above it.
+                if (SignAnchors.IsOnLeftHand(t.anchor)) return new Vector3(-0.03f, -0.09f, 0f);
+                if (SignAnchors.LeftTarget(t, out var lp) && SignAnchors.TryGet(t.anchor, out var rp))
+                {
+                    var d = lp - (rp + t.anchorOffset);
+                    if (d.magnitude > 0.08f) return d;
+                }
+                return new Vector3(-0.16f, 0f, 0f);
+            }
             switch (t.movement.type)
             {
                 case MovementTypes.Crank: return new Vector3(-0.03f, -0.10f, 0f);  // COFFEE: under the top fist
@@ -332,7 +349,11 @@ namespace SignSight.Learn
             var s = SignMotion.Sample(t, u, Vector3.up);
             targetHand.SetMotion(s.RightOffset * targetHand.DrawScale, s.RightRotation);
             if (s.RightCurl != null) targetHand.Pose(s.RightCurl);
-            if (t.TwoHanded) _targetLeft.SetMotion(s.LeftOffset * _targetLeft.DrawScale, Quaternion.identity);
+            if (t.TwoHanded)
+            {
+                _targetLeft.SetMotion(s.LeftOffset * _targetLeft.DrawScale, s.LeftRotation);
+                if (s.LeftCurl != null) _targetLeft.Pose(s.LeftCurl);
+            }
         }
 
         private void StopReplay()
