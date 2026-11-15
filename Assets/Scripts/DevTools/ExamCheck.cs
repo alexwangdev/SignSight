@@ -80,6 +80,9 @@ namespace SignSight.DevTools
             Vector3 teacherHome = teacher.transform.localPosition;
             ui.Find("StartCards/ExamCard").GetComponentInChildren<Oculus.Interaction.InteractableUnityEventWrapper>(true).WhenSelect.Invoke();
             yield return null;
+            // v3.10a: the café props appear at black, after the fade (0.3 s out, 0.3 s in)
+            var envMode = lm.GetComponent<SignSight.UI.EnvironmentMode>();
+            while (envMode.Fading) yield return null;
             Check("Start card 'Final Exam' -> Exam mode, turn 1, café props on, teacher behind the counter",
                   lm.CurrentMode == LessonManager.Mode.Exam && ex.TurnIndex == 0 && cafe.gameObject.activeSelf &&
                   teacher.transform.localPosition == ExamMode.TeacherCafePosition,
@@ -182,6 +185,7 @@ namespace SignSight.DevTools
             // ---- MENU -> Start, teacher back home, café hidden ----
             lm.Next(); // MENU
             yield return null;
+            while (lm.GetComponent<SignSight.UI.EnvironmentMode>().Fading) yield return null; // café hides at black
             Check("MENU -> Start; teacher back at his place; café props hidden",
                   lm.CurrentMode == LessonManager.Mode.Start && teacher.transform.localPosition == teacherHome && !cafe.gameObject.activeSelf,
                   $"{lm.CurrentMode}, teacher {teacher.transform.localPosition}");

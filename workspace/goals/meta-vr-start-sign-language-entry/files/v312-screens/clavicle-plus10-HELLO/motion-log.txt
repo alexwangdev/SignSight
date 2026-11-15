@@ -1,0 +1,1 @@
+HELLO: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R pitch 20.6 yaw 40.4 twist 0.6 total 42.3 | L pitch -1.3 yaw -0.7 twist 1.3 total 1.9

@@ -35,10 +35,12 @@ namespace SignSight.Learn
         [Header("v3.10 wrist limits: how far the hand may turn away from the forearm (degrees)")]
         [Tooltip("v3.10 verify: OFF = v3.9 wrist behaviour. The clamp broke 9 scored self-test words (wrist turn too small); see v310-verify.txt.")]
         [SerializeField] private bool wristClampEnabled = false;
-        [Tooltip("Pitch + yaw of the wrist, relative to the forearm. Clamped, not snapped.")]
-        [SerializeField] private float wristSwingMaxDeg = 35f;
-        [Tooltip("Roll of the wrist about the forearm.")]
-        [SerializeField] private float wristTwistMaxDeg = 45f;
+        [Tooltip("v3.12: wrist flexion / extension (pitch), degrees. Standard wrist range of motion: flexion ~70-80, extension ~60-70; 70 used.")]
+        [SerializeField] private float wristPitchMaxDeg = 70f;
+        [Tooltip("v3.12: wrist radial / ulnar deviation (yaw), degrees. Standard range: radial ~20, ulnar ~30-35; 30 used.")]
+        [SerializeField] private float wristYawMaxDeg = 30f;
+        [Tooltip("v3.12: wrist twist TOLERANCE, degrees, one value for all words. Twist is forearm pronation / supination; the roll search leaves about 17 deg on WHERE and under 3 deg on the others, so 0 punished the search, not the wrist. 15 used.")]
+        [SerializeField] private float wristTwistMaxDeg = 15f;
         [Tooltip("Sideways splay at spread = 1, per finger: index, middle, ring, pinky (degrees away from the middle finger).")]
         [SerializeField] private Vector4 spreadDegrees = new Vector4(10f, 0f, 8f, 16f);
         [Tooltip("Relaxed hand at rest.")]
@@ -78,6 +80,7 @@ namespace SignSight.Learn
             public float Roll;               // v3.11: damped forearm roll (pronation / supination), degrees
             public bool RollInit;
             public float DevAngle, DevSwing, DevTwist; // v3.11 measurement: wrist deviation from the forearm (degrees)
+            public float DevPitch, DevYaw;             // v3.12: flexion (+) / extension (-) and radial-ulnar yaw (degrees)
             public bool FollowInit;          // v3.10 steps 3-4: the damped follow state below is set
             public Vector3 FollowPos;        // damped wrist position (teacher space)
             public Quaternion FollowRot;     // damped hand bone rotation (teacher space)
@@ -725,21 +728,45 @@ namespace SignSight.Learn
             Quaternion neutral = a.Lower.rotation * a.HandRest;               // the hand following the forearm exactly
             Quaternion dev = Quaternion.Inverse(neutral) * desired;           // wrist deviation, in the hand's frame
             if (dev.w < 0f) dev = new Quaternion(-dev.x, -dev.y, -dev.z, -dev.w);
-            Vector3 ax = (Quaternion.Inverse(neutral) * (a.Hand.position - a.Lower.position)).normalized; // forearm axis
+            Vector3 fLocal = Quaternion.Inverse(neutral) * (a.Hand.position - a.Lower.position);
+            Vector3 ax = fLocal.normalized;                                    // forearm axis, hand frame
+            Vector3 f = (a.Hand.position - a.Lower.position).normalized;       // forearm axis, world
+            // twist = rotation about the forearm (carried by the roll search; limited to wristTwistMaxDeg)
             Vector3 proj = Vector3.Dot(ax, new Vector3(dev.x, dev.y, dev.z)) * ax;
             Quaternion twist = new Quaternion(proj.x, proj.y, proj.z, dev.w);
             float tn = twist.x * twist.x + twist.y * twist.y + twist.z * twist.z + twist.w * twist.w;
-            twist = tn < 1e-8f ? Quaternion.identity : Quaternion.Normalize(twist); // swing-twist split
+            twist = tn < 1e-8f ? Quaternion.identity : Quaternion.Normalize(twist);
             Quaternion swing = dev * Quaternion.Inverse(twist);
-            // v3.11 measurement, always recorded: how far the forearm is from carrying the hand (degrees)
-            a.DevAngle = Quaternion.Angle(Quaternion.identity, dev);
+            float twistSigned = 2f * Mathf.Atan2(Vector3.Dot(ax, new Vector3(twist.x, twist.y, twist.z)), twist.w) * Mathf.Rad2Deg;
+
+            // pitch / yaw in the wrist's own frame. The hand's frame: forward = finger, up = palm normal (FrameToBone).
+            Quaternion inv = Quaternion.Inverse(a.FrameToBone);
+            Vector3 pn = neutral * inv * Vector3.up;                           // palm normal, neutral hand
+            Vector3 lat = Vector3.Cross(f, pn).normalized;                     // lateral axis (thumb - pinky line)
+            Vector3 fingerN = neutral * inv * Vector3.forward;
+            Vector3 fingerD = desired * inv * Vector3.forward;
+            // angle of the finger in the sagittal plane (pitch: flexion towards the palm is positive) and the lateral plane (yaw)
+            float pitch = Mathf.DeltaAngle(Mathf.Atan2(Vector3.Dot(fingerN, pn), Vector3.Dot(fingerN, f)) * Mathf.Rad2Deg,
+                                           Mathf.Atan2(Vector3.Dot(fingerD, pn), Vector3.Dot(fingerD, f)) * Mathf.Rad2Deg);
+            float yaw = Mathf.DeltaAngle(Mathf.Atan2(Vector3.Dot(fingerN, lat), Vector3.Dot(fingerN, f)) * Mathf.Rad2Deg,
+                                         Mathf.Atan2(Vector3.Dot(fingerD, lat), Vector3.Dot(fingerD, f)) * Mathf.Rad2Deg);
+
+            // v3.12 measurement, always recorded (degrees)
+            a.DevAngle = Quaternion.Angle(neutral, desired);
             a.DevSwing = Quaternion.Angle(Quaternion.identity, swing);
-            a.DevTwist = Quaternion.Angle(Quaternion.identity, twist);
+            a.DevTwist = Mathf.Abs(twistSigned);
+            a.DevPitch = pitch;
+            a.DevYaw = yaw;
             if (!wristClampEnabled) return desired; // v3.9 behaviour: the template's hand rotation, unclamped
-            Quaternion swingC = Quaternion.RotateTowards(Quaternion.identity, swing, wristSwingMaxDeg);
-            Quaternion twistC = Quaternion.RotateTowards(Quaternion.identity, twist, wristTwistMaxDeg);
-            WristClampedMaxDeg = Mathf.Max(WristClampedMaxDeg, Quaternion.Angle(swing, swingC), Quaternion.Angle(twist, twistC));
-            return neutral * (swingC * twistC);
+
+            // per-axis clamp: the excess beyond each limit is taken off the desired orientation about that axis
+            float ep = Mathf.Sign(pitch) * Mathf.Max(0f, Mathf.Abs(pitch) - wristPitchMaxDeg);
+            float ey = Mathf.Sign(yaw) * Mathf.Max(0f, Mathf.Abs(yaw) - wristYawMaxDeg);
+            float et = Mathf.Sign(twistSigned) * Mathf.Max(0f, Mathf.Abs(twistSigned) - wristTwistMaxDeg);
+            // signs: +rotation about lat raises the pitch; +rotation about pn lowers the yaw; +rotation about f raises the twist
+            Quaternion clamped = Quaternion.AngleAxis(-et, f) * Quaternion.AngleAxis(ey, pn) * Quaternion.AngleAxis(-ep, lat) * desired;
+            WristClampedMaxDeg = Mathf.Max(WristClampedMaxDeg, Mathf.Abs(ep), Mathf.Abs(ey), Mathf.Abs(et));
+            return clamped;
         }
 
         [Tooltip("v3.10 step 2: how quickly the elbow direction follows the hand (per second, exponential damp).")]
@@ -776,8 +803,8 @@ namespace SignSight.Learn
 
         private void RecordHold()
         {
-            HoldReport = $"R swing {_right.DevSwing:0.0} twist {_right.DevTwist:0.0} total {_right.DevAngle:0.0} | " +
-                         $"L swing {_left.DevSwing:0.0} twist {_left.DevTwist:0.0} total {_left.DevAngle:0.0}";
+            HoldReport = $"R pitch {_right.DevPitch:0.0} yaw {_right.DevYaw:0.0} twist {_right.DevTwist:0.0} total {_right.DevAngle:0.0} | " +
+                         $"L pitch {_left.DevPitch:0.0} yaw {_left.DevYaw:0.0} twist {_left.DevTwist:0.0} total {_left.DevAngle:0.0}";
         }
 
         /// <summary>Two-bone solve for one elbow pole, from the rest pose (the bones are reset first).</summary>

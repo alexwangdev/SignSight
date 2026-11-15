@@ -1,0 +1,6 @@
+HELLO: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R pitch 12.6 yaw 43.3 twist 1.7 total 43.8 | L pitch 3.4 yaw 0.8 twist 0.0 total 3.5
+YES: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R pitch -71.6 yaw -66.1 twist 3.0 total 77.8 | L pitch 3.4 yaw 0.8 twist 0.0 total 3.5
+BAD: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R pitch 125.5 yaw -112.2 twist 0.4 total 109.5 | L pitch 3.4 yaw 0.8 twist 0.0 total 3.5
+DRINK: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R pitch -99.6 yaw -97.5 twist 2.2 total 97.8 | L pitch 3.4 yaw 0.8 twist 0.0 total 3.5
+WHERE: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R pitch -42.6 yaw -19.9 twist 17.0 total 48.2 | L pitch 3.4 yaw 0.8 twist 0.0 total 3.5
+HOW: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R pitch 73.5 yaw 64.0 twist 0.4 total 72.9 | L pitch 75.5 yaw -68.3 twist 0.1 total 74.9

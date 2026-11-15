@@ -10793,7 +10793,6 @@ MonoBehaviour:
   explore: {fileID: 1822268962}
   relax: {fileID: 1822268963}
   exam: {fileID: 1822268964}
-  classroomProps: {fileID: 1498725121}
 --- !u!114 &1822268959
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13537,6 +13536,10 @@ PrefabInstance:
       propertyPath: face
       value: 
       objectReference: {fileID: 3362038296222486589}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: wristTwistMaxDeg
+      value: 15
+      objectReference: {fileID: 0}
     - target: {fileID: 6093902652468623999, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.32
