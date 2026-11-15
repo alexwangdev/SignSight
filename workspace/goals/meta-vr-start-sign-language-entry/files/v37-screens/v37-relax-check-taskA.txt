@@ -1,0 +1,20 @@
+CHECK Start card 'Finger Relax' -> Relax mode, step 1: PASS (Relax, step 1 Open & Close)
+CHECK no top bar (score / streak) and no Tutor panel in Relax: PASS
+CHECK safety line + why line on screen: PASS
+CHECK teacher rests (not demonstrating): PASS
+CHECK no hand for 2.5 s: 'Show me your hand', ring at 0, still step 1: PASS (status 'Show me your hand', progress 0.00)
+CHECK step 1 Open & Close done by target: PASS (target)
+CHECK step 2 Spread Wide done by target: PASS (target,target)
+CHECK step 3 Finger Piano done by target: PASS (target,target,target)
+CHECK step 4 Shake It Out done by target: PASS (target,target,target,target, 0.8s)
+CHECK step 5 Wiggle & Rest ends after 8 s (wiggle seen): PASS (8.0s)
+CHECK end screen 'All loose — nice work' + one soft sparkle, DONE shown, SKIP hidden: PASS (Finished, 'All loose — nice work', sparkles 14, run 25s, endings target,target,target,target,target)
+  buttons: ReplayButton[DONE], NextButton[MENU]
+CHECK score unchanged, no word attempts: PASS (score 0 -> 0, attempts 0)
+CHECK DONE (standalone) -> Start: PASS (Start / Menu)
+CHECK all steps time out with a wrong / partial hand shape, never 'wrong', ends on the end screen: PASS (timeout,timeout,timeout,timeout,target, total 80.7s)
+CHECK DONE -> Start: PASS
+CHECK SKIP -> next step: PASS (step 2)
+CHECK SKIP on the last step -> end screen: PASS
+CHECK MENU mid-way -> Start (not the lesson list): PASS (Start / Menu)
+Errors during the check: 0

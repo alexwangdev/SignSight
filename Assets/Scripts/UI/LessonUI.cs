@@ -552,11 +552,13 @@ namespace SignSight.UI
                 var step = relax.CurrentStep;
                 string status = relax.Status;
                 string line = $"<color=#9DB7FF>Step {relax.StepIndex + 1} of {SignSight.Relax.RelaxMode.Steps.Length}</color>";
+                line += "\n" + RelaxDots(relax.StepIndex, SignSight.Relax.RelaxMode.Steps.Length);
                 if (!string.IsNullOrEmpty(status))
                     line += status == SignSight.Relax.RelaxMode.ShowHand ? $"\n<color={UIStyle.Amber}>{status}</color>" : $"\n{status}";
                 wordCard?.Show(step.name, step.instruction, line);
             }
-            SetInstruction($"{SignSight.Relax.RelaxMode.WhyLine}\n<size=70%><color={UIStyle.Amber}>{SignSight.Relax.RelaxMode.SafetyLine}</color></size>");
+            SetInstruction($"{SignSight.Relax.RelaxMode.WhyLine}\n<size=62%><color=#9DB7FF>{RelaxBreathLine}</color></size>" +
+                           $"\n<size=70%><color={UIStyle.Amber}>{SignSight.Relax.RelaxMode.SafetyLine}</color></size>");
 
             bool stepping = st != R;
             Show(tryAgainButton, stepping);
@@ -634,6 +636,26 @@ namespace SignSight.UI
             LayOut(visible);
             // End screen: RETRY EXAM sits left of centre so it never covers the breakdown on the word card.
             if (st == S && replayButton != null) replayButton.transform.localPosition += new Vector3(-0.12f, 0f, 0f);
+        }
+
+        /// <summary>v3.7: a small breathing cue on every Relax screen (the why line and the safety line stay).</summary>
+        public const string RelaxBreathLine = "Breathe in\u2026 out\u2026";
+
+        /// <summary>
+        /// v3.7: step dots — filled for finished steps, amber for the current one, hollow for the rest (step 2 of 5:
+        /// two filled, three hollow). Text glyphs U+25CF / U+25CB, which render through the project font's fallback.
+        /// </summary>
+        public static string RelaxDots(int current, int count)
+        {
+            var sb = new System.Text.StringBuilder("<size=120%>");
+            for (int i = 0; i < count; i++)
+            {
+                if (i > 0) sb.Append(' ');
+                if (i < current) sb.Append("<color=#7CE38B>\u25CF</color>");
+                else if (i == current) sb.Append($"<color={UIStyle.Amber}>\u25CF</color>");
+                else sb.Append("<color=#9DB7FF>\u25CB</color>");
+            }
+            return sb.Append("</size>").ToString();
         }
 
         public void SetInstruction(string text)

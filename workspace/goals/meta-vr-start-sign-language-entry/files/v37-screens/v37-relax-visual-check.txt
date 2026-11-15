@@ -1,0 +1,16 @@
+CHECK teacher soft smile in Relax, hands at rest: PASS (smile 54)
+CHECK ghost is warm (not the Learn ghost's pale blue): PASS
+CHECK step 1 Open & Close: only its visual shows; dots line; breathing + safety lines: PASS (visible Bubbles+Flower; dots '● ○ ○ ○ ○')
+CHECK step 2 Spread Wide: only its visual shows; dots line; breathing + safety lines: PASS (visible Bubbles+Sun; dots '● ● ○ ○ ○')
+CHECK Spread: involved fingers turn green while the hold counts: PASS
+CHECK step 3 Finger Piano: only its visual shows; dots line; breathing + safety lines: PASS (visible Bubbles+PianoDots; dots '● ● ● ○ ○')
+CHECK step 4 Shake It Out: only its visual shows; dots line; breathing + safety lines: PASS (visible Bubbles+Leaves; dots '● ● ● ● ○')
+CHECK step 5 Wiggle & Rest: only its visual shows; dots line; breathing + safety lines: PASS (visible Bubbles; dots '● ● ● ● ●')
+CHECK target endings: ghost pop on each of the 5 steps + Finish; a sparkle on each target ending + Finish: PASS (pops 6, sparkles 6, endings target,target,target,target,target)
+CHECK end screen: step visuals hidden: FAIL (Bubbles)
+CHECK DONE -> Start; teacher face back to neutral: PASS (smile 45)
+CHECK teacher smile faded to neutral after leaving Relax: PASS (smile 0)
+CHECK timeout endings: pop yes, sparkle no (only Wiggle's 8 s end and Finish sparkle): PASS (pops 6, sparkles 2, endings timeout,timeout,timeout,timeout,target)
+CHECK MENU -> Start; classroom / café props hidden and unmoved: PASS
+Errors during the check: 0
+RECHECK end screen one frame later: step visuals hidden: PASS (state Finished, visible: '') — the first check read the renderers in the same frame the state changed, before RelaxVisual.LateUpdate ran

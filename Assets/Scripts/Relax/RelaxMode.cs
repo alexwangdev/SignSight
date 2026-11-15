@@ -105,6 +105,33 @@ namespace SignSight.Relax
         public bool ReturnToLesson { get; set; }
         public GhostHand Ghost => _ghost;
 
+        // ---- v3.7 visuals: read-only views of what the steps already measure (no new detection) ----
+        /// <summary>The last measured frame (what the steps read).</summary>
+        public Sample LastSample { get; private set; }
+        /// <summary>Finger Piano: the target finger (0 index .. 3 pinky); 4 = all done.</summary>
+        public int PianoFinger => _phase;
+        /// <summary>Shake: direction changes counted in the current 2 s window.</summary>
+        public int ShakeCount { get; private set; }
+        /// <summary>A hold (Open &amp; Close, Spread Wide) is counting right now.</summary>
+        public bool Holding => _hold > 0f;
+        public RelaxVisual Visual => _visual;
+
+        // v3.7 look: warm ghost, green while a hold counts, a small pop and a coloured sparkle per finished step
+        public static readonly Color GhostWarm = new Color(1f, 0.9f, 0.75f, 0.6f);
+        public static readonly Color GhostHold = new Color(0.55f, 0.95f, 0.6f, 0.6f);
+        public const float PopSeconds = CelebrationFX.PopSeconds;   // 0.4 s, as the lesson celebration
+        public const float PopSize = 0.9f;                          // GhostSize 0.8 -> 0.9 -> 0.8
+        public const int SparkleParticles = 18;
+        /// <summary>Sparkle colour per step: OpenClose green, Spread gold, Piano blue, Shake green, Wiggle blue.</summary>
+        public static readonly Color[] SparkleColor =
+        {
+            new Color(0.45f, 0.9f, 0.5f), new Color(1f, 0.82f, 0.3f), new Color(0.5f, 0.7f, 1f),
+            new Color(0.6f, 0.95f, 0.55f), new Color(0.6f, 0.85f, 1f),
+        };
+        public const float TeacherSmile = 30f;
+        public int Sparkles { get; private set; }
+        public int Pops { get; private set; }
+
         /// <summary>Test hook (Editor checks): measured frames come from here instead of the hands.</summary>
         public Func<Sample> DebugSample;
 
@@ -122,6 +149,9 @@ namespace SignSight.Relax
         private float[] _poseFrom = new float[5], _poseTo = new float[5];
         private CelebrationFX _fx;
         private Transform _fxAnchor;
+        private RelaxVisual _visual;
+        private float _popT = -1f;
+        private float _fingerTint = -1f;
 
         private static readonly float[] Open = { 0f, 0f, 0f, 0f, 0f };
         private static readonly float[] Fist = { 0.7f, 0.95f, 0.95f, 0.95f, 0.95f };
@@ -150,16 +180,17 @@ namespace SignSight.Relax
             _ghost.IsLeft = false;
             _ghost.SizeMultiplier = GhostSize;
             go.SetActive(true);
-            _ghost.SetAllColors(new Color(0.75f, 0.85f, 1f, 0.6f));
+            _ghost.SetAllColors(GhostWarm); // v3.7: warm, still semi-transparent (the Learn feedback ghost is unchanged)
             go.SetActive(false);
 
             _fxAnchor = new GameObject("RelaxSparkle").transform;
             _fxAnchor.SetParent(go.transform.parent, false);
             _fxAnchor.localPosition = GhostPosition + new Vector3(0f, 0.08f, 0f);
             _fx = CelebrationFX.Create(_fxAnchor);
-            // A soft sparkle: a dozen particles, no stars, no title pop, no points.
+            // A soft sparkle per finished step: 18 particles, no stars, no title pop, no points.
             var ps = _fx.GetComponentInChildren<ParticleSystem>(true);
-            if (ps != null) ps.emission.SetBursts(new[] { new ParticleSystem.Burst(0f, (short)12) });
+            if (ps != null) ps.emission.SetBursts(new[] { new ParticleSystem.Burst(0f, (short)SparkleParticles) });
+            _visual = RelaxVisual.Create(go.transform.parent, this);
         }
 
         /// <summary>Entering / leaving Relax (LessonManager calls this).</summary>
@@ -171,6 +202,7 @@ namespace SignSight.Relax
             if (on)
             {
                 if (teacher != null && teacher.IsDemonstrating) teacher.Rest(); // the ghost hand demonstrates, the teacher rests
+                if (teacher != null && teacher.Face != null) teacher.Face.Expression(TeacherSmile, 0f); // v3.7: a soft smile, hands at rest
                 _hasSide = false;
                 _traj.Clear();
                 BeginStep(0);
@@ -180,6 +212,7 @@ namespace SignSight.Relax
                 Current = State.Off;
                 ReturnToLesson = false;
                 _fx?.Hide();
+                if (teacher != null && teacher.Face != null && !teacher.IsDemonstrating) teacher.Face.Neutral();
             }
             Changed?.Invoke();
         }
@@ -230,7 +263,8 @@ namespace SignSight.Relax
             _ghost.Spread = 0f;
             SetGhostTarget(Open, false);
             _ghost.ClearMotion();
-            if (_fx != null) _fx.Play(null, null, 0, _fxAnchor.localPosition); // confetti only: 0 stars
+            Pop();
+            Sparkle(SparkleColor[SparkleColor.Length - 1]); // confetti only: 0 stars
             Changed?.Invoke();
         }
 
@@ -242,7 +276,59 @@ namespace SignSight.Relax
             _betweenT = 0f;
             Progress = byTarget ? 1f : Progress;
             Status = MovingOn;
+            Pop(); // every finished step gets the small pop ("Nice — moving on", no fail)
+            if (byTarget) Sparkle(SparkleColor[Mathf.Clamp(StepIndex, 0, SparkleColor.Length - 1)]); // target endings only
             Changed?.Invoke();
+        }
+
+        private void Pop()
+        {
+            _popT = 0f;
+            Pops++;
+        }
+
+        private void Sparkle(Color c)
+        {
+            if (_fx == null) return;
+            var ps = _fx.GetComponentInChildren<ParticleSystem>(true);
+            if (ps != null)
+            {
+                var main = ps.main;
+                main.startColor = new ParticleSystem.MinMaxGradient(c, Color.Lerp(c, Color.white, 0.4f)) { mode = ParticleSystemGradientMode.TwoColors };
+            }
+            _fx.Play(null, null, 0, _fxAnchor.localPosition);
+            Sparkles++;
+        }
+
+        /// <summary>v3.7: the ghost pop (0.8 -> 0.9 -> 0.8 over 0.4 s) and the involved fingers turning green while a hold counts.</summary>
+        private void AnimateLook(float dt)
+        {
+            if (_ghost == null) return;
+            if (_popT >= 0f)
+            {
+                _popT += dt;
+                float u = Mathf.Clamp01(_popT / PopSeconds);
+                _ghost.SizeMultiplier = GhostSize + (PopSize - GhostSize) * Mathf.Sin(u * Mathf.PI);
+                if (u >= 1f)
+                {
+                    _ghost.SizeMultiplier = GhostSize;
+                    _popT = -1f;
+                }
+            }
+            float tint = 0f;
+            var step = CurrentStep;
+            if (Current == State.Step && step != null && _hold > 0f)
+            {
+                float need = step.kind == Kind.OpenClose ? OpenCloseHoldSeconds : step.kind == Kind.Spread ? SpreadHoldSeconds : 1f;
+                tint = Mathf.Clamp01(_hold / need);
+            }
+            tint = Mathf.Round(tint * 10f) / 10f; // repaint the mesh only when the shade changes
+            if (Mathf.Approximately(tint, _fingerTint)) return;
+            _fingerTint = tint;
+            var c = Color.Lerp(GhostWarm, GhostHold, tint);
+            // the involved fingers: index..pinky (and the thumb for Open & Close)
+            bool thumb = step != null && step.kind == Kind.OpenClose;
+            for (int f = 0; f < 5; f++) _ghost.SetFingerColor(f, f == 0 && !thumb ? GhostWarm : c);
         }
 
         // ---------------- per frame ----------------
@@ -253,7 +339,9 @@ namespace SignSight.Relax
             float dt = Time.deltaTime;
             var s = Measure();
             HandTracked = s.Tracked;
+            LastSample = s;
             AnimateGhost(dt);
+            AnimateLook(dt);
 
             if (Current == State.Between)
             {
@@ -280,7 +368,7 @@ namespace SignSight.Relax
             else if (Status != before) Changed?.Invoke();
         }
 
-        private static float MeanFingerCurl(float[] c) => (c[1] + c[2] + c[3] + c[4]) * 0.25f;
+        public static float MeanFingerCurl(float[] c) => (c[1] + c[2] + c[3] + c[4]) * 0.25f;
 
         private bool Evaluate(in Sample s, float dt)
         {
@@ -339,6 +427,7 @@ namespace SignSight.Relax
                 case Kind.Shake:
                 {
                     ShakeMeasure(out float amp, out int rev);
+                    ShakeCount = rev;
                     Progress = Mathf.Clamp01(Mathf.Min(amp / ShakeAmplitude, rev / (float)ShakeReversals));
                     return amp >= ShakeAmplitude && rev >= ShakeReversals;
                 }
