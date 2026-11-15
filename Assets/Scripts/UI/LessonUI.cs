@@ -55,6 +55,11 @@ namespace SignSight.UI
         private const float StartTitleScale = 0.7f;
         private static readonly Vector3 MenuCornerPosition = new Vector3(-0.42f, 0.10f, 0.75f);
         private static readonly Vector3 StartInstructionPosition = new Vector3(0.155f, -0.17f, 0.70f);
+        [Header("v3.4: Finger Relax (third mode + RELAX on the lesson summary)")]
+        [SerializeField] private SignSight.Relax.RelaxMode relax;
+        private GameObject _relaxButton;
+        private GameObject _ringLabel;
+        private Vector3 _ringHome;
         private Vector3 _cardHome, _instructionHome;
         private bool _cardHomeCaptured;
 
@@ -71,6 +76,25 @@ namespace SignSight.UI
                 // Explore: the same ring fills while the pointing ray holds on an object (0.6 s).
                 copying = explore.Current == SignSight.Explore.ExploreMode.State.Pointing && explore.HoldProgress > 0f;
                 p = explore.HoldProgress;
+            }
+            if (lessons.CurrentMode == LessonManager.Mode.Relax && relax != null)
+            {
+                // Relax: the same ring fills toward the step's target; it pauses while no hand is tracked.
+                copying = relax.Current == SignSight.Relax.RelaxMode.State.Step || relax.Current == SignSight.Relax.RelaxMode.State.Between;
+                p = relax.Progress;
+            }
+            if (holdRingRoot != null)
+            {
+                // Relax: the ring sits next to the ghost hand, without Learn's "3s" label.
+                if (_ringLabel == null)
+                {
+                    _ringHome = holdRingRoot.transform.localPosition;
+                    var l = holdRingRoot.transform.Find("Label");
+                    _ringLabel = l != null ? l.gameObject : holdRingRoot;
+                }
+                bool inRelax = lessons.CurrentMode == LessonManager.Mode.Relax;
+                holdRingRoot.transform.localPosition = inRelax ? SignSight.Relax.RelaxMode.RingPosition : _ringHome;
+                if (_ringLabel != holdRingRoot && _ringLabel.activeSelf == inRelax) _ringLabel.SetActive(!inRelax);
             }
             if (holdRingRoot != null && holdRingRoot.activeSelf != copying) holdRingRoot.SetActive(copying);
             holdRing.fillAmount = p;
@@ -118,6 +142,8 @@ namespace SignSight.UI
             lessons.PhaseChanged += Refresh;
             lessons.ModeChanged += OnModeChanged;
             if (explore != null) explore.Changed += Refresh;
+            if (relax == null) relax = FindFirstObjectByType<SignSight.Relax.RelaxMode>();
+            if (relax != null) relax.Changed += Refresh;
             if (score != null) score.Changed += Refresh;
             Refresh(lessons.Current);
         }
@@ -163,6 +189,14 @@ namespace SignSight.UI
                     _lessonButtons.Add(b);
                 }
             }
+            if (_relaxButton == null && tryAgainButton != null)
+            {
+                // v3.4 Task B: RELAX on the lesson summary (a runtime copy of a row button; the scene stays unchanged).
+                _relaxButton = CloneButton(tryAgainButton, "RelaxButton", "RELAX", lessons.StartRelaxThenNextLesson);
+                var ri = _relaxButton.GetComponent<ButtonIcon>();
+                if (ri != null) ri.Set("hand");
+                _relaxButton.SetActive(false);
+            }
             if (speedButton != null && _speedLabel == null) _speedLabel = speedButton.GetComponentInChildren<TMP_Text>(true);
             if (faceButton != null && _faceLabel == null)
             {
@@ -182,6 +216,7 @@ namespace SignSight.UI
             if (lessons != null) lessons.PhaseChanged -= Refresh;
             if (lessons != null) lessons.ModeChanged -= OnModeChanged;
             if (explore != null) explore.Changed -= Refresh;
+            if (relax != null) relax.Changed -= Refresh;
             if (score != null) score.Changed -= Refresh;
         }
 
@@ -328,7 +363,12 @@ namespace SignSight.UI
             Show(tryAgainButton, phase == LessonManager.Phase.Feedback && score != null && score.CanTryAgain);
             var tryLabel = tryAgainButton != null ? tryAgainButton.transform.Find("Label")?.GetComponent<TMP_Text>() : null;
             if (tryLabel != null) tryLabel.text = "TRY\nAGAIN";
+            SetIcon(tryAgainButton, "tryagain");
+            SetLabel(replayButton, _replayText);
+            SetIcon(replayButton, "replay");
             Show(practiceButton, phase == LessonManager.Phase.Complete && !lessons.IsPractice && score != null && score.Missed.Count > 0);
+            // v3.4 Task B: the learner may take a 1-minute Finger Relax before the next lesson (never forced).
+            Show(_relaxButton, phase == LessonManager.Phase.LessonSummary && !lessons.IsPractice);
             bool next = phase == LessonManager.Phase.Copy || phase == LessonManager.Phase.Feedback ||
                         phase == LessonManager.Phase.LessonSummary || phase == LessonManager.Phase.Complete ||
                         phase == LessonManager.Phase.Menu; // v3.3: MENU back to Start from the lesson list
@@ -362,6 +402,17 @@ namespace SignSight.UI
             Show(lesson1Button, false);
             Show(lesson2Button, false);
             Show(practiceButton, false);
+            Show(_relaxButton, false);
+
+            if (lessons.CurrentMode == LessonManager.Mode.Relax)
+            {
+                RefreshRelax(visible, Show);
+                return;
+            }
+            // Relax relabels Try Again / Replay: restore them (Explore sets its own BACK label below).
+            SetLabel(replayButton, _replayText);
+            SetIcon(replayButton, "replay");
+            SetIcon(tryAgainButton, "tryagain");
 
             if (isStart)
             {
@@ -423,6 +474,70 @@ namespace SignSight.UI
                 if (hasFace && _faceLabel != null)
                     _faceLabel.text = $"FACE\n<size=60%>{FaceDriver.Resolve(tpl.face).name.Split('—')[0].Trim()}</size>";
             }
+            LayOut(visible);
+        }
+
+        private static void SetIcon(GameObject button, string icon)
+        {
+            var bi = button != null ? button.GetComponent<ButtonIcon>() : null;
+            if (bi != null) bi.Set(icon);
+        }
+
+        private string _replayText;
+
+        private void SetLabel(GameObject button, string text)
+        {
+            var l = button != null ? button.transform.Find("Label")?.GetComponent<TMP_Text>() : null;
+            if (l == null) return;
+            if (button == replayButton && _replayText == null) _replayText = l.text; // the scene's own Replay label
+            if (text != null) l.text = text;
+        }
+
+        /// <summary>
+        /// v3.4 Finger Relax: step name + one instruction line on the word card, the ghost hand shows the pose, the ring
+        /// fills toward the target. SKIP always (during the steps), DONE on the end screen, MENU top-left. No score,
+        /// stars, streak or Tutor. The safety line is on every Relax screen.
+        /// </summary>
+        private void RefreshRelax(List<GameObject> visible, System.Action<GameObject, bool> Show)
+        {
+            var R = SignSight.Relax.RelaxMode.State.Finished;
+            var st = relax != null ? relax.Current : R;
+            if (st == R)
+            {
+                int pending = lessons.PendingLessonAfterRelax;
+                string next = relax != null && relax.ReturnToLesson && pending != LessonManager.NoPending
+                    ? (pending >= 0 ? $"Pinch DONE to start Lesson {pending + 1}" : "Pinch DONE to see your results")
+                    : "Pinch DONE to go back";
+                wordCard?.Show(SignSight.Relax.RelaxMode.FinishedTitle, next);
+            }
+            else if (relax != null && relax.CurrentStep != null)
+            {
+                var step = relax.CurrentStep;
+                string status = relax.Status;
+                string line = $"<color=#9DB7FF>Step {relax.StepIndex + 1} of {SignSight.Relax.RelaxMode.Steps.Length}</color>";
+                if (!string.IsNullOrEmpty(status))
+                    line += status == SignSight.Relax.RelaxMode.ShowHand ? $"\n<color={UIStyle.Amber}>{status}</color>" : $"\n{status}";
+                wordCard?.Show(step.name, step.instruction, line);
+            }
+            SetInstruction($"{SignSight.Relax.RelaxMode.WhyLine}\n<size=70%><color={UIStyle.Amber}>{SignSight.Relax.RelaxMode.SafetyLine}</color></size>");
+
+            bool stepping = st != R;
+            Show(tryAgainButton, stepping);
+            SetLabel(tryAgainButton, "SKIP");
+            SetIcon(tryAgainButton, "next");
+            Show(replayButton, !stepping);
+            SetLabel(replayButton, "DONE");
+            SetIcon(replayButton, "check");
+            if (nextButton != null)
+            {
+                // MENU top-left, as in the lesson list: leaves Relax for Start (and starts no lesson).
+                nextButton.SetActive(true);
+                nextButton.transform.localPosition = MenuCornerPosition;
+            }
+            if (nextLabel != null) nextLabel.text = "MENU";
+            SetIcon(nextButton, "menu");
+            if (speedButton != null) speedButton.SetActive(false);
+            if (faceButton != null) faceButton.SetActive(false);
             LayOut(visible);
         }
 

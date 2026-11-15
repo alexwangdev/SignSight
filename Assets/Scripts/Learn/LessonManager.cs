@@ -23,9 +23,10 @@ namespace SignSight.Learn
 
         /// <summary>
         /// v3.3: which part of the app is open — separate from Phase. Start = the mode choice (entry point);
-        /// Learn = lessons (Phase.Menu means "pick a lesson" here only); Explore = point at objects, no scoring.
+        /// Learn = lessons (Phase.Menu means "pick a lesson" here only); Explore = point at objects, no scoring;
+        /// Relax (v3.4) = Finger Relax stretch break, no scoring.
         /// </summary>
-        public enum Mode { Start, Learn, Explore }
+        public enum Mode { Start, Learn, Explore, Relax }
 
         /// <summary>cue: one-line movement cue for the word card (SPEC v3 §6), e.g. "Both fists — only the top hand cranks".</summary>
         [Serializable] public class Word { public string intent; public string meaning; public string cue; }
@@ -36,6 +37,7 @@ namespace SignSight.Learn
         [SerializeField] private SignRecognizer recognizer;
         [SerializeField] private TutorAgent tutor;
         [SerializeField] private SignSight.Explore.ExploreMode explore;
+        [SerializeField] private SignSight.Relax.RelaxMode relax;
 
         public LessonFile Data { get; private set; }
         public Phase Current { get; private set; } = Phase.Loading;
@@ -56,6 +58,11 @@ namespace SignSight.Learn
         public TutorAgent Tutor => tutor;
         public Mode CurrentMode { get; private set; } = Mode.Start;
         public SignSight.Explore.ExploreMode Explore => explore;
+        public SignSight.Relax.RelaxMode Relax => relax;
+        /// <summary>v3.4: lesson to start when an inter-lesson Relax is finished (-1 = the Complete screen); NoPending otherwise.</summary>
+        public int PendingLessonAfterRelax => _pendingLessonAfterRelax;
+        public const int NoPending = -2;
+        private int _pendingLessonAfterRelax = NoPending;
         public event Action<Mode> ModeChanged;
 
         /// <summary>Teacher demo speed, 1 or 0.5 (learner-selectable; visual-only learning needs a slow view).</summary>
@@ -81,6 +88,12 @@ namespace SignSight.Learn
             if (tutor == null) tutor = FindFirstObjectByType<TutorAgent>() ?? gameObject.AddComponent<TutorAgent>();
             if (explore == null) explore = FindFirstObjectByType<SignSight.Explore.ExploreMode>();
             if (explore != null) explore.SetActive(false);
+            if (relax == null) relax = FindFirstObjectByType<SignSight.Relax.RelaxMode>();
+            if (relax != null)
+            {
+                relax.SetActive(false);
+                relax.DoneRequested += OnRelaxDone;
+            }
             recognizer.Listening = false;
             recognizer.Recognized += OnRecognized;
             teacher.DemonstrationFinished += OnDemonstrationFinished;
@@ -121,18 +134,67 @@ namespace SignSight.Learn
         /// <summary>Start card 2: Explore — point at objects.</summary>
         public void StartExploreMode() => SwitchMode(Mode.Explore);
 
-        private void SwitchMode(Mode m)
+        /// <summary>Start card 3 (v3.4): Finger Relax on its own; finishing or MENU goes back to Start.</summary>
+        public void StartRelaxMode()
         {
-            if (explore != null) explore.SetActive(m == Mode.Explore);
+            _pendingLessonAfterRelax = NoPending;
+            SwitchMode(Mode.Relax);
+        }
+
+        /// <summary>
+        /// v3.4 Task B: RELAX on the lesson summary. Finishing Relax (DONE) starts the next lesson, or the Complete
+        /// screen after the last lesson. MENU out of Relax goes to Start and starts nothing. Always the learner's choice.
+        /// </summary>
+        public void StartRelaxThenNextLesson()
+        {
+            if (CurrentMode != Mode.Learn || Current != Phase.LessonSummary || Data == null) return;
+            _pendingLessonAfterRelax = LessonIndex + 1 < Data.lessons.Length ? LessonIndex + 1 : -1;
+            // Keep the summary phase (not Menu): Phase.Menu resets score and streak, and Relax must change neither.
+            SwitchMode(Mode.Relax, Phase.LessonSummary);
+            if (relax != null) relax.ReturnToLesson = true;
+        }
+
+        private void OnRelaxDone()
+        {
+            int pending = _pendingLessonAfterRelax;
+            bool back = relax != null && relax.ReturnToLesson && pending != NoPending;
+            _pendingLessonAfterRelax = NoPending;
+            if (!back)
+            {
+                GoStart(); // standalone Relax: back to the Start screen
+                return;
+            }
+            // Back to Learn through the summary phase (not Menu), so the score carries on exactly as with NEXT LESSON.
+            if (pending >= 0)
+            {
+                SwitchMode(Mode.Learn, Phase.LessonSummary);
+                StartLesson(pending);
+            }
+            else SwitchMode(Mode.Learn, Phase.Complete);
+        }
+
+        private void SwitchMode(Mode m, Phase phase = Phase.Menu)
+        {
+            // The mode changes first: Explore / Relax notify the UI from SetActive, which must see the new mode.
+            var previous = CurrentMode;
             CurrentMode = m;
+            if (explore != null) explore.SetActive(m == Mode.Explore);
+            if (m == Mode.Relax)
+            {
+                recognizer.Listening = false; // Relax has no sign recognition and no word attempts
+                if (teacher != null && teacher.IsDemonstrating) teacher.Rest();
+            }
+            if (relax != null && (m == Mode.Relax || previous == Mode.Relax)) relax.SetActive(m == Mode.Relax);
+            if (m != Mode.Relax) _pendingLessonAfterRelax = NoPending;
             ModeChanged?.Invoke(m);
-            SetPhase(Phase.Menu);
+            SetPhase(phase);
         }
 
         private void OnDestroy()
         {
             if (recognizer != null) recognizer.Recognized -= OnRecognized;
             if (teacher != null) teacher.DemonstrationFinished -= OnDemonstrationFinished;
+            if (relax != null) relax.DoneRequested -= OnRelaxDone;
         }
 
         private IEnumerator Load()
@@ -192,13 +254,19 @@ namespace SignSight.Learn
                 explore?.Replay();
                 return;
             }
+            if (CurrentMode == Mode.Relax)
+            {
+                relax?.Done(); // the Replay slot is DONE on Relax's end screen
+                return;
+            }
             if (CurrentWord == null || (Current != Phase.Demonstrate && Current != Phase.Copy && Current != Phase.Feedback)) return;
             BeginWord(false);
         }
 
         public void Next()
         {
-            // v3.3: Next is the MENU button outside a lesson: back to Start.
+            // v3.3: Next is the MENU button outside a lesson: back to Start (v3.4: also out of Relax, which starts
+            // no pending lesson).
             if (CurrentMode != Mode.Learn || Current == Phase.Menu)
             {
                 GoStart();
@@ -245,6 +313,11 @@ namespace SignSight.Learn
             if (CurrentMode == Mode.Explore)
             {
                 explore?.Back(); // the Try Again button is "BACK" in Explore
+                return;
+            }
+            if (CurrentMode == Mode.Relax)
+            {
+                relax?.Skip(); // the Try Again button is "SKIP" in Relax
                 return;
             }
             if (CurrentWord == null) return;

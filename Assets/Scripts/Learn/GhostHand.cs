@@ -246,6 +246,13 @@ namespace SignSight.Learn
 
         public void ClearMotion() => SetMotion(Vector3.zero, Quaternion.identity);
 
+        /// <summary>
+        /// v3.4 (Finger Relax): fan the four fingers apart, 0 = together (default, unchanged look), 1 = wide.
+        /// Applied on the next Pose call.
+        /// </summary>
+        public float Spread { get; set; }
+        private const float SpreadDegrees = 11f; // per finger step from the middle at Spread = 1
+
         /// <summary>Poses the hand. curl: 0 = straight, 1 = fully curled.</summary>
         public void Pose(float[] curl)
         {
@@ -262,7 +269,9 @@ namespace SignSight.Learn
                     Quaternion bend = f == 0
                         ? Quaternion.AngleAxis(deg, new Vector3(1f, 0f, -1f).normalized)
                         : Quaternion.AngleAxis(deg, Vector3.right);
-                    Quaternion rest = (f == 0 && j == 0) ? Quaternion.Euler(0f, 0f, 40f) : Quaternion.identity;
+                    Quaternion rest = (f == 0 && j == 0) ? Quaternion.Euler(0f, 0f, 40f)
+                        : (j == 0 && Spread > 0f) ? Quaternion.Euler(0f, 0f, (2.5f - f) * SpreadDegrees * Spread) // index toward the thumb side
+                        : Quaternion.identity;
                     _joints[f][j].localRotation = rest * bend;
                 }
             }

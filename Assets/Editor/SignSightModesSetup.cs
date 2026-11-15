@@ -1,5 +1,6 @@
 using SignSight.Explore;
 using SignSight.Learn;
+using SignSight.Relax;
 using SignSight.UI;
 using TMPro;
 using UnityEditor;
@@ -12,7 +13,8 @@ namespace SignSight.EditorTools
     /// <summary>
     /// v3.3 Task A, applied to Main.unity once (idempotent) and saved: the Start screen's two mode cards
     /// (Learn &amp; Test, Explore) and the Explore table with three primitive objects (apple, cup, bottle).
-    /// Menu: SignSight / Apply v3.3 modes.
+    /// v3.4 adds the third card (Finger Relax), lays the three cards out (CardLayout, re-applied on every run) and
+    /// wires RelaxMode. Menu: SignSight / Apply v3.3 modes (v3.4 Relax).
     /// </summary>
     public static class SignSightModesSetup
     {
@@ -22,7 +24,18 @@ namespace SignSight.EditorTools
         public static readonly Vector3 TablePos = new Vector3(0f, -0.34f, 0.80f);
         public static readonly float[] ObjectX = { -0.28f, 0f, 0.28f };
 
-        [MenuItem("SignSight/Apply v3.3 modes")]
+        /// <summary>v3.4: three cards in one row across the right half (positions found in the Simulator view).</summary>
+        public static readonly Vector3[] Card3Pos =
+        {
+            new Vector3(-0.035f, 0.05f, 0.9f), new Vector3(0.20f, 0.05f, 0.9f), new Vector3(0.435f, 0.05f, 0.9f),
+        };
+        public const float Card3Disc = 0.165f, Card3Title = 0.21f, Card3Icon = 0.048f, Card3Sub = 0.15f;
+        public static readonly Vector2 Card3Panel = new Vector2(0.215f, 0.31f);
+        public const float Card3PanelY = -0.06f;
+        public static readonly Vector2 Card3SubRect = new Vector2(0.195f, 0.10f);
+        public static readonly string[] CardNames = { "LearnCard", "ExploreCard", "RelaxCard" };
+
+        [MenuItem("SignSight/Apply v3.3 modes (v3.4 Relax)")]
         public static string Apply()
         {
             var log = new System.Text.StringBuilder();
@@ -45,6 +58,9 @@ namespace SignSight.EditorTools
                      "Teacher shows a word · You copy it · Scored", "50 words · 5 lessons", null, learn.StartLearnMode, instruction, log);
             MakeCard(cards, lesson1, "ExploreCard", ExploreCardPos, "eye", "Explore",
                      "Point at something · See its word · Teacher shows its sign", "3 objects to try", green, learn.StartExploreMode, instruction, log);
+            MakeCard(cards, lesson1, "RelaxCard", Card3Pos[2], "hand", "Finger Relax",
+                     "Stretch your fingers · Shake it out", "About 1 minute · No score", null, learn.StartRelaxMode, instruction, log);
+            CardLayout(cards);
 
             // ---- Explore table + objects (primitives only; no floating labels) ----
             var objs = root.Find("ExploreObjects");
@@ -82,12 +98,23 @@ namespace SignSight.EditorTools
             eso.FindProperty("objectsRoot").objectReferenceValue = objs.gameObject;
             eso.FindProperty("lessons").objectReferenceValue = learn;
             eso.ApplyModifiedPropertiesWithoutUndo();
+            var relax = learn.GetComponent<RelaxMode>();
+            if (relax == null) relax = learn.gameObject.AddComponent<RelaxMode>();
+            var rso = new SerializedObject(relax);
+            rso.FindProperty("lessons").objectReferenceValue = learn;
+            GhostHand target = null;
+            foreach (var g in Object.FindObjectsByType<GhostHand>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (g.name == "TargetHand") target = g;
+            rso.FindProperty("ghostTemplate").objectReferenceValue = target;
+            rso.ApplyModifiedPropertiesWithoutUndo();
             var lso = new SerializedObject(learn);
             lso.FindProperty("explore").objectReferenceValue = explore;
+            lso.FindProperty("relax").objectReferenceValue = relax;
             lso.ApplyModifiedPropertiesWithoutUndo();
             var uso = new SerializedObject(ui);
             uso.FindProperty("startCards").objectReferenceValue = cards.gameObject;
             uso.FindProperty("explore").objectReferenceValue = explore;
+            uso.FindProperty("relax").objectReferenceValue = relax;
             uso.ApplyModifiedPropertiesWithoutUndo();
 
             EditorSceneManager.MarkSceneDirty(root.gameObject.scene);
@@ -138,6 +165,47 @@ namespace SignSight.EditorTools
             sub.transform.localPosition = new Vector3(0f, -0.15f, -0.002f);
             sub.text = $"{subtitle}\n<size=80%><color=#9DB7FF>{small}</color></size>";
             log.AppendLine("created " + name);
+        }
+
+        /// <summary>
+        /// v3.4: the three cards side by side on the right half with smaller discs and narrower panels (the teacher
+        /// stands left of centre). Safe to run again; also usable at runtime to try positions.
+        /// </summary>
+        public static void CardLayout(Transform cards)
+        {
+            for (int i = 0; i < CardNames.Length; i++)
+            {
+                var go = cards.Find(CardNames[i]);
+                if (go == null) continue;
+                go.localPosition = Card3Pos[i];
+                var d = go.Find("Disc");
+                if (d != null) d.localScale = new Vector3(Card3Disc, d.localScale.y, Card3Disc);
+                var label = go.Find("Label")?.GetComponent<TMP_Text>();
+                if (label != null)
+                {
+                    label.fontSize = Card3Title;
+                    label.rectTransform.sizeDelta = new Vector2(Card3Panel.x - 0.02f, 0.05f);
+                }
+                var bi = go.GetComponent<ButtonIcon>();
+                if (bi != null)
+                {
+                    bi.Size = Card3Icon;
+                    var icon = go.Find("Icon");
+                    if (icon != null) icon.localScale = Vector3.one * Card3Icon;
+                }
+                var panel = go.Find("Panel");
+                if (panel != null)
+                {
+                    panel.localScale = new Vector3(Card3Panel.x, Card3Panel.y, 1f);
+                    panel.localPosition = new Vector3(0f, Card3PanelY, panel.localPosition.z);
+                }
+                var sub = go.Find("Subtitle")?.GetComponent<TMP_Text>();
+                if (sub != null)
+                {
+                    sub.fontSize = Card3Sub;
+                    sub.rectTransform.sizeDelta = Card3SubRect;
+                }
+            }
         }
 
         private static TMP_Text NewText(Transform parent, string name, TMP_Text style, float size, Vector2 rect)

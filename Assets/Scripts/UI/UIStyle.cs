@@ -184,6 +184,15 @@ namespace SignSight.UI
                     Arc(32, 50, 26, 222, 318, 5);
                     Disk(32, 32, 9);
                     break;
+                case "hand": // Finger Relax: an open hand (palm + four fingers + thumb)
+                    // same height as the other icons (y 16..48) so it never reaches the label below
+                    Disk(31, 25, 9);
+                    Line(23, 29, 21, 45, 5); Line(28, 31, 28, 49, 5); Line(34, 31, 35, 48, 5); Line(39, 29, 41, 43, 5);
+                    Line(39, 21, 48, 29, 5);
+                    break;
+                case "check": // ✓
+                    Line(12, 32, 26, 18, 8); Line(26, 18, 52, 46, 8);
+                    break;
                 case "practice": // circle with a dot
                     Arc(32, 32, 20, 0, 360, 6); Disk(32, 32, 7);
                     break;

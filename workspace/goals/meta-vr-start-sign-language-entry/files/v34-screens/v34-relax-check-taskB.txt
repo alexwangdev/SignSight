@@ -1,0 +1,14 @@
+Lesson 1 (LessonSmokeRun): End: LessonSummary, words 10, score 95, errors 0, time 44s, XR True
+CHECK Lesson 1 summary shows RELAX and NEXT LESSON: PASS (LessonSummary, relax True, next 'NEXT LESSON')
+  buttons: NextButton[NEXT LESSON], RelaxButton[RELAX <size=60%>1 min</size>]
+CHECK RELAX -> Relax mode (pending Lesson 2): PASS
+  end screen: 'All loose — nice work' / instruction ok True
+CHECK finish Relax -> Lesson 2 starts automatically: PASS (Learn, lesson 2, Demonstrate, word MOTHER)
+CHECK score unchanged, no word attempts during Relax: PASS (score 95 -> 95)
+CHECK NEXT LESSON (no Relax) -> Lesson 2 straight away: PASS (lesson 2, Demonstrate)
+CHECK MENU out of inter-lesson Relax -> Start, Lesson 2 NOT started: PASS (Start, word none)
+CHECK a later standalone Relax still returns to Start: PASS
+CHECK Lesson 5 summary -> RELAX (pending = Complete): PASS (summary next label 'FINISH')
+CHECK finish Relax after Lesson 5 -> Complete screen: PASS (Learn / Complete)
+CHECK Complete -> MENU -> Start: PASS
+Errors during the check: 0

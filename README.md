@@ -6,12 +6,18 @@ location, movement, head and face — at normal or half speed; you copy it with 
 scored on handshape, start location and movement. When you are wrong, ghost hands show the target next to yours,
 replay the movement at half speed, mark the fingers that are off, and say what to change.
 
-Two modes from the start screen: **Learn & Test** (the teacher shows a word, you copy it, it is scored) and
+Three modes from the start screen: **Learn & Test** (the teacher shows a word, you copy it, it is scored) and
 **Explore** (point at an object and hold 0.6 s; you see its English word and the teacher shows its sign — teaching only,
 no score). On a headset Explore uses three virtual objects (apple, cup, bottle). In the Unity Editor it can instead run
 on-device YOLOv9-t object detection (Unity Inference Engine, CPU, ~7 fps) on a mock camera frame and you point at the
 detected boxes; the Quest passthrough camera path is a stub and its alignment is not validated. Objects outside the 50
 words show "Not in my 50 words yet" and are never signed.
+
+**Finger Relax** is a gentle ~1 minute stretch break for fingers that feel stiff after signing: open & close, spread
+wide, finger piano, shake it out, wiggle & rest. A ghost hand shows each pose and a ring fills as you hold it; every
+step also moves on by itself after a few seconds, so there is no score and nothing to fail. It can be started from the
+start screen or, after a lesson, with RELAX on the lesson summary (then DONE starts the next lesson). Gentle only — stop
+if it hurts; it is not medical advice.
 
 An on-device **Tutor Agent** decides what you practise next — a word you missed twice comes back at once, a finger you
 keep getting wrong is the only one highlighted, words you have not seen for two lessons come back for review, words you
