@@ -32,7 +32,10 @@ namespace SignSight.Hand
         public string movingHand = "";
     }
 
-    /// <summary>Teacher-only head motion: none | nod | shake. Never scored.</summary>
+    /// <summary>
+    /// Teacher-only head motion, never scored: none | nod | shake (v3) | tilt (sideways roll, held; WH-questions) |
+    /// bow (forward pitch, held). Only where Lifeprint describes it.
+    /// </summary>
     [Serializable]
     public class SignHead
     {
@@ -41,12 +44,28 @@ namespace SignSight.Hand
         public int repeats;
     }
 
-    /// <summary>Teacher-only face, blendshape weights 0..100. Never scored.</summary>
+    /// <summary>
+    /// Teacher-only face, ARKit blendshape weights 0..100 (v3.2). Demonstration only: the learner's face is never read
+    /// or scored (Quest 3 / 3S has no face tracking). 'preset' names a FaceDriver preset (Smile, Sad, Furrowed, Tired,
+    /// Pain) whose values are used instead of the fields; 'name' is the short label for the expression line.
+    /// Old files with only {smile, jawOpen} still load (all other fields default to 0).
+    /// </summary>
     [Serializable]
     public class SignFace
     {
         public float smile;
         public float jawOpen;
+        public float browInnerUp, browDown, browOuterUp;
+        public float eyeSquint, eyeWide;
+        public float mouthFrown, mouthPress, mouthPucker;
+        public float cheekSquint, noseSneer;
+        public string preset = "";
+        public string name = "";
+
+        public bool IsNeutral =>
+            string.IsNullOrEmpty(preset) && smile <= 0f && jawOpen <= 0f && browInnerUp <= 0f && browDown <= 0f &&
+            browOuterUp <= 0f && eyeSquint <= 0f && eyeWide <= 0f && mouthFrown <= 0f && mouthPress <= 0f &&
+            mouthPucker <= 0f && cheekSquint <= 0f && noseSneer <= 0f;
     }
 
     /// <summary>
@@ -367,6 +386,8 @@ namespace SignSight.Hand
                 t.endPalm = d.endPalm;
                 t.nonManual = d.nonManual;
                 t.beat2 = d.beat2;
+                t.face = d.face;  // teacher display data: always the shipped definition
+                t.head = d.head;
                 if (!MovementTypes.IsV3(d.movement.type)) t.movement = d.movement;
             }
             // Keep the shipped order (lessons and reports follow it).

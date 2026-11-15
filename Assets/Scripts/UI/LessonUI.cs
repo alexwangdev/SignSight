@@ -37,16 +37,18 @@ namespace SignSight.UI
         [SerializeField] private UnityEngine.UI.Image holdRing;
         [SerializeField] private GameObject holdRingRoot;
 
-        [Header("v3.1: Tutor panel (left of the word card) and demo speed toggle; created at runtime when empty")]
+        [Header("v3.2: Tutor panel (scene object, left of the teacher), speed toggle and FACE replay buttons")]
+        [SerializeField] private GameObject tutorRoot;
         [SerializeField] private TMP_Text tutorPanel;
         [SerializeField] private GameObject speedButton;
-        // Left of the teacher, level with the word card on the right (same depth); speed toggle below it, outside the
-        // button row so the row keeps its v3 width. Tuned in the Simulator view.
-        private static readonly Vector3 TutorPanelPosition = new Vector3(-0.72f, 0.08f, 1.35f);
-        private static readonly Vector3 SpeedButtonPosition = new Vector3(-0.30f, -0.05f, 0.60f);
+        [SerializeField] private GameObject faceButton;
+        [SerializeField] private TeacherAvatarDriver teacher;
+        // Speed toggle sits on its own, left of the button row; FACE sits right of it. Tuned in the Simulator view.
+        private static readonly Vector3 SpeedButtonPosition = new Vector3(-0.30f, -0.12f, 0.60f);
+        private static readonly Vector3 FaceButtonPosition = new Vector3(0.30f, -0.12f, 0.60f);
 
         private readonly List<GameObject> _lessonButtons = new List<GameObject>();
-        private TMP_Text _speedLabel;
+        private TMP_Text _speedLabel, _faceLabel;
 
         private void Update()
         {
@@ -55,6 +57,31 @@ namespace SignSight.UI
             float p = copying && recognizer != null ? recognizer.HoldProgress : 0f;
             if (holdRingRoot != null && holdRingRoot.activeSelf != copying) holdRingRoot.SetActive(copying);
             holdRing.fillAmount = p;
+            if (wordCard != null && teacher != null) wordCard.HighlightFace(teacher.IsFaceOnly);
+        }
+
+        /// <summary>Speed button: teacher demo at 1x / 0.5x.</summary>
+        public void ToggleSpeed()
+        {
+            lessons.ToggleDemoSpeed();
+            Refresh();
+        }
+
+        /// <summary>
+        /// FACE button (v3.2 B4): replays only the teacher's face and head at 0.5x, hands at rest, with the expression
+        /// line highlighted. Demonstration only; nothing reads the learner's face.
+        /// </summary>
+        public void ReplayFace()
+        {
+            var t = lessons.CurrentTemplate;
+            if (teacher == null || t == null || lessons.Current != LessonManager.Phase.Demonstrate) return;
+            teacher.DemonstrateFace(SignSight.Hand.TemplateStore.Canonical(t.intent) ?? t, 0.5f);
+        }
+
+        private string FaceLine()
+        {
+            var t = lessons.CurrentTemplate;
+            return t != null ? FaceDriver.Describe(t.face) : "";
         }
 
         private Vector3 _buttonRowCentre;
@@ -64,6 +91,7 @@ namespace SignSight.UI
         {
             if (lessons == null) lessons = FindFirstObjectByType<LessonManager>();
             if (score == null) score = FindFirstObjectByType<ScoreManager>();
+            if (teacher == null) teacher = FindFirstObjectByType<TeacherAvatarDriver>();
             lessons.PhaseChanged += Refresh;
             if (score != null) score.Changed += Refresh;
             Refresh(lessons.Current);
@@ -103,25 +131,18 @@ namespace SignSight.UI
                     int index = i;
                     var l = lessons.Data.lessons[i];
                     string topic = l.title.Contains("·") ? l.title.Substring(l.title.IndexOf('·') + 1).Trim() : l.title;
-                    string label = $"LESSON {l.id}\n<size=55%>{topic}</size>";
+                    string label = $"LESSON {l.id}\n<size=60%>{topic}</size>";
                     GameObject b = i == 0 ? lesson1Button : i == 1 && lesson2Button != null ? lesson2Button
                         : CloneButton(lesson1Button, $"Lesson{l.id}Button", label, null);
                     SetButton(b, label, () => lessons.StartLesson(index));
                     _lessonButtons.Add(b);
                 }
             }
-            if (speedButton == null && replayButton != null)
-                speedButton = CloneButton(replayButton, "SpeedButton", "", () => { lessons.ToggleDemoSpeed(); Refresh(); });
             if (speedButton != null && _speedLabel == null) _speedLabel = speedButton.GetComponentInChildren<TMP_Text>(true);
-            if (tutorPanel == null && instruction != null)
+            if (faceButton != null && _faceLabel == null)
             {
-                tutorPanel = Instantiate(instruction, instruction.transform.parent);
-                tutorPanel.name = "TutorPanel";
-                tutorPanel.transform.localPosition = TutorPanelPosition;
-                tutorPanel.alignment = TextAlignmentOptions.Left;
-                tutorPanel.fontSize = instruction.fontSize * 1.25f; // twice as far away as the instruction line
-                tutorPanel.rectTransform.sizeDelta = new Vector2(0.48f, 0.30f);
-                tutorPanel.text = "";
+                foreach (var t in faceButton.GetComponentsInChildren<TMP_Text>(true))
+                    if (t.name == "Label") _faceLabel = t;
             }
         }
 
@@ -148,8 +169,8 @@ namespace SignSight.UI
             lessons.StartPractice(words);
         }
 
-        private static string StarText(int stars) =>
-            $"<color=#FFD24A>{new string('★', stars)}</color><color=#555555>{new string('★', 3 - stars)}</color>";
+        // The project fonts have no star glyph (and no font may be added), so the stars are written out.
+        private static string StarText(int stars) => $"<color=#FFD24A>{stars} of 3 stars</color>";
 
         private void Refresh(LessonManager.Phase phase)
         {
@@ -185,11 +206,11 @@ namespace SignSight.UI
                     SetInstruction("Pinch a lesson to start");
                     break;
                 case LessonManager.Phase.Demonstrate:
-                    wordCard?.Show(word.intent, word.meaning, word.cue + NonManualLine());
+                    wordCard?.Show(word.intent, word.meaning, word.cue + NonManualLine(), FaceLine());
                     SetInstruction($"Watch the teacher{(lessons.DemoSpeed < 0.75f ? " (half speed)" : "")}");
                     break;
                 case LessonManager.Phase.Copy:
-                    wordCard?.Show(word.intent, word.meaning, word.cue + NonManualLine());
+                    wordCard?.Show(word.intent, word.meaning, word.cue + NonManualLine(), FaceLine());
                     SetInstruction(lessons.CurrentIsPracticeOnly
                         ? "<color=#FFD27F>Practice only — not scored</color>\n<size=75%>Copy the teacher, then pinch Next</size>"
                         : lessons.LastAttempt.HasValue
@@ -228,21 +249,32 @@ namespace SignSight.UI
                 Show(lesson2Button, phase == LessonManager.Phase.Menu);
             }
             Show(replayButton, phase == LessonManager.Phase.Demonstrate || phase == LessonManager.Phase.Copy);
-            // Speed toggle sits on its own, left of the button row (under the Tutor panel), so the row keeps its v3 width.
+            // Speed toggle sits on its own, left of the button row, so the row keeps its v3 width.
             if (speedButton != null)
             {
                 speedButton.SetActive(phase == LessonManager.Phase.Demonstrate || phase == LessonManager.Phase.Copy);
                 speedButton.transform.localPosition = SpeedButtonPosition;
             }
-            if (_speedLabel != null) _speedLabel.text = lessons.DemoSpeed < 0.75f ? "SPEED\n0.5x" : "SPEED\n1x";
+            if (_speedLabel != null) _speedLabel.text = lessons.DemoSpeed < 0.75f ? "½×\n<size=60%>SPEED</size>" : "1×\n<size=60%>SPEED</size>";
+            // FACE replay: only while the teacher demonstrates a word whose face does something.
+            if (faceButton != null)
+            {
+                var ft = lessons.CurrentTemplate;
+                bool hasFace = ft != null && ft.face != null && !ft.face.IsNeutral;
+                faceButton.SetActive(phase == LessonManager.Phase.Demonstrate && hasFace);
+                faceButton.transform.localPosition = FaceButtonPosition;
+                if (hasFace && _faceLabel != null)
+                    _faceLabel.text = $"FACE\n<size=60%>{FaceDriver.Resolve(ft.face).name.Split('—')[0].Trim()}</size>";
+            }
 
             // Tutor panel: the agent's decision and its reason, in plain text (SPEC v3.1 §4.1).
             if (tutorPanel != null)
             {
                 bool showTutor = !lessons.IsPractice && tutor != null &&
                                  (phase == LessonManager.Phase.Demonstrate || phase == LessonManager.Phase.Copy || phase == LessonManager.Phase.Feedback);
-                tutorPanel.gameObject.SetActive(showTutor);
-                if (showTutor) tutorPanel.text = tutor.PanelText();
+                (tutorRoot != null ? tutorRoot : tutorPanel.gameObject).SetActive(showTutor);
+                // The panel has its own TUTOR title line.
+                if (showTutor) tutorPanel.text = tutor.PanelText().Replace("<b><color=#9DB7FF>Tutor</color></b>\n", "");
             }
             Show(tryAgainButton, phase == LessonManager.Phase.Feedback && score != null && score.CanTryAgain);
             Show(practiceButton, phase == LessonManager.Phase.Complete && !lessons.IsPractice && score != null && score.Missed.Count > 0);
@@ -254,6 +286,8 @@ namespace SignSight.UI
                 nextLabel.text = phase == LessonManager.Phase.LessonSummary
                     ? (lessons.LessonIndex + 1 < lessons.Data.lessons.Length ? "NEXT\nLESSON" : "FINISH")
                     : phase == LessonManager.Phase.Complete ? "MENU" : "NEXT";
+                var icon = nextButton != null ? nextButton.GetComponent<ButtonIcon>() : null;
+                if (icon != null) icon.Set(phase == LessonManager.Phase.Complete ? "menu" : "next");
             }
             LayOut(visible);
         }

@@ -11,6 +11,13 @@ keep getting wrong is the only one highlighted, words you have not seen for two 
 get right first time twice are shown less often — and shows its reason on screen ("Next: YES — because you missed it
 twice / Focus: your index finger"). Rule-based, no network, no account.
 
+The teacher also shows the face, because ASL is not hands-only: 22 of the 50 signs have a facial expression (WH-question
+furrowed brows with a head tilt, SAD, HAPPY, PAIN, THANK-YOU's smile, ...), sourced from Lifeprint where it describes
+one. The word card names what the brows, eyes and mouth do, and a FACE button replays just the face at half speed.
+**The learner's face is never read or scored** — Quest 3 / 3S has no face tracking; every face line says
+"Not scored — watch and copy". Correct answers get a silent confetti burst and stars; wrong answers get the ghost-hand
+correction only.
+
 Visual only, by design: the learner may be Deaf or hard of hearing. Every instruction is a caption; nothing depends on
 sound. Hands only, seated, no controllers. Built for the Meta VR Start Developer Competition 2026 (Productivity, New
 Experience).

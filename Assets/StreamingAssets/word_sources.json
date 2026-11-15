@@ -9,7 +9,9 @@
    "movement": "wave side to side",
    "palm": "forward",
    "non_manual": "",
-   "notes": "v3 word"
+   "notes": "v3 word",
+   "face_source": "emotion",
+   "face_note": "greeting warmth (Lifeprint describes a natural wave; no face)"
   },
   {
    "word": "YES",
@@ -19,7 +21,9 @@
    "movement": "nod at the wrist",
    "palm": "forward",
    "non_manual": "head nod",
-   "notes": "v3 word"
+   "notes": "v3 word",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "NO",
@@ -29,7 +33,9 @@
    "movement": "snap onto the thumb",
    "palm": "forward",
    "non_manual": "head shake",
-   "notes": "v3 word"
+   "notes": "v3 word",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "THANK-YOU",
@@ -39,7 +45,9 @@
    "movement": "forward and down",
    "palm": "toward self",
    "non_manual": "smile",
-   "notes": "v3 word"
+   "notes": "v3 word",
+   "face_source": "lifeprint",
+   "face_note": "t/thankyou.htm: \"Smile (so they'll know you mean it).\" (v3 face kept)"
   },
   {
    "word": "PLEASE",
@@ -49,7 +57,9 @@
    "movement": "circle (clockwise from the observer)",
    "palm": "toward self",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "lifeprint",
+   "face_note": "p/please.htm: \"while using a hopeful / pleading facial expression\""
   },
   {
    "word": "SORRY",
@@ -59,7 +69,9 @@
    "movement": "a couple of circles",
    "palm": "toward self",
    "non_manual": "",
-   "notes": "S-hand also seen; Lifeprint recommends A"
+   "notes": "S-hand also seen; Lifeprint recommends A",
+   "face_source": "emotion",
+   "face_note": "plain meaning, not a smile (Lifeprint s/sorry.htm: no face or bow described)"
   },
   {
    "word": "GOOD",
@@ -69,7 +81,9 @@
    "movement": "forward and down",
    "palm": "toward self",
    "non_manual": "",
-   "notes": "Lifeprint: one-handed GOOD overlaps THANK-YOU; the two-handed form is taught"
+   "notes": "Lifeprint: one-handed GOOD overlaps THANK-YOU; the two-handed form is taught",
+   "face_source": "lifeprint",
+   "face_note": "g/good.htm: \"You also change your facial expression to match your meaning.\""
   },
   {
    "word": "BAD",
@@ -79,7 +93,9 @@
    "movement": "down and away, ending palm down",
    "palm": "toward self",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "lifeprint",
+   "face_note": "g/good.htm: \"Generally this is a frown or scowl when signing BAD.\""
   },
   {
    "word": "GOODBYE",
@@ -89,7 +105,9 @@
    "movement": "fingers bend at the large knuckles (open-close)",
    "palm": "forward",
    "non_manual": "",
-   "notes": "Lifeprint page is video only; description from the video label WAVE-goodbye and the page Q&A. Needs a human check."
+   "notes": "Lifeprint page is video only; description from the video label WAVE-goodbye and the page Q&A. Needs a human check.",
+   "face_source": "emotion",
+   "face_note": "greeting warmth (Lifeprint bye page is video only)"
   },
   {
    "word": "GOOD-MORNING",
@@ -99,7 +117,9 @@
    "movement": "GOOD forward; MORNING forearm rises",
    "palm": "toward self",
    "non_manual": "",
-   "notes": "Compound GOOD + MORNING (lifeprint m/morning.htm). Page is video only."
+   "notes": "Compound GOOD + MORNING (lifeprint m/morning.htm). Page is video only.",
+   "face_source": "emotion",
+   "face_note": "greeting warmth (Lifeprint pages are video only)"
   },
   {
    "word": "MOTHER",
@@ -109,7 +129,9 @@
    "movement": "touch; double tap common",
    "palm": "sideways",
    "non_manual": "",
-   "notes": "Also m/mother.htm (video). Same handshape as FATHER, different location."
+   "notes": "Also m/mother.htm (video). Same handshape as FATHER, different location.",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "FATHER",
@@ -119,7 +141,9 @@
    "movement": "touch; double tap common",
    "palm": "sideways",
    "non_manual": "",
-   "notes": "Also f/father.htm (video)."
+   "notes": "Also f/father.htm (video).",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "FRIEND",
@@ -129,7 +153,9 @@
    "movement": "index fingers interlock twice",
    "palm": "right down / left up",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "BABY",
@@ -139,7 +165,9 @@
    "movement": "rock the arms back and forth",
    "palm": "up",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "MAN",
@@ -149,7 +177,9 @@
    "movement": "from FATHER position down to the chest",
    "palm": "sideways",
    "non_manual": "",
-   "notes": "Several versions; the FATHER-to-chest version is taught."
+   "notes": "Several versions; the FATHER-to-chest version is taught.",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "WOMAN",
@@ -159,7 +189,9 @@
    "movement": "down to the chest",
    "palm": "sideways",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "BOY",
@@ -169,7 +201,9 @@
    "movement": "grab the brim of a cap (close), repeated",
    "palm": "down",
    "non_manual": "",
-   "notes": "b/boy.htm is images only; description from b/boygirl.htm. Needs a human check of the handshape."
+   "notes": "b/boy.htm is images only; description from b/boygirl.htm. Needs a human check of the handshape.",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "GIRL",
@@ -179,7 +213,9 @@
    "movement": "slide forward and down along the cheek",
    "palm": "sideways",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "TEACHER",
@@ -189,7 +225,9 @@
    "movement": "forward ~15 cm, then down (PERSON)",
    "palm": "forward",
    "non_manual": "",
-   "notes": "Compound TEACH + PERSON"
+   "notes": "Compound TEACH + PERSON",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "DOCTOR",
@@ -199,7 +237,9 @@
    "movement": "tap twice",
    "palm": "down",
    "non_manual": "",
-   "notes": "Base hand shape does not matter (Lifeprint)."
+   "notes": "Base hand shape does not matter (Lifeprint).",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "WATER",
@@ -209,7 +249,9 @@
    "movement": "tap twice",
    "palm": "sideways",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "MILK",
@@ -219,7 +261,9 @@
    "movement": "squeeze twice",
    "palm": "sideways",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "EAT",
@@ -229,7 +273,9 @@
    "movement": "fingertips to the mouth, repeated",
    "palm": "down",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "DRINK",
@@ -239,7 +285,9 @@
    "movement": "short arc to the mouth (tilt)",
    "palm": "sideways",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "BREAD",
@@ -249,7 +297,9 @@
    "movement": "slice down a couple of times",
    "palm": "down",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "APPLE",
@@ -259,7 +309,9 @@
    "movement": "pivot back and forth",
    "palm": "down",
    "non_manual": "",
-   "notes": "A-hand version is not recommended by Lifeprint."
+   "notes": "A-hand version is not recommended by Lifeprint.",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "HUNGRY",
@@ -269,7 +321,9 @@
    "movement": "down the middle of the chest",
    "palm": "toward self",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint h/hungry.htm does not describe the mouth or face for HUNGRY itself"
   },
   {
    "word": "THIRSTY",
@@ -279,7 +333,9 @@
    "movement": "run the fingertip down the throat",
    "palm": "toward self",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint: a more intense face changes THIRSTY to CRAVE; the base sign has none"
   },
   {
    "word": "COFFEE",
@@ -289,7 +345,9 @@
    "movement": "top hand cranks",
    "palm": "down",
    "non_manual": "",
-   "notes": "v3 word"
+   "notes": "v3 word",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "HOT",
@@ -299,7 +357,9 @@
    "movement": "flick out and down, fast",
    "palm": "toward self",
    "non_manual": "",
-   "notes": "v3 word"
+   "notes": "v3 word",
+   "face_source": "v3",
+   "face_note": "v3 face kept (jaw open); h/hot.htm does not mention blowing, so no pucker"
   },
   {
    "word": "COLD",
@@ -309,7 +369,9 @@
    "movement": "shiver side to side",
    "palm": "sideways",
    "non_manual": "",
-   "notes": "v3 word"
+   "notes": "v3 word",
+   "face_source": "lifeprint",
+   "face_note": "c/cold.htm: \"To sign very cold use more facial expression, hunch your shoulders\" (base: shivering face)"
   },
   {
    "word": "HELP",
@@ -319,7 +381,9 @@
    "movement": "both hands lift",
    "palm": "down",
    "non_manual": "",
-   "notes": "v3 word"
+   "notes": "v3 word",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint: raised eyebrows only for the question \"Will you help me?\"; the word is taught as a statement"
   },
   {
    "word": "HAPPY",
@@ -329,7 +393,9 @@
    "movement": "forward circles, brushing up the chest",
    "palm": "toward self",
    "non_manual": "happy face",
-   "notes": "One or both hands; one is taught."
+   "notes": "One or both hands; one is taught.",
+   "face_source": "lifeprint",
+   "face_note": "h/happy.htm: \"Remember, you've got to use your face!\" (plain emotion: smile)"
   },
   {
    "word": "SAD",
@@ -339,7 +405,9 @@
    "movement": "down the length of the face",
    "palm": "toward self",
    "non_manual": "sad face, head tilts forward",
-   "notes": ""
+   "notes": "",
+   "face_source": "lifeprint",
+   "face_note": "s/sad.htm: \"Tilt your head forward slightly, and make a sad face.\""
   },
   {
    "word": "TIRED",
@@ -349,7 +417,9 @@
    "movement": "hands slump (change orientation, do not slide)",
    "palm": "toward self",
    "non_manual": "tired face",
-   "notes": ""
+   "notes": "",
+   "face_source": "emotion",
+   "face_note": "plain meaning (Lifeprint t/tired.htm describes the hands only)"
   },
   {
    "word": "SICK",
@@ -359,7 +429,9 @@
    "movement": "both hands move in to touch",
    "palm": "toward self",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "emotion",
+   "face_note": "plain meaning (Lifeprint s/sick.htm describes the hands only)"
   },
   {
    "word": "PAIN",
@@ -369,7 +441,9 @@
    "movement": "tips toward each other twice, with a twist",
    "palm": "toward self",
    "non_manual": "pained face",
-   "notes": "Lifeprint HURT = PAIN (p/pain.htm shows the same sign)."
+   "notes": "Lifeprint HURT = PAIN (p/pain.htm shows the same sign).",
+   "face_source": "lifeprint",
+   "face_note": "h/hurt.htm: \"USE FACIAL EXPRESSION with this sign ... show it on your face.\""
   },
   {
    "word": "LOVE",
@@ -379,7 +453,9 @@
    "movement": "cross over the chest (hold)",
    "palm": "toward self",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "emotion",
+   "face_note": "plain meaning (Lifeprint l/love.htm describes the hands only)"
   },
   {
    "word": "LIKE",
@@ -389,7 +465,9 @@
    "movement": "forward while the middle finger and thumb close",
    "palm": "toward self",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "WANT",
@@ -399,7 +477,9 @@
    "movement": "pull back toward you",
    "palm": "up",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "NEED",
@@ -409,7 +489,9 @@
    "movement": "bend down from the wrist",
    "palm": "forward to down",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint: a stronger face only adds degree; the base sign has none"
   },
   {
    "word": "WHAT",
@@ -419,7 +501,9 @@
    "movement": "slightly forward and to the sides",
    "palm": "up",
    "non_manual": "WH-question eyebrows (furrowed)",
-   "notes": "Lifeprint: facial expression carries much of WHAT."
+   "notes": "Lifeprint: facial expression carries much of WHAT.",
+   "face_source": "lifeprint",
+   "face_note": "w/what.htm: \"There is a facial expression that is sometimes called a wh-q expression\"; lifeprint.com/asl101/pages-signs/w/where.htm: \"you use 'furrowed eyebrows' for all of the 'wh-' question types: WHO, WHEN, WHERE, WHY\""
   },
   {
    "word": "WHERE",
@@ -429,7 +513,9 @@
    "movement": "pivot side to side (wrist and elbow)",
    "palm": "forward",
    "non_manual": "WH-question eyebrows",
-   "notes": ""
+   "notes": "",
+   "face_source": "lifeprint",
+   "face_note": "lifeprint.com/asl101/pages-signs/w/where.htm: \"you use 'furrowed eyebrows' for all of the 'wh-' question types: WHO, WHEN, WHERE, WHY\""
   },
   {
    "word": "WHEN",
@@ -439,7 +525,9 @@
    "movement": "right index circles the left index tip, then touches",
    "palm": "down / sideways",
    "non_manual": "WH-question eyebrows",
-   "notes": ""
+   "notes": "",
+   "face_source": "lifeprint",
+   "face_note": "lifeprint.com/asl101/pages-signs/w/where.htm: \"you use 'furrowed eyebrows' for all of the 'wh-' question types: WHO, WHEN, WHERE, WHY\""
   },
   {
    "word": "WHO",
@@ -449,7 +537,9 @@
    "movement": "index finger bends twice",
    "palm": "sideways",
    "non_manual": "WH-question eyebrows",
-   "notes": "Lifeprint names this the good general variation."
+   "notes": "Lifeprint names this the good general variation.",
+   "face_source": "lifeprint",
+   "face_note": "w/who.htm: \"you will be furrowing your eyebrows when you do WHO sign\""
   },
   {
    "word": "WHY",
@@ -459,7 +549,9 @@
    "movement": "forward and down, changing to Y",
    "palm": "toward self",
    "non_manual": "WH-question eyebrows",
-   "notes": ""
+   "notes": "",
+   "face_source": "lifeprint",
+   "face_note": "lifeprint.com/asl101/pages-signs/w/where.htm: \"you use 'furrowed eyebrows' for all of the 'wh-' question types: WHO, WHEN, WHERE, WHY\""
   },
   {
    "word": "HOW",
@@ -469,7 +561,9 @@
    "movement": "roll forward to palms up",
    "palm": "down",
    "non_manual": "WH-question eyebrows",
-   "notes": ""
+   "notes": "",
+   "face_source": "lifeprint",
+   "face_note": "h/how.htm: \"When asking how something was done or how something happened you should furrow your eyebrows.\""
   },
   {
    "word": "TODAY",
@@ -479,7 +573,9 @@
    "movement": "NOW drop, then DAY arc",
    "palm": "up",
    "non_manual": "",
-   "notes": "Compound NOW + DAY (n/now.htm, d/day.htm)."
+   "notes": "Compound NOW + DAY (n/now.htm, d/day.htm).",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "TOMORROW",
@@ -489,7 +585,9 @@
    "movement": "forward pivot: thumb points back, ends up",
    "palm": "sideways",
    "non_manual": "",
-   "notes": "Description from lifeprint topics/parameters-asl.htm and lessons/lesson06.htm (sign page is images only)."
+   "notes": "Description from lifeprint topics/parameters-asl.htm and lessons/lesson06.htm (sign page is images only).",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   },
   {
    "word": "GO",
@@ -499,7 +597,9 @@
    "movement": "throw the index fingers forward",
    "palm": "forward",
    "non_manual": "",
-   "notes": ""
+   "notes": "",
+   "face_source": "none — neutral by default",
+   "face_note": "Lifeprint describes no face or head marker for this sign"
   }
  ]
 }

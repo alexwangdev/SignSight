@@ -286,6 +286,81 @@ S = {
 }
 
 
+# ---- v3.2 teacher faces (display only; the learner's face is never read or scored) ----
+# face: preset name (FaceDriver.Preset: Smile, Sad, Furrowed, Tired, Pain) or explicit ARKit weights 0..100.
+# source: 'lifeprint' (quoted from the word's Lifeprint page), 'emotion' (plain meaning of the word, Lifeprint silent),
+# or 'none — neutral by default'. THANK-YOU and HOT keep their v3 faces.
+LP_WH = 'lifeprint.com/asl101/pages-signs/w/where.htm: "you use \'furrowed eyebrows\' for all of the \'wh-\' question types: WHO, WHEN, WHERE, WHY"'
+FACES = {
+    'HAPPY': ({'preset': 'Smile', 'name': 'smile'}, 'lifeprint', 'h/happy.htm: "Remember, you\'ve got to use your face!" (plain emotion: smile)'),
+    'SAD': ({'preset': 'Sad', 'name': 'sad'}, 'lifeprint', 's/sad.htm: "Tilt your head forward slightly, and make a sad face."'),
+    'PAIN': ({'preset': 'Pain', 'name': 'pain'}, 'lifeprint', 'h/hurt.htm: "USE FACIAL EXPRESSION with this sign ... show it on your face."'),
+    'TIRED': ({'preset': 'Tired', 'name': 'tired'}, 'emotion', 'plain meaning (Lifeprint t/tired.htm describes the hands only)'),
+    'SICK': ({'browDown': 40, 'mouthPress': 30, 'name': 'unwell'}, 'emotion', 'plain meaning (Lifeprint s/sick.htm describes the hands only)'),
+    'LOVE': ({'smile': 50, 'cheekSquint': 20, 'name': 'warm smile'}, 'emotion', 'plain meaning (Lifeprint l/love.htm describes the hands only)'),
+    'GOOD': ({'smile': 30, 'name': 'pleased'}, 'lifeprint', 'g/good.htm: "You also change your facial expression to match your meaning."'),
+    'BAD': ({'mouthFrown': 40, 'browDown': 20, 'name': 'frown'}, 'lifeprint', 'g/good.htm: "Generally this is a frown or scowl when signing BAD."'),
+    'PLEASE': ({'browInnerUp': 35, 'smile': 20, 'name': 'hopeful, pleading'}, 'lifeprint', 'p/please.htm: "while using a hopeful / pleading facial expression"'),
+    'SORRY': ({'browInnerUp': 40, 'mouthPress': 20, 'name': 'apologetic'}, 'emotion', 'plain meaning, not a smile (Lifeprint s/sorry.htm: no face or bow described)'),
+    'COLD': ({'eyeSquint': 30, 'mouthPress': 20, 'name': 'shivering'}, 'lifeprint', 'c/cold.htm: "To sign very cold use more facial expression, hunch your shoulders" (base: shivering face)'),
+    'HELLO': ({'smile': 40, 'name': 'friendly smile'}, 'emotion', 'greeting warmth (Lifeprint describes a natural wave; no face)'),
+    'GOODBYE': ({'smile': 40, 'name': 'friendly smile'}, 'emotion', 'greeting warmth (Lifeprint bye page is video only)'),
+    'GOOD-MORNING': ({'smile': 40, 'name': 'friendly smile'}, 'emotion', 'greeting warmth (Lifeprint pages are video only)'),
+    'WHAT': ({'preset': 'Furrowed'}, 'lifeprint', 'w/what.htm: "There is a facial expression that is sometimes called a wh-q expression"; ' + LP_WH),
+    'WHERE': ({'preset': 'Furrowed'}, 'lifeprint', LP_WH),
+    'WHEN': ({'preset': 'Furrowed'}, 'lifeprint', LP_WH),
+    'WHO': ({'preset': 'Furrowed'}, 'lifeprint', 'w/who.htm: "you will be furrowing your eyebrows when you do WHO sign"'),
+    'WHY': ({'preset': 'Furrowed'}, 'lifeprint', LP_WH),
+    'HOW': ({'preset': 'Furrowed'}, 'lifeprint', 'h/how.htm: "When asking how something was done or how something happened you should furrow your eyebrows."'),
+}
+KEEP_V3_FACE = {'THANK-YOU': 't/thankyou.htm: "Smile (so they\'ll know you mean it)." (v3 face kept)',
+                'HOT': 'v3 face kept (jaw open); h/hot.htm does not mention blowing, so no pucker'}
+NEUTRAL_NOTES = {
+    'HUNGRY': 'Lifeprint h/hungry.htm does not describe the mouth or face for HUNGRY itself',
+    'THIRSTY': 'Lifeprint: a more intense face changes THIRSTY to CRAVE; the base sign has none',
+    'NEED': 'Lifeprint: a stronger face only adds degree; the base sign has none',
+    'HELP': 'Lifeprint: raised eyebrows only for the question "Will you help me?"; the word is taught as a statement',
+}
+# Head (teacher display only): WH tilt (v3.2 brief B3, the WH-question marker shown with the furrow; Lifeprint's WH
+# pages quote the eyebrows), SAD bow (Lifeprint s/sad.htm "Tilt your head forward slightly"). YES / NO unchanged.
+HEADS = {w: {'type': 'tilt', 'amplitudeDeg': 8, 'repeats': 0} for w in ('WHAT', 'WHERE', 'WHEN', 'WHO', 'WHY', 'HOW')}
+HEADS['SAD'] = {'type': 'bow', 'amplitudeDeg': 8, 'repeats': 0}
+FACE_FIELDS = ['smile', 'jawOpen', 'browInnerUp', 'browDown', 'browOuterUp', 'eyeSquint', 'eyeWide', 'mouthFrown',
+               'mouthPress', 'mouthPucker', 'cheekSquint', 'noseSneer']
+
+
+def full_face(d):
+    f = {k: 0 for k in FACE_FIELDS}
+    f.update({'preset': '', 'name': ''})
+    f.update(d)
+    return f
+
+
+def apply_faces(out):
+    for t in out:
+        w = t['intent']
+        if w in FACES:
+            t['face'] = full_face(FACES[w][0])
+        elif w not in KEEP_V3_FACE:
+            t['face'] = full_face({})
+        else:
+            t['face'] = full_face({k: v for k, v in t['face'].items() if k in FACE_FIELDS})
+            t['face']['name'] = 'smile' if w == 'THANK-YOU' else 'mouth open'
+        if w in HEADS:
+            t['head'] = HEADS[w]
+        # The expression line (from the face data) replaces the old free-text face captions.
+        if t.get('nonManual', '').startswith(('Eyebrows', 'Face')):
+            t['nonManual'] = ''
+
+
+def face_source(w):
+    if w in FACES:
+        return FACES[w][1], FACES[w][2]
+    if w in KEEP_V3_FACE:
+        return 'lifeprint' if w == 'THANK-YOU' else 'v3', KEEP_V3_FACE[w]
+    return 'none — neutral by default', NEUTRAL_NOTES.get(w, 'Lifeprint describes no face or head marker for this sign')
+
+
 def main():
     old = json.load(open(TPL, encoding='utf-8-sig'))
     by_intent = {t['intent']: t for t in old['templates']}
@@ -311,6 +386,9 @@ def main():
             if t['intent'] in ov:
                 t['scored'] = ov[t['intent']]['scored']
                 t['teachOnlyReason'] = ov[t['intent']].get('reason', '')
+    apply_faces(out)
+    nonneutral = [t['intent'] for t in out if any(t['face'].get(k, 0) for k in FACE_FIELDS) or t['face'].get('preset')]
+    print(f'non-neutral faces: {len(nonneutral)}: {nonneutral}')
     with open(TPL, 'w', encoding='utf-8-sig', newline='\n') as f:
         f.write('{\n  "version": 2,\n  "templates": [\n')
         f.write(',\n'.join('    ' + json.dumps(t, ensure_ascii=False) for t in out))
@@ -336,8 +414,9 @@ def main():
     src = []
     for w in WORDS:
         url, hs, loc, mov, palm, nm, notes = S[w]
+        fsrc, fnote = face_source(w)
         src.append({'word': w, 'lifeprint_url': LP + url, 'handshape': hs, 'location': loc, 'movement': mov,
-                    'palm': palm, 'non_manual': nm, 'notes': notes})
+                    'palm': palm, 'non_manual': nm, 'notes': notes, 'face_source': fsrc, 'face_note': fnote})
     with open(SOURCES, 'w', encoding='utf-8', newline='\n') as f:
         json.dump({'source': 'Lifeprint / ASL University (Dr. Bill Vicars), lifeprint.com. Not reviewed by Deaf signers yet.',
                    'words': src}, f, ensure_ascii=False, indent=1)

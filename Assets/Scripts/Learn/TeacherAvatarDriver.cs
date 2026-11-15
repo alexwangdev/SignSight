@@ -245,7 +245,7 @@ namespace SignSight.Learn
             ApplyMovement(template, plan, m, 1f);
             float dur = Mathf.Max(0.01f, template.movement.durationSec);
             ApplyHead(template, u < 0f ? 0f : m * dur / Mathf.Max(dur, minHeadSeconds));
-            if (face != null) face.Expression(template.face.smile, template.face.jawOpen, immediate: true);
+            if (face != null) face.SetExpression(template.face, immediate: true);
         }
 
         /// <summary>Back to the rest pose, neutral face.</summary>
@@ -257,6 +257,45 @@ namespace SignSight.Learn
             IsDemonstrating = false;
             ApplyRest();
             if (face != null) face.Neutral(immediate: true);
+        }
+
+        /// <summary>
+        /// v3.2 B4: replays only the face and head of a sign (hands at rest) at 'speed', so the learner looks at the
+        /// face. Display only. Raises DemonstrationFinished at the end like a normal demonstration.
+        /// </summary>
+        public void DemonstrateFace(SignTemplate template, float speed = 0.5f)
+        {
+            if (!_ready) Setup();
+            if (!_ready || template == null) return;
+            if (_routine != null) StopCoroutine(_routine);
+            _routine = StartCoroutine(RunFace(template, Mathf.Clamp(speed, 0.25f, 1f)));
+        }
+
+        public bool IsFaceOnly { get; private set; }
+
+        private IEnumerator RunFace(SignTemplate t, float speed)
+        {
+            IsDemonstrating = true;
+            IsFaceOnly = true;
+            float slow = 1f / speed;
+            ApplyRest();
+            float headDur = Mathf.Max(t.movement.durationSec, minHeadSeconds) * slow;
+            float total = headDur + holdEndSeconds * slow;
+            if (face != null) face.SetExpression(t.face);
+            for (float tau = 0f; tau < total; tau += Time.deltaTime)
+            {
+                ApplyArm(_right, RestPose(_right));
+                ApplyArm(_left, RestPose(_left));
+                ApplyHead(t, t.head.type == "none" ? 0f : tau / headDur);
+                yield return null;
+            }
+            ApplyHead(t, 1f);
+            if (face != null) face.Neutral();
+            for (float r = 0f; r < returnSeconds * slow; r += Time.deltaTime) yield return null;
+            IsDemonstrating = false;
+            IsFaceOnly = false;
+            _routine = null;
+            DemonstrationFinished?.Invoke();
         }
 
         // ================= Sequence =================
@@ -278,7 +317,7 @@ namespace SignSight.Learn
             }
 
             // 2) Perform the movement; face fades in with it, head moves with it.
-            if (face != null) face.Expression(t.face.smile, t.face.jawOpen);
+            if (face != null) face.SetExpression(t.face);
             float tau = 0f;
             for (; tau < dur; tau += Time.deltaTime)
             {
@@ -603,7 +642,15 @@ namespace SignSight.Learn
             _head.localRotation = _headRest;
             if (hu <= 0f || hu >= 1f || t.head == null || t.head.type == "none") return;
             float a = t.head.amplitudeDeg * Mathf.Sin(2f * Mathf.PI * Mathf.Max(1, t.head.repeats) * hu);
-            Vector3 axis = t.head.type == "nod" ? transform.right : t.head.type == "shake" ? transform.up : Vector3.zero;
+            if (t.head.type == "tilt" || t.head.type == "bow")
+            {
+                // v3.2: held head positions (WH-question tilt, SAD bow): ease in, hold, ease out.
+                float env = Smooth(hu / 0.2f) * (1f - Smooth((hu - 0.8f) / 0.2f));
+                a = t.head.amplitudeDeg * env;
+            }
+            Vector3 axis = t.head.type == "nod" || t.head.type == "bow" ? transform.right
+                : t.head.type == "shake" ? transform.up
+                : t.head.type == "tilt" ? transform.forward : Vector3.zero;
             if (axis == Vector3.zero) return;
             _head.rotation = Quaternion.AngleAxis(a, axis) * _head.rotation;
         }

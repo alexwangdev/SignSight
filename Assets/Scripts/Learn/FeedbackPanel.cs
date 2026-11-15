@@ -59,6 +59,8 @@ namespace SignSight.Learn
         }
 
         private GhostHand _targetLeft, _userLeft;
+        private CelebrationFX _fx;
+        public CelebrationFX Celebration => _fx;
         private Vector3 _targetPos, _userPos;
         private Coroutine _replay;
 
@@ -84,6 +86,9 @@ namespace SignSight.Learn
             _targetPos = targetHand.transform.localPosition;
             _userPos = userHand.transform.localPosition;
             // Left hands are mirrored right hands (one implementation).
+            // v3.2: dark rounded backing behind the text column (A2) and the correct-answer celebration (A1).
+            SignSight.UI.TextBacking.For(gameObject, title, hint, looksLike);
+            if (title != null) _fx = CelebrationFX.Create(title.transform.parent);
             _targetLeft = NewLeftHand(targetHand, "TargetHandLeft");
             _userLeft = NewLeftHand(userHand, "YourHandLeft");
             if (movementHint == null && looksLike != null)
@@ -92,6 +97,7 @@ namespace SignSight.Learn
                 movementHint.name = "MovementHint";
                 movementHint.transform.localPosition = looksLike.transform.localPosition + new Vector3(0f, -0.045f, 0f);
             }
+            if (movementHint != null) SignSight.UI.TextBacking.For(gameObject, movementHint);
         }
 
         /// <summary>
@@ -120,6 +126,7 @@ namespace SignSight.Learn
         private void Hide()
         {
             StopReplay();
+            if (_fx != null) _fx.Hide();
             if (handsRoot != null) handsRoot.SetActive(false);
             SetText(title, "");
             SetText(hint, "");
@@ -142,6 +149,7 @@ namespace SignSight.Learn
                     SetText(looksLike, "");
                     SetText(movementHint, "");
                     StackText();
+                    Celebrate(v);
                     return;
             }
             // Compare against what the learner did for the word being learned: the target's own start pose,
@@ -155,6 +163,16 @@ namespace SignSight.Learn
                 attempt.UserPalm = te.Value.PalmRight;
             }
             ShowCorrection(attempt, target, v.Outcome == ScoreManager.Outcome.WrongCanRetry);
+        }
+
+        /// <summary>v3.2 A1: confetti, title pop and stars (3 first try, 2 second try). Correct answers only.</summary>
+        private void Celebrate(ScoreManager.Verdict v)
+        {
+            if (_fx == null || title == null) return;
+            var low = hint != null && !string.IsNullOrEmpty(hint.text) ? hint : title;
+            var rt = (RectTransform)low.transform;
+            var at = new Vector3(title.transform.localPosition.x, rt.localPosition.y - rt.sizeDelta.y * 0.5f - 0.03f, title.transform.localPosition.z);
+            _fx.Play(title, hint, v.Outcome == ScoreManager.Outcome.CorrectFirstTry ? 3 : 2, at);
         }
 
         /// <summary>Shows the ghost-hand comparison, hints and the 0.5x replay for a wrong attempt.</summary>
