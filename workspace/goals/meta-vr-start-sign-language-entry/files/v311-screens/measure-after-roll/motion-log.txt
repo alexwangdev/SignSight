@@ -1,0 +1,9 @@
+HELLO: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R swing 43.8 twist 1.7 total 43.8 | L swing 3.5 twist 0.0 total 3.5
+YES: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R swing 77.8 twist 3.0 total 77.8 | L swing 3.5 twist 0.0 total 3.5
+BAD: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R swing 109.5 twist 0.4 total 109.5 | L swing 3.5 twist 0.0 total 3.5
+MAN: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R swing 46.7 twist 0.7 total 46.7 | L swing 3.5 twist 0.0 total 3.5
+DRINK: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R swing 97.8 twist 2.2 total 97.8 | L swing 3.5 twist 0.0 total 3.5
+BREAD: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R swing 156.5 twist 0.4 total 156.5 | L swing 29.6 twist 1.6 total 29.6
+NEED: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R swing 39.7 twist 31.7 total 50.4 | L swing 3.5 twist 0.0 total 3.5
+WHERE: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R swing 45.3 twist 17.0 total 48.2 | L swing 3.5 twist 0.0 total 3.5
+HOW: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 0.0 deg | hold: R swing 72.9 twist 0.4 total 72.9 | L swing 74.9 twist 0.0 total 74.9

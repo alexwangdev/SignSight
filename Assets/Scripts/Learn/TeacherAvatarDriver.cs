@@ -31,6 +31,14 @@ namespace SignSight.Learn
         [Header("Finger bend at curl = 1 (degrees per joint: proximal, intermediate, distal)")]
         [SerializeField] private Vector3 fingerMaxDegrees = new Vector3(80f, 100f, 70f);
         [SerializeField] private Vector3 thumbMaxDegrees = new Vector3(45f, 45f, 55f);
+
+        [Header("v3.10 wrist limits: how far the hand may turn away from the forearm (degrees)")]
+        [Tooltip("v3.10 verify: OFF = v3.9 wrist behaviour. The clamp broke 9 scored self-test words (wrist turn too small); see v310-verify.txt.")]
+        [SerializeField] private bool wristClampEnabled = false;
+        [Tooltip("Pitch + yaw of the wrist, relative to the forearm. Clamped, not snapped.")]
+        [SerializeField] private float wristSwingMaxDeg = 35f;
+        [Tooltip("Roll of the wrist about the forearm.")]
+        [SerializeField] private float wristTwistMaxDeg = 45f;
         [Tooltip("Sideways splay at spread = 1, per finger: index, middle, ring, pinky (degrees away from the middle finger).")]
         [SerializeField] private Vector4 spreadDegrees = new Vector4(10f, 0f, 8f, 16f);
         [Tooltip("Relaxed hand at rest.")]
@@ -65,6 +73,15 @@ namespace SignSight.Learn
             public Quaternion UpperRest, LowerRest, HandRest;
             public Quaternion FrameToBone;   // (finger dir, palm normal) frame -> hand bone rotation
             public Vector3 RestPos;          // rest wrist position, teacher space
+            public Vector3 Pole;             // v3.10 step 2: damped elbow pole direction (teacher space)
+            public Vector3 Chosen;           // v3.11: damped elbow pole after the swivel search
+            public float Roll;               // v3.11: damped forearm roll (pronation / supination), degrees
+            public bool RollInit;
+            public float DevAngle, DevSwing, DevTwist; // v3.11 measurement: wrist deviation from the forearm (degrees)
+            public bool FollowInit;          // v3.10 steps 3-4: the damped follow state below is set
+            public Vector3 FollowPos;        // damped wrist position (teacher space)
+            public Quaternion FollowRot;     // damped hand bone rotation (teacher space)
+            public float[] FollowCurl;       // damped finger curl
             public Quaternion RestRot;       // rest hand bone rotation, teacher space
             public Vector3 Shoulder;         // teacher space
             public float PalmLength;         // wrist -> middle knuckle
@@ -226,6 +243,7 @@ namespace SignSight.Learn
             if (!_ready) Setup();
             if (!_ready || template == null) return;
             if (_routine != null) StopCoroutine(_routine);
+            WristClampedMaxDeg = 0f;
             _routine = StartCoroutine(Run(template));
         }
 
@@ -332,6 +350,7 @@ namespace SignSight.Learn
             for (float h = 0f; h < hold * slow; h += Time.deltaTime, tau += Time.deltaTime)
             {
                 ApplyMovement(t, plan, 1f, 1f);
+                RecordHold();
                 ApplyHead(t, headDur > 0f ? tau / headDur : 0f);
                 yield return null;
             }
@@ -670,8 +689,9 @@ namespace SignSight.Learn
             a.Upper.localRotation = a.UpperRest;
             a.Lower.localRotation = a.LowerRest;
             a.Hand.localRotation = a.HandRest;
-            SolveTwoBone(a, transform.TransformPoint(p.Pos));
-            a.Hand.rotation = transform.rotation * p.BoneRot;
+            Quaternion desired = transform.rotation * p.BoneRot;
+            SolveTwoBone(a, transform.TransformPoint(p.Pos), desired);
+            a.Hand.rotation = ClampWrist(a, desired);
 
             for (int f = 0; f < 5; f++)
             {
@@ -693,23 +713,147 @@ namespace SignSight.Learn
             }
         }
 
-        /// <summary>Analytic two-bone IK: places the elbow so the hand reaches the target, elbow pointing down and out.</summary>
-        private void SolveTwoBone(Arm arm, Vector3 target)
+        /// <summary>Largest wrist correction (degrees) the clamp applied since the last Demonstrate: a check, not a control.</summary>
+        public float WristClampedMaxDeg { get; private set; }
+
+        /// <summary>
+        /// v3.10 step 1: the wrist may turn away from the forearm by at most wristSwingMaxDeg (pitch + yaw) and
+        /// wristTwistMaxDeg (roll). The template's hand rotation is clamped to that range, never snapped past it.
+        /// </summary>
+        private Quaternion ClampWrist(Arm a, Quaternion desired)
         {
+            Quaternion neutral = a.Lower.rotation * a.HandRest;               // the hand following the forearm exactly
+            Quaternion dev = Quaternion.Inverse(neutral) * desired;           // wrist deviation, in the hand's frame
+            if (dev.w < 0f) dev = new Quaternion(-dev.x, -dev.y, -dev.z, -dev.w);
+            Vector3 ax = (Quaternion.Inverse(neutral) * (a.Hand.position - a.Lower.position)).normalized; // forearm axis
+            Vector3 proj = Vector3.Dot(ax, new Vector3(dev.x, dev.y, dev.z)) * ax;
+            Quaternion twist = new Quaternion(proj.x, proj.y, proj.z, dev.w);
+            float tn = twist.x * twist.x + twist.y * twist.y + twist.z * twist.z + twist.w * twist.w;
+            twist = tn < 1e-8f ? Quaternion.identity : Quaternion.Normalize(twist); // swing-twist split
+            Quaternion swing = dev * Quaternion.Inverse(twist);
+            // v3.11 measurement, always recorded: how far the forearm is from carrying the hand (degrees)
+            a.DevAngle = Quaternion.Angle(Quaternion.identity, dev);
+            a.DevSwing = Quaternion.Angle(Quaternion.identity, swing);
+            a.DevTwist = Quaternion.Angle(Quaternion.identity, twist);
+            if (!wristClampEnabled) return desired; // v3.9 behaviour: the template's hand rotation, unclamped
+            Quaternion swingC = Quaternion.RotateTowards(Quaternion.identity, swing, wristSwingMaxDeg);
+            Quaternion twistC = Quaternion.RotateTowards(Quaternion.identity, twist, wristTwistMaxDeg);
+            WristClampedMaxDeg = Mathf.Max(WristClampedMaxDeg, Quaternion.Angle(swing, swingC), Quaternion.Angle(twist, twistC));
+            return neutral * (swingC * twistC);
+        }
+
+        [Tooltip("v3.10 step 2: how quickly the elbow direction follows the hand (per second, exponential damp).")]
+        [SerializeField] private float poleDamping = 8f;
+
+        /// <summary>
+        /// v3.10 step 2: the elbow points down and out when the hand is high (face, temple, chin) and back and out when it
+        /// is low (chest). The direction is damped over time, so the elbow travels with the hand instead of jumping.
+        /// </summary>
+        private Vector3 ElbowPole(Arm arm, Vector3 target, Vector3 dir)
+        {
+            Vector3 tl = transform.InverseTransformPoint(target);
+            Vector3 sl = transform.InverseTransformPoint(arm.Upper.position);
+            // height of the hand relative to the shoulder: 0 = at or below the chest spot, 1 = above the shoulder
+            float high = Smooth(Mathf.Clamp01((tl.y - sl.y + 0.15f) / 0.45f));
+            Vector3 hi = -transform.up + transform.right * (arm.Side * 0.4f);            // down and out
+            Vector3 lo = -transform.forward * 0.8f - transform.up * 0.2f + transform.right * (arm.Side * 0.2f); // back and out
+            Vector3 want = Vector3.Lerp(lo, hi, high);
+            if (arm.Pole == Vector3.zero) arm.Pole = want;
+            else arm.Pole = Vector3.Lerp(arm.Pole, want, 1f - Mathf.Exp(-poleDamping * Time.deltaTime));
+            Vector3 p = Vector3.ProjectOnPlane(arm.Pole, dir);
+            return p.sqrMagnitude > 1e-6f ? p.normalized : Vector3.ProjectOnPlane(hi, dir).normalized;
+        }
+
+        /// <summary>Analytic two-bone IK: places the elbow so the hand reaches the target, elbow pointing down and out.</summary>
+        [Header("v3.11 arm carries the angle")]
+        [Tooltip("Swivel search: turn the elbow plane about the shoulder-hand line and keep the swivel at which the forearm " +
+                 "carries the hand's orientation best. Moves the arm only; the hand's end pose is unchanged.")]
+        [SerializeField] private bool swivelSearch = true;
+        [SerializeField] private int swivelSteps = 36;
+
+        /// <summary>Hold-pose wrist deviation (both arms), written each hold frame: the measurement for the v3.11 report.</summary>
+        public string HoldReport { get; private set; } = "";
+
+        private void RecordHold()
+        {
+            HoldReport = $"R swing {_right.DevSwing:0.0} twist {_right.DevTwist:0.0} total {_right.DevAngle:0.0} | " +
+                         $"L swing {_left.DevSwing:0.0} twist {_left.DevTwist:0.0} total {_left.DevAngle:0.0}";
+        }
+
+        /// <summary>Two-bone solve for one elbow pole, from the rest pose (the bones are reset first).</summary>
+        private static void ApplyTwoBone(Arm arm, Vector3 a, Vector3 dir, float d, float cosA, float sinA, float lenA, Vector3 pole)
+        {
+            arm.Upper.localRotation = arm.UpperRest;
+            arm.Lower.localRotation = arm.LowerRest;
+            Vector3 b = arm.Lower.position;
+            Vector3 elbow = a + dir * (lenA * cosA) + pole * (lenA * sinA);
+            arm.Upper.rotation = Quaternion.FromToRotation(b - a, elbow - a) * arm.Upper.rotation;
+            b = arm.Lower.position;
+            Vector3 c = arm.Hand.position;
+            arm.Lower.rotation = Quaternion.FromToRotation(c - b, (a + dir * d) - b) * arm.Lower.rotation;
+        }
+
+        /// <summary>
+        /// Two-bone IK with the elbow pole chosen by the swivel search: the candidate poles are the height-based base pole
+        /// turned about the shoulder-hand line; the one whose forearm best carries the hand's orientation wins, and the
+        /// winner is damped over time so the elbow travels instead of jumping between candidates.
+        /// </summary>
+        private void SolveTwoBone(Arm arm, Vector3 target, Quaternion desired)
+        {
+            // called after the arm is reset to its rest pose: the lengths come from the rest bones
             Vector3 a = arm.Upper.position, b = arm.Lower.position, c = arm.Hand.position;
             float lenA = Vector3.Distance(a, b), lenB = Vector3.Distance(b, c);
             Vector3 toTarget = target - a;
             float d = Mathf.Clamp(toTarget.magnitude, Mathf.Abs(lenA - lenB) + 1e-3f, lenA + lenB - 1e-3f);
             Vector3 dir = toTarget.normalized;
             float cosA = Mathf.Clamp((lenA * lenA + d * d - lenB * lenB) / (2f * lenA * d), -1f, 1f);
-            Vector3 pole = Vector3.ProjectOnPlane(-transform.up + transform.right * (arm.Side * 0.4f), dir).normalized;
-            Vector3 elbow = a + dir * (lenA * cosA) + pole * (lenA * Mathf.Sqrt(1f - cosA * cosA));
+            float sinA = Mathf.Sqrt(1f - cosA * cosA);
+            Vector3 pole = ElbowPole(arm, target, dir);
 
-            arm.Upper.rotation = Quaternion.FromToRotation(b - a, elbow - a) * arm.Upper.rotation;
-            b = arm.Lower.position;
-            c = arm.Hand.position;
-            arm.Lower.rotation = Quaternion.FromToRotation(c - b, (a + dir * d) - b) * arm.Lower.rotation;
+            if (swivelSearch && swivelSteps > 1)
+            {
+                float bestErr = float.MaxValue;
+                Vector3 best = pole;
+                for (int k = 0; k < swivelSteps; k++)
+                {
+                    Vector3 cand = Quaternion.AngleAxis(k * 360f / swivelSteps, dir) * pole;
+                    ApplyTwoBone(arm, a, dir, d, cosA, sinA, lenA, cand);
+                    float err = Quaternion.Angle(arm.Lower.rotation * arm.HandRest, desired);
+                    if (err < bestErr) { bestErr = err; best = cand; }
+                }
+                // damp the winner, so a change of winner moves the elbow instead of snapping it
+                if (arm.Chosen == Vector3.zero) arm.Chosen = best;
+                else arm.Chosen = Vector3.Lerp(arm.Chosen, best, 1f - Mathf.Exp(-poleDamping * Time.deltaTime));
+                Vector3 p = Vector3.ProjectOnPlane(arm.Chosen, dir);
+                pole = p.sqrMagnitude > 1e-6f ? p.normalized : Vector3.ProjectOnPlane(best, dir).normalized;
+            }
+            ApplyTwoBone(arm, a, dir, d, cosA, sinA, lenA, pole);
+
+            if (forearmRoll && rollSteps > 0)
+            {
+                // the forearm rolls about its own axis (pronation / supination): the one lever the swivel cannot move.
+                // Search +-rollLimitDeg, keep the roll whose forearm best carries the hand's orientation, damp it.
+                Vector3 axis = (arm.Hand.position - arm.Lower.position).normalized;
+                Quaternion baseRot = arm.Lower.rotation;
+                float bestErr = float.MaxValue, bestRoll = 0f;
+                for (int k = 0; k <= rollSteps; k++)
+                {
+                    float r = -rollLimitDeg + k * (2f * rollLimitDeg / rollSteps);
+                    arm.Lower.rotation = Quaternion.AngleAxis(r, axis) * baseRot;
+                    float err = Quaternion.Angle(arm.Lower.rotation * arm.HandRest, desired);
+                    if (err < bestErr) { bestErr = err; bestRoll = r; }
+                }
+                if (!arm.RollInit) { arm.Roll = bestRoll; arm.RollInit = true; }
+                else arm.Roll = Mathf.Lerp(arm.Roll, bestRoll, 1f - Mathf.Exp(-poleDamping * Time.deltaTime));
+                arm.Lower.rotation = Quaternion.AngleAxis(arm.Roll, axis) * baseRot;
+            }
         }
+
+        [Tooltip("v3.11: search the forearm's roll (pronation / supination) so the palm can turn without the wrist doing it.")]
+        [SerializeField] private bool forearmRoll = true;
+        [Tooltip("Largest forearm roll either way, degrees (human pronation / supination is about 90 each way).")]
+        [SerializeField] private float rollLimitDeg = 90f;
+        [SerializeField] private int rollSteps = 36;
 
         private void PoseRestBody()
         {

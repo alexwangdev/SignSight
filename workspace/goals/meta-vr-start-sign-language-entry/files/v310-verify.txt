@@ -1,0 +1,36 @@
+v3.10 Task B verification (wrist clamp + elbow pole). Branch v3.10-motion-room. Task A is committed separately as b336b52.
+
+1. SELF-TEST (54 scored templates), three runs, same code except the clamp switch:
+   - Clamp ON at 35 deg swing / 45 deg twist (step 1 as built): 45 / 54. Nine scored FAILs:
+       HELLO, YES, BAD, MAN, DRINK, BREAD, NEED, WHERE, HOW.
+     The recogniser hints name the wrist: "Turn your hand further - 6 deg of about 50", "16 deg of about 45",
+     "31 deg of about 140", "End with your palm facing down". Log: v310-selftest-clamp-35-45.txt
+   - Clamp OFF (elbow pole on): 54 / 54. Log: v310-selftest-clamp-off.txt
+   - DEFAULT as committed (clamp switch off, elbow pole on): 54 / 54. Log: v310-selftest-default.txt
+   Conclusion: the wrist clamp caused every failure. The elbow pole change does not affect recognition (54 / 54 with it on).
+
+2. FULL-SIZE VISUAL CHECK: NOT RUN. The brief gates it on a 54 / 54 self-test with the clamp on, which was not met.
+   The four-word verdicts below come from the self-test only, not from looking at the teacher full-size.
+
+   Word      | Clamp ON (35/45)              | Clamp OFF (v3.9 wrist)  | Largest wrist correction (clamp ON)
+   HELLO     | FAIL (hint: "Wave it")        | PASS                    | 65.2 deg (step 2 run)
+   THANK-YOU | PASS                          | PASS                    | 129.4 deg
+   COFFEE    | PASS                          | PASS                    | 135.0 deg
+   HOT       | PASS                          | PASS                    | 129.5 deg
+   Visual: not judged at full size. Thumbnail sheets only (motion/*): not enough to judge wrist bend or elbow travel.
+
+3. STEP 3 OPTION TAKEN: (c). Reason: the self-test is not 54 / 54 with the clamp on, so the clamp is the wrong tool
+   here, and the brief says not to raise the limits to hide it. Under (c) the clamp is disabled (wristClampEnabled = false),
+   so the wrist is the v3.9 behaviour. The 35 / 45 values are kept on record for the arm-pose prompt.
+   Note on the brief's premise: the brief said the problem is not the clamp, but the measurements say the clamp is the cause.
+   The arm-pose work (the forearm must carry the wrist angle that these templates ask for) is still the real question.
+
+4. NUMBERS IN FORCE AT THE END OF THIS PROMPT:
+   - Wrist clamp: OFF (wristClampEnabled = false). If switched on: swing 35 deg, twist 45 deg, hard clamp.
+   - Elbow pole: high = Smooth(clamp01((hand_y - shoulder_y + 0.15) / 0.45)); down-and-out at high = 1,
+     back-and-out (0.8 back, 0.2 down, 0.2 out) at low = 0; damped at poleDamping = 8 per second.
+   - Per-joint lag, easing, and between-phase damping: NOT implemented (steps 3-5 not started).
+   - Head timing, shoulder: unchanged.
+
+5. NOT DONE in this prompt: steps 3-5, Lesson 1 / 6, Exam, Explore, Relax regressions, v3-10 report, commit of Task B.
+   The Task B changes (TeacherAvatarDriver.cs, MotionFrames.cs, motion/*) are uncommitted.

@@ -1,0 +1,12 @@
+HELLO: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 56.5 deg
+YES: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 83.0 deg
+NO: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 75.7 deg
+THANK-YOU: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 139.0 deg
+COFFEE: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 111.9 deg
+HOT: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 140.6 deg
+COLD: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 21.9 deg
+HELP: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 83.6 deg
+WHERE: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 80.3 deg
+GOOD-MORNING: frames 16 (0.25 s apart), demo 3.9s, max wrist correction 140.1 deg
+PLEASE: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 29.4 deg
+BIG: frames 16 (0.25 s apart), demo 3.8s, max wrist correction 4.0 deg
