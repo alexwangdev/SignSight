@@ -276,7 +276,6 @@ namespace SignSight.EditorTools
             uso.FindProperty("explore").objectReferenceValue = explore;
             uso.FindProperty("relax").objectReferenceValue = relax;
             uso.FindProperty("exam").objectReferenceValue = exam;
-            uso.FindProperty("classroomProps").objectReferenceValue = room.gameObject;
             uso.ApplyModifiedPropertiesWithoutUndo();
 
             EditorSceneManager.MarkSceneDirty(root.gameObject.scene);

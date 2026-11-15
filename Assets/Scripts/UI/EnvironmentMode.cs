@@ -26,6 +26,7 @@ namespace SignSight.UI
         private Material _fadeMat;
         private Room _room = Room.None;
         private Coroutine _run;
+        private GameObject _classroomProps, _cafeProps; // v3.10: this component owns the room props' visibility
 
         /// <summary>The room now on screen.</summary>
         public Room CurrentRoom => _room;
@@ -52,6 +53,13 @@ namespace SignSight.UI
             _passthrough = FindFirstObjectByType<OVRPassthroughLayer>();
             var anchor = GameObject.Find("CenterEyeAnchor");
             _eye = anchor != null ? anchor.GetComponent<Camera>() : Camera.main;
+            var learnUi = GameObject.Find("LearnUI");
+            if (learnUi != null)
+            {
+                // Transform.Find also finds inactive children (the room props start inactive)
+                _classroomProps = learnUi.transform.Find("ClassroomProps")?.gameObject;
+                _cafeProps = learnUi.transform.Find("CafeProps")?.gameObject;
+            }
             BuildFade();
         }
 
@@ -61,6 +69,20 @@ namespace SignSight.UI
             if (_lessons == null) return;
             _room = RoomFor(_lessons.CurrentMode);
             ApplyRoom(_room);
+        }
+
+        private void Update()
+        {
+            // keeps the props right after the load finishes; during a fade they stay as the old room until black
+            if (!Fading && _lessons != null) ShowRoomProps(_room);
+        }
+
+        /// <summary>Room props follow the room on screen; hidden while the lesson is still loading.</summary>
+        private void ShowRoomProps(Room r)
+        {
+            bool loaded = _lessons != null && _lessons.Current != LessonManager.Phase.Loading;
+            if (_classroomProps != null) _classroomProps.SetActive(loaded && r == Room.Classroom);
+            if (_cafeProps != null) _cafeProps.SetActive(loaded && r == Room.Cafe);
         }
 
         private void OnEnable()
@@ -81,7 +103,11 @@ namespace SignSight.UI
         private void OnModeChanged(LessonManager.Mode m)
         {
             // same room before and after (e.g. Start → Learn, Learn → Start): nothing changes on screen, so no fade
-            if (RoomFor(m) == _room && _run == null) return;
+            if (RoomFor(m) == _room && _run == null)
+            {
+                ShowRoomProps(_room); // no fade: nothing on screen changes, so nothing is deferred
+                return;
+            }
             if (_run != null) StopCoroutine(_run);
             _run = StartCoroutine(Transition());
         }
@@ -104,6 +130,7 @@ namespace SignSight.UI
 
         private void ApplyRoom(Room r)
         {
+            ShowRoomProps(r); // at black: the new room's props appear here, the old room's were kept until now
             if (_passthrough != null) _passthrough.enabled = r == Room.None;
             if (_eye != null)
             {

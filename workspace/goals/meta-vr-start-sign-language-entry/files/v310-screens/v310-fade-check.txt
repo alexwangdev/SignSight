@@ -1,0 +1,63 @@
+CHECK start: classroom shown, café hidden: PASS
+  frame   1 t=0.059s alpha=0.02 room=Classroom classroom=True cafe=False fading=True
+  frame   2 t=0.068s alpha=0.25 room=Classroom classroom=True cafe=False fading=True
+  frame   3 t=0.098s alpha=0.34 room=Classroom classroom=True cafe=False fading=True
+  frame   4 t=0.106s alpha=0.37 room=Classroom classroom=True cafe=False fading=True
+  frame   5 t=0.112s alpha=0.39 room=Classroom classroom=True cafe=False fading=True
+  frame   6 t=0.117s alpha=0.41 room=Classroom classroom=True cafe=False fading=True
+  frame   7 t=0.122s alpha=0.42 room=Classroom classroom=True cafe=False fading=True
+  frame   8 t=0.128s alpha=0.44 room=Classroom classroom=True cafe=False fading=True
+  frame   9 t=0.134s alpha=0.47 room=Classroom classroom=True cafe=False fading=True
+  frame  10 t=0.139s alpha=0.48 room=Classroom classroom=True cafe=False fading=True
+  frame  11 t=0.144s alpha=0.50 room=Classroom classroom=True cafe=False fading=True
+  frame  12 t=0.149s alpha=0.52 room=Classroom classroom=True cafe=False fading=True
+  frame  13 t=0.154s alpha=0.53 room=Classroom classroom=True cafe=False fading=True
+  frame  14 t=0.159s alpha=0.55 room=Classroom classroom=True cafe=False fading=True
+  frame  15 t=0.167s alpha=0.58 room=Classroom classroom=True cafe=False fading=True
+  frame  16 t=0.173s alpha=0.60 room=Classroom classroom=True cafe=False fading=True
+  frame  17 t=0.180s alpha=0.62 room=Classroom classroom=True cafe=False fading=True
+  frame  18 t=0.185s alpha=0.64 room=Classroom classroom=True cafe=False fading=True
+  frame  19 t=0.190s alpha=0.65 room=Classroom classroom=True cafe=False fading=True
+  frame  20 t=0.197s alpha=0.68 room=Classroom classroom=True cafe=False fading=True
+  frame  21 t=0.203s alpha=0.69 room=Classroom classroom=True cafe=False fading=True
+  frame  22 t=0.207s alpha=0.71 room=Classroom classroom=True cafe=False fading=True
+  frame  23 t=0.213s alpha=0.73 room=Classroom classroom=True cafe=False fading=True
+  frame  24 t=0.218s alpha=0.75 room=Classroom classroom=True cafe=False fading=True
+  frame  25 t=0.222s alpha=0.76 room=Classroom classroom=True cafe=False fading=True
+  frame  26 t=0.231s alpha=0.79 room=Classroom classroom=True cafe=False fading=True
+  frame  27 t=0.237s alpha=0.81 room=Classroom classroom=True cafe=False fading=True
+  frame  28 t=0.244s alpha=0.83 room=Classroom classroom=True cafe=False fading=True
+  frame  29 t=0.250s alpha=0.85 room=Classroom classroom=True cafe=False fading=True
+  frame  30 t=0.533s alpha=1.00 room=Classroom classroom=True cafe=False fading=True
+  frame  31 t=0.541s alpha=0.97 room=Cafe classroom=False cafe=True fading=True
+  frame  32 t=0.566s alpha=0.89 room=Cafe classroom=False cafe=True fading=True
+  frame  33 t=0.575s alpha=0.86 room=Cafe classroom=False cafe=True fading=True
+  frame  34 t=0.585s alpha=0.83 room=Cafe classroom=False cafe=True fading=True
+  frame  35 t=0.606s alpha=0.77 room=Cafe classroom=False cafe=True fading=True
+  frame  36 t=0.616s alpha=0.72 room=Cafe classroom=False cafe=True fading=True
+  frame  37 t=0.631s alpha=0.69 room=Cafe classroom=False cafe=True fading=True
+  frame  38 t=0.643s alpha=0.63 room=Cafe classroom=False cafe=True fading=True
+  frame  39 t=0.654s alpha=0.59 room=Cafe classroom=False cafe=True fading=True
+  frame  40 t=0.669s alpha=0.54 room=Cafe classroom=False cafe=True fading=True
+  frame  41 t=0.679s alpha=0.51 room=Cafe classroom=False cafe=True fading=True
+  frame  42 t=0.687s alpha=0.48 room=Cafe classroom=False cafe=True fading=True
+  frame  43 t=0.701s alpha=0.44 room=Cafe classroom=False cafe=True fading=True
+  frame  44 t=0.712s alpha=0.40 room=Cafe classroom=False cafe=True fading=True
+  frame  45 t=0.721s alpha=0.37 room=Cafe classroom=False cafe=True fading=True
+  frame  46 t=0.730s alpha=0.34 room=Cafe classroom=False cafe=True fading=True
+  frame  47 t=0.743s alpha=0.30 room=Cafe classroom=False cafe=True fading=True
+  frame  48 t=0.754s alpha=0.26 room=Cafe classroom=False cafe=True fading=True
+  frame  49 t=0.768s alpha=0.22 room=Cafe classroom=False cafe=True fading=True
+  frame  50 t=0.785s alpha=0.16 room=Cafe classroom=False cafe=True fading=True
+  frame  51 t=0.798s alpha=0.12 room=Cafe classroom=False cafe=True fading=True
+  frame  52 t=0.809s alpha=0.08 room=Cafe classroom=False cafe=True fading=True
+  frame  53 t=0.816s alpha=0.05 room=Cafe classroom=False cafe=True fading=True
+  frame  54 t=0.821s alpha=0.04 room=Cafe classroom=False cafe=True fading=True
+  frame  55 t=0.827s alpha=0.02 room=Cafe classroom=False cafe=True fading=True
+  frame  56 t=0.833s alpha=0.00 room=Cafe classroom=False cafe=True fading=True
+  frame  57 t=0.840s alpha=0.00 room=Cafe classroom=False cafe=True fading=False
+CHECK fade-start capture: old room (classroom) fully shown, screen dimming (alpha 0.1-0.6): PASS (alpha 0.25)
+CHECK old room props stay until black (no empty frame): PASS
+CHECK new room props appear only at black: PASS (alpha at black 0.97)
+CHECK black capture: screen near black, café shown, classroom gone: PASS (alpha 0.97)
+CHECK end: fade finished, café shown: PASS

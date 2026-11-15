@@ -63,8 +63,6 @@ namespace SignSight.UI
         [SerializeField] private SignSight.Exam.ExamMode exam;
         private GameObject _examButton;
 
-        [Header("v3.6: classroom props (KayKit, CC0) — shown in Learn mode only")]
-        [SerializeField] private GameObject classroomProps;
         private GameObject _ringLabel;
         private Vector3 _ringHome;
         private Vector3 _cardHome, _instructionHome;
@@ -270,10 +268,7 @@ namespace SignSight.UI
                 _cardHomeCaptured = true;
             }
             bool start = lessons.CurrentMode == LessonManager.Mode.Start;
-            // v3.6: the classroom (teacher desk, books, shelf, blackboard, two student desks) belongs to Learn only.
-            // v3.9: and to Start, which shows the same virtual classroom.
-            if (classroomProps != null)
-                classroomProps.SetActive((lessons.CurrentMode == LessonManager.Mode.Learn || start) && phase != LessonManager.Phase.Loading);
+            // v3.10: the room props (classroom, café) are shown by EnvironmentMode, at black during a room change.
             if (startCards != null) startCards.SetActive(start && phase != LessonManager.Phase.Loading);
             if (wordCard != null)
             {

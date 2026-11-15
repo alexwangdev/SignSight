@@ -122,9 +122,9 @@ namespace SignSight.Exam
         /// <summary>Entering / leaving the exam (LessonManager calls this).</summary>
         public void SetActive(bool on)
         {
+            // v3.10: CafeProps' visibility belongs to EnvironmentMode (it changes at black), not here.
             if (cafeRoot != null)
             {
-                cafeRoot.SetActive(on);
                 // The menu text sits on the menu board (set here: the saved scene drops a RectTransform's x / y
                 // under the plain CafeProps parent).
                 var board = cafeRoot.transform.Find("MenuBoard");
