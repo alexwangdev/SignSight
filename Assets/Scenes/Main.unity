@@ -13537,12 +13537,180 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3362038296222486589}
     - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: phaseDamp
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: phaseEasing
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: curlLagSeconds
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
       propertyPath: armFixPolePrior
       value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: wristLagSeconds
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
       propertyPath: wristTwistMaxDeg
       value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: armFixRevertWords.Array.size
+      value: 37
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[0]'
+      value: THANK-YOU
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[1]'
+      value: PLEASE
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[2]'
+      value: SORRY
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[3]'
+      value: GOOD
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[4]'
+      value: GOOD-MORNING
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[5]'
+      value: MAN
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[6]'
+      value: GIRL
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[7]'
+      value: DOCTOR
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[8]'
+      value: WATER
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[9]'
+      value: MILK
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[10]'
+      value: EAT
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[11]'
+      value: BREAD
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[12]'
+      value: APPLE
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[13]'
+      value: HUNGRY
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[14]'
+      value: HOT
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[15]'
+      value: COLD
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[16]'
+      value: HAPPY
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[17]'
+      value: SAD
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[18]'
+      value: TIRED
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[19]'
+      value: SICK
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[20]'
+      value: LOVE
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[21]'
+      value: WANT
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[22]'
+      value: WHERE
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[23]'
+      value: WHEN
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[24]'
+      value: WHY
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[25]'
+      value: TODAY
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[26]'
+      value: TOMORROW
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[27]'
+      value: ME
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[28]'
+      value: YOU
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[29]'
+      value: ONE
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[30]'
+      value: TWO
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[31]'
+      value: THREE
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[32]'
+      value: BIG
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[33]'
+      value: MORE
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[34]'
+      value: FINISH
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[35]'
+      value: HERE
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: 'armFixRevertWords.Array.data[36]'
+      value: HOW-MUCH
       objectReference: {fileID: 0}
     - target: {fileID: 6093902652468623999, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
       propertyPath: m_LocalPosition.x

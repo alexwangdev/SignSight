@@ -81,6 +81,8 @@ namespace SignSight.Learn
             public bool RollInit;
             public float DevAngle, DevSwing, DevTwist; // v3.11 measurement: wrist deviation from the forearm (degrees)
             public float DevPitch, DevYaw;             // v3.12: flexion (+) / extension (-) and radial-ulnar yaw (degrees)
+            public Quaternion DevPrev;       // v3.15: last wrist deviation during travel (keeps the blend on one side)
+            public bool DevInit;
             public bool FollowInit;          // v3.10 steps 3-4: the damped follow state below is set
             public Vector3 FollowPos;        // damped wrist position (teacher space)
             public Quaternion FollowRot;     // damped hand bone rotation (teacher space)
@@ -292,7 +294,17 @@ namespace SignSight.Learn
         [SerializeField] private Vector3 endFingerTarget = new Vector3(-1f, 0f, 0.6f);
         [Tooltip("Elbow prior for those words: cost in wrist degrees per degree the elbow turns away from the down-and-out / back-and-out pole. Keeps the elbow out of the body and below the head while the hand travels.")]
         [SerializeField] private float armFixPolePrior = 0.3f;
-        private bool _fix;
+        [Tooltip("v3.15: the swivel objective and the travel rule apply to every word, except the words listed in armFixRevertWords (kept on the v3.13 arm because the new one measured worse for them).")]
+        [SerializeField] private bool armFixAllWords = true;
+        [SerializeField] private string[] armFixRevertWords =
+        {
+            "THANK-YOU", "PLEASE", "SORRY", "GOOD", "GOOD-MORNING", "MAN", "GIRL", "DOCTOR", "WATER", "MILK", "EAT", "BREAD", "APPLE",
+            "HUNGRY", "HOT", "COLD", "HAPPY", "SAD", "TIRED", "SICK", "LOVE", "WANT", "WHERE", "WHEN", "WHY", "TODAY", "TOMORROW",
+            "ME", "YOU", "ONE", "TWO", "THREE", "BIG", "MORE", "FINISH", "HERE", "HOW-MUCH",
+        };
+        private bool _fix;        // v3.14 swivel objective at the sign itself (and the travel rule)
+        private bool _travel;     // v3.15: travel rule only (every word): between rest and the sign the hand follows the forearm
+        private bool _fixLayout;  // v3.14 layout rules (mirrored left hand, carried end finger direction): armFixWords only
         private float _blendW = 1f; // weight of the sign pose over the rest pose in the frame being posed (1 = the sign itself)
 
         /// <summary>
@@ -300,16 +312,29 @@ namespace SignSight.Learn
         /// sign's orientation over the last part of the travel. Half-way between two unrelated orientations there is no arm
         /// that carries the hand, and the wrist took the whole difference.
         /// </summary>
-        private float WristWeight() => _blendW >= 1f ? 1f : Smooth((_blendW - 0.4f) / 0.6f);
+        private float WristWeight() => _blendW >= 1f ? 1f
+            // close to rest (the first / last 15 % of the travel) the pose is the rest pose itself, so leaving and reaching rest has no snap
+            : Mathf.Max(Smooth((_blendW - 0.4f) / 0.6f), 1f - Smooth(_blendW / 0.15f));
 
         private void SetWord(SignTemplate t)
         {
             _fix = false;
-            if (t == null || string.IsNullOrEmpty(t.intent) || armFixWords == null) return;
+            _fixLayout = false;
+            _travel = false;
+            if (t == null || string.IsNullOrEmpty(t.intent)) return;
             string w = t.intent;
             int hash = w.IndexOf('#');
             if (hash >= 0) w = w.Substring(0, hash);
-            foreach (var x in armFixWords) if (x == w) { _fix = true; break; }
+            _fixLayout = Listed(armFixWords, w);
+            _fix = armFixAllWords ? !Listed(armFixRevertWords, w) : _fixLayout;
+            _travel = armFixAllWords || _fix;
+        }
+
+        private static bool Listed(string[] list, string w)
+        {
+            if (list == null) return false;
+            foreach (var x in list) if (x == w) return true;
+            return false;
         }
 
         /// <summary>Back to the rest pose, neutral face.</summary>
@@ -364,79 +389,163 @@ namespace SignSight.Learn
 
         // ================= Sequence =================
 
+        [Header("v3.15 timing (v3.10 steps 3-4): OFF (all 0). Tried at 0.10 / 0.05 / 0.5 / 40 and measured rougher, see v3-15-report.md")]
+        [Tooltip("Step 3: the wrist rotation follows the arm position by this many seconds (0 = off).")]
+        [SerializeField] private float wristLagSeconds = 0f;
+        [Tooltip("Step 3: the finger curl follows the arm position by this many seconds (0 = off).")]
+        [SerializeField] private float curlLagSeconds = 0f;
+        [Tooltip("Step 3: ease-out for the move to the start; ease-in-out (this strength, 0..1) for the movement itself. 0 = v3.14 timing.")]
+        [SerializeField] private float phaseEasing = 0f;
+        [Tooltip("Step 4: exponential damp of the hand pose across phase changes, per second (0 = off). 40 = a 25 ms time constant.")]
+        [SerializeField] private float phaseDamp = 0f;
+
+        /// <summary>The phases of one demonstration on a single clock (seconds from the start).</summary>
+        private sealed class Timeline
+        {
+            public SignTemplate T, Beat;
+            public SignPlan Plan, Plan2;
+            public HandPose R1, L1, R2, L2;            // end of beat 1, start of beat 2
+            public float ToStart, Dur, Dur2, Return;
+            public float TMove, THold, TBeat, TMove2, THold2, TReturn, Total;
+        }
+
+        /// <summary>Both hand poses at time x on the demonstration clock; w = weight of the sign over the rest pose.</summary>
+        private void Eval(Timeline tl, float x, out HandPose r, out HandPose l, out float w)
+        {
+            w = 1f;
+            if (x <= 0f)
+            {
+                r = RestPose(_right);
+                l = RestPose(_left);
+                w = 0f;
+                return;
+            }
+            if (x < tl.TMove) // 1) move to the start
+            {
+                float k = x / tl.ToStart;
+                w = phaseEasing > 0f ? EaseOut(k) : Smooth(k);
+                Poses(tl.T, tl.Plan, 0f, out r, out l);
+                r = Blend(RestPose(_right), r, w);
+                l = tl.Plan.LeftActive ? Blend(RestPose(_left), l, w) : RestPose(_left);
+                return;
+            }
+            if (x < tl.TBeat) // 2) the movement, 3) the hold
+            {
+                float u = Mathf.Clamp01((x - tl.TMove) / tl.Dur);
+                if (phaseEasing > 0f) u = Mathf.Lerp(u, Smooth(u), phaseEasing);
+                Poses(tl.T, tl.Plan, u, out r, out l);
+                if (!tl.Plan.LeftActive) l = RestPose(_left);
+                return;
+            }
+            SignTemplate last = tl.T;
+            SignPlan lastPlan = tl.Plan;
+            if (tl.Beat != null)
+            {
+                if (x < tl.TMove2) // 3b) into the second beat
+                {
+                    float k = Smooth((x - tl.TBeat) / tl.ToStart);
+                    r = Blend(tl.R1, tl.R2, k);
+                    l = Blend(tl.L1, tl.L2, k);
+                    return;
+                }
+                if (x < tl.TReturn)
+                {
+                    float u = Mathf.Clamp01((x - tl.TMove2) / tl.Dur2);
+                    if (phaseEasing > 0f) u = Mathf.Lerp(u, Smooth(u), phaseEasing);
+                    Poses(tl.Beat, tl.Plan2, u, out r, out l);
+                    if (!tl.Plan2.LeftActive) l = RestPose(_left);
+                    return;
+                }
+                last = tl.Beat;
+                lastPlan = tl.Plan2;
+            }
+            // 4) back to rest
+            w = 1f - Smooth((x - tl.TReturn) / tl.Return);
+            Poses(last, lastPlan, 1f, out r, out l);
+            r = Blend(RestPose(_right), r, w);
+            l = lastPlan.LeftActive ? Blend(RestPose(_left), l, w) : RestPose(_left);
+        }
+
+        /// <summary>Step 4: the pose follows its target through an exponential damp, so a phase change has no velocity jump.</summary>
+        private void Damp(Arm a, ref HandPose p)
+        {
+            if (phaseDamp <= 0f) return;
+            if (!a.FollowInit || a.FollowCurl == null)
+            {
+                a.FollowPos = p.Pos;
+                a.FollowRot = p.BoneRot;
+                a.FollowCurl = (float[])p.Curl.Clone();
+                a.FollowInit = true;
+            }
+            float k = 1f - Mathf.Exp(-phaseDamp * Time.deltaTime);
+            a.FollowPos = Vector3.Lerp(a.FollowPos, p.Pos, k);
+            a.FollowRot = Quaternion.Slerp(a.FollowRot, p.BoneRot, k);
+            for (int i = 0; i < 5; i++) a.FollowCurl[i] = Mathf.Lerp(a.FollowCurl[i], p.Curl[i], k);
+            p.Pos = a.FollowPos;
+            p.BoneRot = a.FollowRot;
+            p.Curl = a.FollowCurl;
+        }
+
         private IEnumerator Run(SignTemplate t)
         {
             IsDemonstrating = true;
-            var plan = Plan(t);
             float slow = 1f / _speed;
-            float dur = Mathf.Max(0.05f, t.movement.durationSec) * slow;
-            float headDur = t.head.type == "none" ? 0f : Mathf.Max(dur, minHeadSeconds);
-            ApplyHead(t, 0f);
-
-            // 1) Move to the start location, fingers to the start curl, palm to the start orientation.
-            for (float s = 0f; s < toStartSeconds * slow; s += Time.deltaTime)
-            {
-                ApplyMovement(t, plan, 0f, Smooth(s / (toStartSeconds * slow)));
-                yield return null;
-            }
-
-            // 2) Perform the movement; face fades in with it, head moves with it.
-            if (face != null) face.SetExpression(t.face);
-            float tau = 0f;
-            for (; tau < dur; tau += Time.deltaTime)
-            {
-                ApplyMovement(t, plan, tau / dur, 1f);
-                ApplyHead(t, headDur > 0f ? tau / headDur : 0f);
-                yield return null;
-            }
-
-            // 3) Hold the end pose so the learner sees the end point (the head finishes its nod / shake).
             var beat = SignMotion.BeatTemplate(t);
-            float hold = beat != null ? 0.25f : holdEndSeconds;
-            for (float h = 0f; h < hold * slow; h += Time.deltaTime, tau += Time.deltaTime)
+            var tl = new Timeline
             {
-                ApplyMovement(t, plan, 1f, 1f);
-                RecordHold();
-                ApplyHead(t, headDur > 0f ? tau / headDur : 0f);
-                yield return null;
-            }
-            ApplyHead(t, 1f);
-
-            // 3b) Compound signs (GOOD-MORNING, TEACHER, TODAY): move into the second beat and perform it.
+                T = t, Beat = beat, Plan = Plan(t),
+                ToStart = toStartSeconds * slow,
+                Dur = Mathf.Max(0.05f, t.movement.durationSec) * slow,
+                Return = returnSeconds * slow,
+            };
+            float hold = (beat != null ? 0.25f : holdEndSeconds) * slow;
+            tl.TMove = tl.ToStart;
+            tl.THold = tl.TMove + tl.Dur;
+            tl.TBeat = tl.THold + hold;
+            tl.TMove2 = tl.THold2 = tl.TReturn = tl.TBeat;
             if (beat != null)
             {
-                var plan2 = Plan(beat);
-                Poses(t, plan, 1f, out var r1, out var l1);
-                Poses(beat, plan2, 0f, out var r2, out var l2);
-                for (float s = 0f; s < toStartSeconds * slow; s += Time.deltaTime)
-                {
-                    float w = Smooth(s / (toStartSeconds * slow));
-                    ApplyArm(_right, Blend(r1, r2, w));
-                    ApplyArm(_left, Blend(l1, l2, w));
-                    yield return null;
-                }
-                float dur2 = Mathf.Max(0.05f, beat.movement.durationSec) * slow;
-                for (float b = 0f; b < dur2; b += Time.deltaTime)
-                {
-                    ApplyMovement(beat, plan2, b / dur2, 1f);
-                    yield return null;
-                }
-                for (float h = 0f; h < holdEndSeconds * slow; h += Time.deltaTime)
-                {
-                    ApplyMovement(beat, plan2, 1f, 1f);
-                    yield return null;
-                }
-                t = beat;
-                plan = plan2;
+                // Compound signs (GOOD-MORNING, TEACHER, TODAY): move into the second beat and perform it.
+                tl.Plan2 = Plan(beat);
+                Poses(t, tl.Plan, 1f, out tl.R1, out tl.L1);
+                Poses(beat, tl.Plan2, 0f, out tl.R2, out tl.L2);
+                tl.Dur2 = Mathf.Max(0.05f, beat.movement.durationSec) * slow;
+                tl.TMove2 = tl.TBeat + tl.ToStart;
+                tl.THold2 = tl.TMove2 + tl.Dur2;
+                tl.TReturn = tl.THold2 + holdEndSeconds * slow;
             }
+            tl.Total = tl.TReturn + tl.Return;
+            float headDur = t.head.type == "none" ? 0f : Mathf.Max(tl.Dur, minHeadSeconds);
+            _right.FollowInit = _left.FollowInit = false;
+            bool faceOn = false, faceOff = false;
+            ApplyHead(t, 0f);
 
-            // 4) Back to rest; face fades out.
-            if (face != null) face.Neutral();
-            for (float r = 0f; r < returnSeconds * slow; r += Time.deltaTime)
+            for (float x = 0f; x < tl.Total; x += Time.deltaTime)
             {
-                ApplyMovement(t, plan, 1f, 1f - Smooth(r / (returnSeconds * slow)));
+                // Step 3: the arm position leads; the wrist rotation and the finger curl follow a little later.
+                // The lags close over the return, so the demonstration still ends at rest on time.
+                float open = Mathf.Clamp01((tl.Total - x) / tl.Return);
+                Eval(tl, x, out var r, out var l, out _);
+                Eval(tl, x - wristLagSeconds * open, out var rr, out var rl, out float wRot);
+                Eval(tl, x - curlLagSeconds * open, out var cr, out var cl, out _);
+                r.BoneRot = rr.BoneRot; r.Curl = cr.Curl; r.Spread = cr.Spread;
+                l.BoneRot = rl.BoneRot; l.Curl = cl.Curl; l.Spread = cl.Spread;
+                Damp(_right, ref r);
+                Damp(_left, ref l);
+                _blendW = wRot;
+                ApplyArm(_right, r);
+                ApplyArm(_left, l);
+                _blendW = 1f;
+
+                // face fades in with the movement and out with the return; the head moves with the movement and the hold
+                if (!faceOn && x >= tl.TMove) { faceOn = true; if (face != null) face.SetExpression(t.face); }
+                if (!faceOff && x >= tl.TReturn) { faceOff = true; if (face != null) face.Neutral(); }
+                if (x >= tl.TBeat) ApplyHead(t, 1f);
+                else ApplyHead(t, headDur > 0f && x > tl.TMove ? (x - tl.TMove) / headDur : 0f);
+                if (x >= tl.THold && x < tl.TBeat) RecordHold();
                 yield return null;
             }
+            if (face != null && !faceOff) face.Neutral();
             ApplyRest();
             IsDemonstrating = false;
             _routine = null;
@@ -599,12 +708,12 @@ namespace SignSight.Learn
                 : AnchorPoint(t.anchor, t.anchorOffset);
             r.Pos = PlaceContact(_right, r, t.contact, rTarget);
             plan.RightStart = r;
-            if (_fix && plan.LeftActive && t.leftAnchor == "mirror")
+            if (_fixLayout && plan.LeftActive && t.leftAnchor == "mirror")
             {
                 // v3.14: "mirror" = the left hand is the mirror image of the right hand, whatever contact point each one names
                 plan.LeftStart.Pos = Mirror(r.Pos - _eyes) + _eyes;
             }
-            if (_fix && t.movement.type == MovementTypes.Stroke && t.endPalm.sqrMagnitude > 1e-4f && t.palm.sqrMagnitude > 1e-4f)
+            if (_fixLayout && t.movement.type == MovementTypes.Stroke && t.endPalm.sqrMagnitude > 1e-4f && t.palm.sqrMagnitude > 1e-4f)
             {
                 // v3.14: the template fixes the END PALM, not the end finger direction. The shortest turn from the start
                 // palm to the end palm can leave the fingers pointing back at the signer, which no arm can carry.
@@ -765,7 +874,21 @@ namespace SignSight.Learn
             Quaternion desired = transform.rotation * p.BoneRot;
             SolveTwoBone(a, transform.TransformPoint(p.Pos), desired);
             Quaternion hand = ClampWrist(a, desired);
-            if (_fix && _blendW < 1f) hand = Quaternion.Slerp(a.Lower.rotation * a.HandRest, hand, WristWeight());
+            if (_travel && _blendW < 1f)
+            {
+                // the hand turns from "following the forearm" into the sign's orientation. The turn is taken as an
+                // angle about an axis and kept on the same side from frame to frame: a shortest-path blend flips sides
+                // when the two orientations pass 180 degrees apart, and the hand would jump.
+                Quaternion neutral = a.Lower.rotation * a.HandRest;
+                Quaternion dev = Quaternion.Inverse(neutral) * hand;
+                if (a.DevInit && Quaternion.Dot(dev, a.DevPrev) < 0f) dev = new Quaternion(-dev.x, -dev.y, -dev.z, -dev.w);
+                a.DevPrev = dev;
+                a.DevInit = true;
+                var ax = new Vector3(dev.x, dev.y, dev.z);
+                float ang = 2f * Mathf.Acos(Mathf.Clamp(dev.w, -1f, 1f)) * Mathf.Rad2Deg;
+                hand = ax.sqrMagnitude < 1e-10f ? neutral : neutral * Quaternion.AngleAxis(ang * WristWeight(), ax.normalized);
+            }
+            else a.DevInit = false;
             a.Hand.rotation = hand;
 
             for (int f = 0; f < 5; f++)
@@ -917,9 +1040,24 @@ namespace SignSight.Learn
                 {
                     Vector3 cand = Quaternion.AngleAxis(k * 360f / swivelSteps, dir) * pole;
                     ApplyTwoBone(arm, a, dir, d, cosA, sinA, lenA, cand);
-                    float err = _fix && armFixObjective > 0
-                        ? WristWeight() * SwingAfterRoll(arm, desired) + armFixPolePrior * Vector3.Angle(cand, pole)
-                        : Quaternion.Angle(arm.Lower.rotation * arm.HandRest, desired);
+                    float err;
+                    if (_fix && armFixObjective > 0)
+                    {
+                        err = WristWeight() * SwingAfterRoll(arm, desired) + armFixPolePrior * Vector3.Angle(cand, pole);
+                        if (ElbowInBody(arm)) err += 1000f; // v3.15: never through the chest
+                    }
+                    else
+                    {
+                        // v3.11 objective at the sign itself (these words measured no better with the new one)
+                        err = Quaternion.Angle(arm.Lower.rotation * arm.HandRest, desired);
+                        if (_travel && _blendW < 1f)
+                        {
+                            // v3.15: on the way between rest and the sign the elbow keeps to its pole and out of the body;
+                            // the v3.11 objective takes over as the hand arrives, so the sign's own pose is unchanged
+                            float ww = WristWeight();
+                            err = ww * err + (1f - ww) * (Vector3.Angle(cand, pole) + (ElbowInBody(arm) ? 1000f : 0f));
+                        }
+                    }
                     if (err < bestErr) { bestErr = err; best = cand; }
                 }
                 // damp the winner, so a change of winner moves the elbow instead of snapping it
@@ -948,6 +1086,20 @@ namespace SignSight.Learn
                 else arm.Roll = Mathf.Lerp(arm.Roll, bestRoll, 1f - Mathf.Exp(-poleDamping * Time.deltaTime));
                 arm.Lower.rotation = Quaternion.AngleAxis(arm.Roll, axis) * baseRot;
             }
+        }
+
+        /// <summary>v3.15: the elbow is inside the torso (between the shoulders, behind the chest front, below the shoulder line).</summary>
+        [Tooltip("v3.15: how far the chest front is ahead of the shoulder joints, plus half an arm (metres).")]
+        [SerializeField] private float torsoFrontFromShoulder = 0.14f;
+        [Tooltip("v3.15: the elbow stays at least this far out from the mid-line, on its own side (metres). The shoulder joint is at about 0.21.")]
+        [SerializeField] private float minElbowLateral = 0.11f;
+        private bool ElbowInBody(Arm arm)
+        {
+            Vector3 e = Local(arm.Lower.position);
+            float halfWidth = Mathf.Abs(arm.Shoulder.x) - 0.03f;
+            float front = arm.Shoulder.z + torsoFrontFromShoulder;
+            if (e.x * arm.Side < minElbowLateral) return true; // the elbow has crossed in toward the mid-line (chest, neck, face)
+            return Mathf.Abs(e.x) < halfWidth && e.z < front && e.y < arm.Shoulder.y + 0.05f;
         }
 
         /// <summary>
