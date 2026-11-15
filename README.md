@@ -25,8 +25,10 @@ the menu (COFFEE / MILK / WATER), be polite, say hot or cold, say how many, say 
 a fixed script — no free chat, no LLM. Each turn allows two tries (+10 / +5 / 0); HINT shows the answer but caps that
 turn at +5; after a miss the clerk shows the sign once. The exam keeps its own score and stars and never changes the
 lesson score or the Tutor's memory. Open from the start screen, or with EXAM on the Lesson 6 summary. The café is
-props in your own room (passthrough stays on): a counter, a menu board and a cup, built from Unity primitives — no
-third-party model.
+props in your own room (passthrough stays on): a counter, a round table with two chairs (KayKit Restaurant Bits, CC0),
+a menu board and a cup. In Learn mode a few classroom props stand behind and beside the teacher (teacher desk, books,
+shelf, two student desks and chairs — KayKit Furniture Bits, CC0 — and a blackboard panel); they are hidden in the
+other modes.
 
 An on-device **Tutor Agent** decides what you practise next — a word you missed twice comes back at once, a finger you
 keep getting wrong is the only one highlighted, words you have not seen for two lessons come back for review, words you
@@ -86,6 +88,13 @@ No image-recognition model and no third-party sign-language API: recognition is 
   MIT License — https://github.com/microsoft/Microsoft-Rocketbox. Imported as a Unity Humanoid. We did not model it.
   Files: `Assets/Models/Rocketbox/`. `Assets/Editor/FixRocketboxMaxImport.cs` is a modified copy of the MIT import
   script from the same repository (scoped to that folder, Humanoid import; changes listed in its header).
+- **Café props:** **KayKit Restaurant Bits 1.0** by Kay Lousberg (www.kaylousberg.com), CC0 1.0 — no attribution
+  required — https://github.com/KayKit-Game-Assets/KayKit-Restaurant-Bits-1.0. Used: `kitchencounter_straight_A.fbx`,
+  `table_round_A.fbx`, `chair_A.fbx` + the atlas texture, in `Assets/Models/Cafe/` with the pack's `LICENSE.txt`.
+- **Classroom props:** **KayKit Furniture Bits 1.0** by Kay Lousberg, CC0 1.0 — no attribution required —
+  https://github.com/KayKit-Game-Assets/KayKit-Furniture-Bits-1.0. Used: `table_medium.fbx`, `chair_A.fbx`,
+  `shelf_A_small.fbx`, `book_set.fbx` + the atlas texture, in `Assets/Models/Classroom/` with the pack's `LICENSE.txt`.
+  The blackboard and the café menu board are the project's own rounded panels. The cup is a Unity primitive.
 - Meta XR All-in-One SDK v207, Unity OpenXR 1.18.0, Unity XR Hands 1.9.0, TextMeshPro.
 
 ## Honest notes

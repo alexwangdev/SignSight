@@ -1,0 +1,11 @@
+Mock source: image explore-mock.png (1280x720); backend CPU; model loaded True
+Detection rate 7.4 fps (target 8), last inference 116 ms, editor frame rate 26 fps
+Detections (>= 0.4): bottle 0.92; cup 0.80; apple 0.74
+Best raw score per class: bottle 0.92, cup 0.80, apple 0.74, banana 0.37, diningtable 0.33, broccoli 0.06
+CHECK apple box present (>= 0.4): PASS (0.74)
+CHECK hold 0.6 s on the apple box -> APPLE + teacher demo: PASS (state Demonstrating, card APPLE / Apple)
+  demo finished after 2.5 s
+CHECK pointing at no box selects nothing: PASS
+CHECK banana (threshold 0.3 for this check) -> "Banana — Not in my 50 words yet", teacher idle: PASS (score 0.37)
+CHECK MENU -> Start and model unloaded: PASS
+CHECK Learn mode runs with no YOLO loaded: PASS

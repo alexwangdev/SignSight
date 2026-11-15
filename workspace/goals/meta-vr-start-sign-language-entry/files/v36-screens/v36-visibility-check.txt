@@ -1,0 +1,8 @@
+Start: mode Start / Menu — classroom hidden, café hidden
+Learn (lesson list): mode Learn / Menu — classroom shown, café hidden
+Learn (in a lesson): mode Learn / Demonstrate — classroom shown, café hidden
+Explore: mode Explore / Menu — classroom hidden, café hidden
+Relax: mode Relax / Menu — classroom hidden, café hidden
+Exam: mode Exam / Menu — classroom hidden, café shown
+Start again: mode Start / Menu — classroom hidden, café hidden
+CHECK classroom only in Learn, café only in Exam: PASS
