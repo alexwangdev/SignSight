@@ -21,6 +21,12 @@ namespace SignSight.Learn
 
         public enum Phase { Loading, Menu, Demonstrate, Copy, Feedback, LessonSummary, Complete }
 
+        /// <summary>
+        /// v3.3: which part of the app is open — separate from Phase. Start = the mode choice (entry point);
+        /// Learn = lessons (Phase.Menu means "pick a lesson" here only); Explore = point at objects, no scoring.
+        /// </summary>
+        public enum Mode { Start, Learn, Explore }
+
         /// <summary>cue: one-line movement cue for the word card (SPEC v3 §6), e.g. "Both fists — only the top hand cranks".</summary>
         [Serializable] public class Word { public string intent; public string meaning; public string cue; }
         [Serializable] public class Lesson { public int id; public string title; public Word[] words; }
@@ -29,6 +35,7 @@ namespace SignSight.Learn
         [SerializeField] private TeacherAvatarDriver teacher;
         [SerializeField] private SignRecognizer recognizer;
         [SerializeField] private TutorAgent tutor;
+        [SerializeField] private SignSight.Explore.ExploreMode explore;
 
         public LessonFile Data { get; private set; }
         public Phase Current { get; private set; } = Phase.Loading;
@@ -47,6 +54,9 @@ namespace SignSight.Learn
         public int OverallPosition { get; private set; }
         public RecognitionResult? LastAttempt { get; private set; }
         public TutorAgent Tutor => tutor;
+        public Mode CurrentMode { get; private set; } = Mode.Start;
+        public SignSight.Explore.ExploreMode Explore => explore;
+        public event Action<Mode> ModeChanged;
 
         /// <summary>Teacher demo speed, 1 or 0.5 (learner-selectable; visual-only learning needs a slow view).</summary>
         public float DemoSpeed
@@ -69,6 +79,8 @@ namespace SignSight.Learn
             if (teacher == null) teacher = FindFirstObjectByType<TeacherAvatarDriver>();
             if (recognizer == null) recognizer = FindFirstObjectByType<SignRecognizer>();
             if (tutor == null) tutor = FindFirstObjectByType<TutorAgent>() ?? gameObject.AddComponent<TutorAgent>();
+            if (explore == null) explore = FindFirstObjectByType<SignSight.Explore.ExploreMode>();
+            if (explore != null) explore.SetActive(false);
             recognizer.Listening = false;
             recognizer.Recognized += OnRecognized;
             teacher.DemonstrationFinished += OnDemonstrationFinished;
@@ -87,6 +99,33 @@ namespace SignSight.Learn
             foreach (var l in Data.lessons)
                 foreach (var w in l.words)
                     if (recognizer.Store.Get(w.intent) == null) Debug.LogError($"[LessonManager] No template for {w.intent}.");
+            CurrentMode = Mode.Start; // v3.3: the app opens on the mode choice, not the lesson list
+            SetPhase(Phase.Menu);
+        }
+
+        // ---- v3.3 modes ----
+
+        /// <summary>Back to the Start screen (MENU from the lesson list, from Explore, and at the end of a run).</summary>
+        public void GoStart()
+        {
+            recognizer.Listening = false;
+            _practice = null;
+            _current = null;
+            if (teacher != null && teacher.IsDemonstrating) teacher.Rest();
+            SwitchMode(Mode.Start);
+        }
+
+        /// <summary>Start card 1: Learn &amp; Test — the lesson list.</summary>
+        public void StartLearnMode() => SwitchMode(Mode.Learn);
+
+        /// <summary>Start card 2: Explore — point at objects.</summary>
+        public void StartExploreMode() => SwitchMode(Mode.Explore);
+
+        private void SwitchMode(Mode m)
+        {
+            if (explore != null) explore.SetActive(m == Mode.Explore);
+            CurrentMode = m;
+            ModeChanged?.Invoke(m);
             SetPhase(Phase.Menu);
         }
 
@@ -120,6 +159,7 @@ namespace SignSight.Learn
         public void StartLesson(int index)
         {
             if (Data == null) return;
+            if (CurrentMode != Mode.Learn) SwitchMode(Mode.Learn);
             _practice = null;
             LessonIndex = Mathf.Clamp(index, 0, Data.lessons.Length - 1);
             WordIndex = 0;
@@ -147,12 +187,23 @@ namespace SignSight.Learn
 
         public void Replay()
         {
+            if (CurrentMode == Mode.Explore)
+            {
+                explore?.Replay();
+                return;
+            }
             if (CurrentWord == null || (Current != Phase.Demonstrate && Current != Phase.Copy && Current != Phase.Feedback)) return;
             BeginWord(false);
         }
 
         public void Next()
         {
+            // v3.3: Next is the MENU button outside a lesson: back to Start.
+            if (CurrentMode != Mode.Learn || Current == Phase.Menu)
+            {
+                GoStart();
+                return;
+            }
             switch (Current)
             {
                 case Phase.Copy:
@@ -184,14 +235,18 @@ namespace SignSight.Learn
                     else SetPhase(Phase.Complete);
                     break;
                 case Phase.Complete:
-                    _practice = null;
-                    SetPhase(Phase.Menu);
+                    GoStart(); // v3.3: MENU at the end lands on Start
                     break;
             }
         }
 
         public void CopyAgain()
         {
+            if (CurrentMode == Mode.Explore)
+            {
+                explore?.Back(); // the Try Again button is "BACK" in Explore
+                return;
+            }
             if (CurrentWord == null) return;
             LastAttempt = null;
             recognizer.Listening = !CurrentIsPracticeOnly;

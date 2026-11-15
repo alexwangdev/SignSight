@@ -179,6 +179,11 @@ namespace SignSight.UI
                     for (int i = 0; i < 10; i++) Tri(new Vector2(32, 31), p[i], p[(i + 1) % 10]);
                     break;
                 }
+                case "eye": // Explore: an eye (outline + pupil)
+                    Arc(32, 14, 26, 42, 138, 5);
+                    Arc(32, 50, 26, 222, 318, 5);
+                    Disk(32, 32, 9);
+                    break;
                 case "practice": // circle with a dot
                     Arc(32, 32, 20, 0, 360, 6); Disk(32, 32, 7);
                     break;

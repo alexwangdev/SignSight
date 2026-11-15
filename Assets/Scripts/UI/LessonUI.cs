@@ -47,14 +47,31 @@ namespace SignSight.UI
         private static readonly Vector3 SpeedButtonPosition = new Vector3(-0.30f, -0.12f, 0.60f);
         private static readonly Vector3 FaceButtonPosition = new Vector3(0.30f, -0.12f, 0.60f);
 
+        [Header("v3.3: Start screen (two mode cards) and Explore")]
+        [SerializeField] private GameObject startCards;
+        [SerializeField] private SignSight.Explore.ExploreMode explore;
+        // On Start the word card becomes the title, centred above the teacher.
+        private static readonly Vector3 StartTitlePosition = new Vector3(0.30f, 0.36f, 1.35f);
+        private const float StartTitleScale = 0.7f;
+        private static readonly Vector3 MenuCornerPosition = new Vector3(-0.42f, 0.10f, 0.75f);
+        private static readonly Vector3 StartInstructionPosition = new Vector3(0.155f, -0.17f, 0.70f);
+        private Vector3 _cardHome, _instructionHome;
+        private bool _cardHomeCaptured;
+
         private readonly List<GameObject> _lessonButtons = new List<GameObject>();
         private TMP_Text _speedLabel, _faceLabel;
 
         private void Update()
         {
             if (holdRing == null) return;
-            bool copying = lessons.Current == LessonManager.Phase.Copy;
+            bool copying = lessons.CurrentMode == LessonManager.Mode.Learn && lessons.Current == LessonManager.Phase.Copy;
             float p = copying && recognizer != null ? recognizer.HoldProgress : 0f;
+            if (lessons.CurrentMode == LessonManager.Mode.Explore && explore != null)
+            {
+                // Explore: the same ring fills while the pointing ray holds on an object (0.6 s).
+                copying = explore.Current == SignSight.Explore.ExploreMode.State.Pointing && explore.HoldProgress > 0f;
+                p = explore.HoldProgress;
+            }
             if (holdRingRoot != null && holdRingRoot.activeSelf != copying) holdRingRoot.SetActive(copying);
             holdRing.fillAmount = p;
             if (wordCard != null && teacher != null) wordCard.HighlightFace(teacher.IsFaceOnly);
@@ -73,6 +90,11 @@ namespace SignSight.UI
         /// </summary>
         public void ReplayFace()
         {
+            if (lessons.CurrentMode == LessonManager.Mode.Explore)
+            {
+                explore?.ReplayFace();
+                return;
+            }
             var t = lessons.CurrentTemplate;
             if (teacher == null || t == null || lessons.Current != LessonManager.Phase.Demonstrate) return;
             teacher.DemonstrateFace(SignSight.Hand.TemplateStore.Canonical(t.intent) ?? t, 0.5f);
@@ -92,7 +114,10 @@ namespace SignSight.UI
             if (lessons == null) lessons = FindFirstObjectByType<LessonManager>();
             if (score == null) score = FindFirstObjectByType<ScoreManager>();
             if (teacher == null) teacher = FindFirstObjectByType<TeacherAvatarDriver>();
+            if (explore == null) explore = FindFirstObjectByType<SignSight.Explore.ExploreMode>();
             lessons.PhaseChanged += Refresh;
+            lessons.ModeChanged += OnModeChanged;
+            if (explore != null) explore.Changed += Refresh;
             if (score != null) score.Changed += Refresh;
             Refresh(lessons.Current);
         }
@@ -155,8 +180,12 @@ namespace SignSight.UI
         private void OnDisable()
         {
             if (lessons != null) lessons.PhaseChanged -= Refresh;
+            if (lessons != null) lessons.ModeChanged -= OnModeChanged;
+            if (explore != null) explore.Changed -= Refresh;
             if (score != null) score.Changed -= Refresh;
         }
+
+        private void OnModeChanged(LessonManager.Mode m) => Refresh();
 
         public void Refresh() => Refresh(lessons.Current);
 
@@ -175,6 +204,26 @@ namespace SignSight.UI
         private void Refresh(LessonManager.Phase phase)
         {
             EnsureParts();
+            if (wordCard != null && !_cardHomeCaptured)
+            {
+                _cardHome = wordCard.transform.localPosition;
+                _instructionHome = instruction != null ? instruction.transform.localPosition : Vector3.zero;
+                _cardHomeCaptured = true;
+            }
+            bool start = lessons.CurrentMode == LessonManager.Mode.Start;
+            if (startCards != null) startCards.SetActive(start && phase != LessonManager.Phase.Loading);
+            if (wordCard != null)
+            {
+                // Start: the word card is a smaller title above the teacher; the instruction goes under the cards.
+                wordCard.transform.localPosition = start ? StartTitlePosition : _cardHome;
+                wordCard.transform.localScale = Vector3.one * (start ? StartTitleScale : 1f);
+            }
+            if (instruction != null) instruction.transform.localPosition = start ? StartInstructionPosition : _instructionHome;
+            if (phase != LessonManager.Phase.Loading && lessons.CurrentMode != LessonManager.Mode.Learn)
+            {
+                RefreshStartOrExplore();
+                return;
+            }
             var lesson = lessons.CurrentLesson;
             var word = lessons.CurrentWord;
             var tutor = lessons.Tutor;
@@ -277,17 +326,102 @@ namespace SignSight.UI
                 if (showTutor) tutorPanel.text = tutor.PanelText().Replace("<b><color=#9DB7FF>Tutor</color></b>\n", "");
             }
             Show(tryAgainButton, phase == LessonManager.Phase.Feedback && score != null && score.CanTryAgain);
+            var tryLabel = tryAgainButton != null ? tryAgainButton.transform.Find("Label")?.GetComponent<TMP_Text>() : null;
+            if (tryLabel != null) tryLabel.text = "TRY\nAGAIN";
             Show(practiceButton, phase == LessonManager.Phase.Complete && !lessons.IsPractice && score != null && score.Missed.Count > 0);
             bool next = phase == LessonManager.Phase.Copy || phase == LessonManager.Phase.Feedback ||
-                        phase == LessonManager.Phase.LessonSummary || phase == LessonManager.Phase.Complete;
-            Show(nextButton, next);
+                        phase == LessonManager.Phase.LessonSummary || phase == LessonManager.Phase.Complete ||
+                        phase == LessonManager.Phase.Menu; // v3.3: MENU back to Start from the lesson list
+            if (phase == LessonManager.Phase.Menu && nextButton != null)
+            {
+                // Five lesson buttons fill the row: MENU sits on its own, top-left (left of the teacher).
+                nextButton.SetActive(true);
+                nextButton.transform.localPosition = MenuCornerPosition;
+            }
+            else Show(nextButton, next);
             if (nextLabel != null)
             {
                 nextLabel.text = phase == LessonManager.Phase.LessonSummary
                     ? (lessons.LessonIndex + 1 < lessons.Data.lessons.Length ? "NEXT\nLESSON" : "FINISH")
-                    : phase == LessonManager.Phase.Complete ? "MENU" : "NEXT";
+                    : phase == LessonManager.Phase.Complete || phase == LessonManager.Phase.Menu ? "MENU" : "NEXT";
                 var icon = nextButton != null ? nextButton.GetComponent<ButtonIcon>() : null;
-                if (icon != null) icon.Set(phase == LessonManager.Phase.Complete ? "menu" : "next");
+                if (icon != null) icon.Set(phase == LessonManager.Phase.Complete || phase == LessonManager.Phase.Menu ? "menu" : "next");
+            }
+            LayOut(visible);
+        }
+
+        /// <summary>v3.3: Start screen (two mode cards) and Explore. No score, stars or Tutor outside Learn.</summary>
+        private void RefreshStartOrExplore()
+        {
+            bool isStart = lessons.CurrentMode == LessonManager.Mode.Start;
+            if (topBar != null) topBar.gameObject.SetActive(false);
+            if (tutorPanel != null) (tutorRoot != null ? tutorRoot : tutorPanel.gameObject).SetActive(false);
+            var visible = new List<GameObject>();
+            void Show(GameObject b, bool on) { if (b == null) return; b.SetActive(on); if (on) visible.Add(b); }
+            foreach (var b in _lessonButtons) Show(b, false);
+            Show(lesson1Button, false);
+            Show(lesson2Button, false);
+            Show(practiceButton, false);
+
+            if (isStart)
+            {
+                wordCard?.Show("SignSight Learn", $"Learn {lessons.TotalWords} signs · Watch the face, copy the hands");
+                SetInstruction("Pinch a mode to start");
+                Show(replayButton, false);
+                Show(tryAgainButton, false);
+                Show(nextButton, false);
+                if (speedButton != null) speedButton.SetActive(false);
+                if (faceButton != null) faceButton.SetActive(false);
+                LayOut(visible);
+                return;
+            }
+
+            // Explore
+            var st = explore != null ? explore.Current : SignSight.Explore.ExploreMode.State.Pointing;
+            var tpl = explore != null ? explore.SelectedTemplate : null;
+            if (st == SignSight.Explore.ExploreMode.State.Pointing)
+            {
+                wordCard?.Hide();
+                SetInstruction(explore != null && explore.UsingCamera
+                    ? "Point at a box in the camera view, hold 0.6 s\n<size=70%>Mock camera (Editor) · try: apple · cup · bottle</size>"
+                    : "Point at an object, hold 0.6 s\n<size=70%>Try: apple · cup · bottle</size>");
+            }
+            else
+            {
+                var e = explore.Selected;
+                string cue = "";
+                if (tpl != null && lessons.Data != null)
+                    foreach (var l in lessons.Data.lessons)
+                        foreach (var w in l.words)
+                            if (w.intent == tpl.intent) cue = w.cue;
+                string meaning = tpl != null ? e.Meaning : $"<color={UIStyle.Amber}>{e.Meaning}</color>";
+                wordCard?.Show(e.Word, meaning, cue, tpl != null ? FaceDriver.Describe(tpl.face) : "");
+                SetInstruction(tpl == null ? "Point at something else"
+                    : st == SignSight.Explore.ExploreMode.State.Demonstrating ? "Watch the teacher — then copy the sign"
+                    : "Copy the sign — Replay, or Back to try another object");
+            }
+            bool shown = st == SignSight.Explore.ExploreMode.State.Shown;
+            Show(replayButton, shown && tpl != null);
+            Show(tryAgainButton, shown || (st == SignSight.Explore.ExploreMode.State.Demonstrating));
+            var backLabel = tryAgainButton != null ? tryAgainButton.transform.Find("Label")?.GetComponent<TMP_Text>() : null;
+            if (backLabel != null) backLabel.text = "BACK";
+            Show(nextButton, true);
+            if (nextLabel != null) nextLabel.text = "MENU";
+            var icon = nextButton != null ? nextButton.GetComponent<ButtonIcon>() : null;
+            if (icon != null) icon.Set("menu");
+            if (speedButton != null)
+            {
+                speedButton.SetActive(tpl != null);
+                speedButton.transform.localPosition = SpeedButtonPosition;
+            }
+            if (_speedLabel != null) _speedLabel.text = lessons.DemoSpeed < 0.75f ? "½×\n<size=60%>SPEED</size>" : "1×\n<size=60%>SPEED</size>";
+            if (faceButton != null)
+            {
+                bool hasFace = tpl != null && tpl.face != null && !tpl.face.IsNeutral;
+                faceButton.SetActive(hasFace && st != SignSight.Explore.ExploreMode.State.Pointing);
+                faceButton.transform.localPosition = FaceButtonPosition;
+                if (hasFace && _faceLabel != null)
+                    _faceLabel.text = $"FACE\n<size=60%>{FaceDriver.Resolve(tpl.face).name.Split('—')[0].Trim()}</size>";
             }
             LayOut(visible);
         }

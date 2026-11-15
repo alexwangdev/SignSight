@@ -41,3 +41,6 @@
 /workspace/goals/meta-vr-start-sign-language-entry/files/teacher-verification/human_clips/
 /workspace/goals/meta-vr-start-sign-language-entry/files/teacher-verification/human_hands/
 /workspace/goals/meta-vr-start-sign-language-entry/files/teacher-verification/human_hands_flat/
+# v3.3 Task B reference downloads (Meta sample scripts under the Oculus SDK licence, ONNX source, photo originals)
+/workspace/goals/meta-vr-start-sign-language-entry/files/explore-ref/
+/workspace/goals/meta-vr-start-sign-language-entry/files/explore-mock/src/

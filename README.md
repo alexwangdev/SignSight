@@ -6,6 +6,13 @@ location, movement, head and face — at normal or half speed; you copy it with 
 scored on handshape, start location and movement. When you are wrong, ghost hands show the target next to yours,
 replay the movement at half speed, mark the fingers that are off, and say what to change.
 
+Two modes from the start screen: **Learn & Test** (the teacher shows a word, you copy it, it is scored) and
+**Explore** (point at an object and hold 0.6 s; you see its English word and the teacher shows its sign — teaching only,
+no score). On a headset Explore uses three virtual objects (apple, cup, bottle). In the Unity Editor it can instead run
+on-device YOLOv9-t object detection (Unity Inference Engine, CPU, ~7 fps) on a mock camera frame and you point at the
+detected boxes; the Quest passthrough camera path is a stub and its alignment is not validated. Objects outside the 50
+words show "Not in my 50 words yet" and are never signed.
+
 An on-device **Tutor Agent** decides what you practise next — a word you missed twice comes back at once, a finger you
 keep getting wrong is the only one highlighted, words you have not seen for two lessons come back for review, words you
 get right first time twice are shown less often — and shows its reason on screen ("Next: YES — because you missed it
