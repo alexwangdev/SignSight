@@ -1,0 +1,14 @@
+1. ME: demo 2.3s, scored; tutor: next word in this lesson
+2. YOU: demo 2.4s, practice only; tutor: next new word in this lesson
+3. ONE: demo 2.4s, scored; tutor: next new word in this lesson
+4. YES: demo 2.6s, scored; tutor: review — last practised 6 lessons ago
+5. TWO: demo 2.4s, scored; tutor: next new word in this lesson
+6. THREE: demo 2.4s, scored; tutor: next new word in this lesson
+7. BIG: demo 2.4s, scored; tutor: next new word in this lesson
+8. PAY: demo 2.2s, practice only; tutor: next new word in this lesson
+9. MORE: demo 2.4s, scored; tutor: next new word in this lesson
+10. FINISH: demo 2.2s, scored; tutor: next new word in this lesson
+11. HERE: demo 2.8s, practice only; tutor: next new word in this lesson
+12. MONEY: demo 2.4s, practice only; tutor: next new word in this lesson
+13. HOW-MUCH: demo 2.3s, practice only; tutor: next new word in this lesson
+End: LessonSummary, words 13, score 90, errors 0, time 46s, XR True

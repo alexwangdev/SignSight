@@ -25,10 +25,14 @@ the menu (COFFEE / MILK / WATER), be polite, say hot or cold, say how many, say 
 a fixed script — no free chat, no LLM. Each turn allows two tries (+10 / +5 / 0); HINT shows the answer but caps that
 turn at +5; after a miss the clerk shows the sign once. The exam keeps its own score and stars and never changes the
 lesson score or the Tutor's memory. Open from the start screen, or with EXAM on the Lesson 6 summary. The café is
-props in your own room (passthrough stays on): a counter, a round table with two chairs (KayKit Restaurant Bits, CC0),
+props in a virtual café room (passthrough off): a counter, a round table with two chairs (KayKit Restaurant Bits, CC0),
 a menu board and a cup. In Learn mode a few classroom props stand behind and beside the teacher (teacher desk, books,
 shelf, two student desks and chairs — KayKit Furniture Bits, CC0 — and a blackboard panel); they are hidden in the
 other modes.
+
+**Rooms and passthrough (v3.8):** Learn and Exam are virtual rooms (passthrough off, with a short fade): the classroom
+and the café, each with a floor, back and side walls and one light, built from plain shapes around the props above.
+Start, Explore and Relax keep passthrough on, so you see your real room.
 
 An on-device **Tutor Agent** decides what you practise next — a word you missed twice comes back at once, a finger you
 keep getting wrong is the only one highlighted, words you have not seen for two lessons come back for review, words you

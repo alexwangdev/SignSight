@@ -164,6 +164,12 @@ namespace SignSight.EditorTools
             for (int i = 0; i < 2; i++)
                 FitHeight(Model(cafe, "CafeChair" + (i + 1), CafeChairFbx, log), CafeChairPos[i], ChairHeight, CafeChairYaw[i]);
 
+            // ---- v3.8 virtual café room (Exam only): primitive shell + a plinth under the KayKit counter + one light ----
+            var cafeShell = BuildRoomShell(cafe, "Cafe", CafeWall, CafeFloor, new Color(1f, 0.9f, 0.76f));
+            float counterBaseY = CounterPos.y - CounterSize.y * 0.5f; // -1.03: the counter's base, from the model bounds
+            Box(cafeShell, "CounterPlinth", new Vector3(CounterPos.x, (RoomFloorY + counterBaseY) * 0.5f, CounterPos.z),
+                new Vector3(CounterSize.x, counterBaseY - RoomFloorY, CounterSize.z), Mat("CafeCounterBase", new Color(0.30f, 0.20f, 0.14f)));
+
             // ---- v3.6 classroom props (Learn mode only; LessonUI shows / hides them) ----
             var room = root.Find("ClassroomProps");
             if (room == null)
@@ -191,6 +197,11 @@ namespace SignSight.EditorTools
                 FitHeight(Model(room, "StudentChair" + (i + 1), ClassChairFbx, log), StudentChairPos[i], ChairHeight, 180f);
             }
             FitWidth(Model(room, "Shelf", ShelfFbx, log), ShelfPos, ShelfWidth, 0f);
+
+            // ---- v3.8 virtual classroom (Learn only): primitive shell + one light; a base under the shelf (its bottom is at y -0.45) ----
+            var roomShell = BuildRoomShell(room, "Class", ClassWall, ClassFloor, new Color(1f, 0.95f, 0.85f));
+            Box(roomShell, "ShelfBase", new Vector3(ShelfPos.x, (RoomFloorY + ShelfPos.y) * 0.5f, ShelfPos.z),
+                new Vector3(ShelfWidth, ShelfPos.y - RoomFloorY, 0.35f), Mat("ClassShelfBase", new Color(0.55f, 0.42f, 0.30f)));
 
             // re-applied on every run, so tuned positions reach the scene
             cafe.Find("MenuBoard").localPosition = MenuBoardPos;
@@ -224,6 +235,13 @@ namespace SignSight.EditorTools
                 Part(bottle, PrimitiveType.Cylinder, new Vector3(0, 0.19f, 0), new Vector3(0.028f, 0.012f, 0.028f), Mat("ExploreCap", new Color(0.15f, 0.25f, 0.6f)));
                 objs.gameObject.SetActive(false);
                 log.AppendLine("created ExploreObjects");
+            }
+
+            // ---- v3.8 passthrough per mode (Learn / Exam = virtual rooms) ----
+            if (learn.GetComponent<EnvironmentMode>() == null)
+            {
+                learn.gameObject.AddComponent<EnvironmentMode>();
+                log.AppendLine("added EnvironmentMode");
             }
 
             // ---- wiring ----
@@ -467,6 +485,67 @@ namespace SignSight.EditorTools
             p.transform.localScale = scale;
             p.GetComponent<Renderer>().sharedMaterial = m;
             // keep the primitive's collider: the pointing ray hits it
+        }
+
+        // ---- v3.8 virtual rooms: one floor height for the whole room (teacher's feet, desk and table bases at -1.67) ----
+        public const float RoomFloorY = -1.67f;
+        public const float RoomWallTop = 1.60f;
+        public static readonly Color CafeWall = new Color(0.86f, 0.74f, 0.58f);
+        public static readonly Color CafeFloor = new Color(0.45f, 0.30f, 0.20f);
+        public static readonly Color ClassWall = new Color(0.84f, 0.88f, 0.76f);
+        public static readonly Color ClassFloor = new Color(0.60f, 0.45f, 0.32f);
+
+        /// <summary>
+        /// v3.8: a flat-coloured room shell (floor, back wall, two side walls; primitive cubes, no colliders) inside the room
+        /// root, plus one directional light for that room. The room root's own visibility hides all of it outside its mode.
+        /// Re-applied on every run.
+        /// </summary>
+        private static Transform BuildRoomShell(Transform room, string name, Color wall, Color floor, Color light)
+        {
+            var shell = room.Find("RoomShell");
+            if (shell == null)
+            {
+                shell = new GameObject("RoomShell").transform;
+                shell.SetParent(room, false);
+            }
+            var wallMat = Mat(name + "Wall", wall);
+            var floorMat = Mat(name + "Floor", floor);
+            float height = RoomWallTop - RoomFloorY;
+            float midY = (RoomWallTop + RoomFloorY) * 0.5f;
+            Box(shell, "Floor", new Vector3(0f, RoomFloorY - 0.05f, 1.5f), new Vector3(5.4f, 0.1f, 3f), floorMat);
+            Box(shell, "BackWall", new Vector3(0f, midY, 3.05f), new Vector3(5.6f, height, 0.1f), wallMat);
+            Box(shell, "LeftWall", new Vector3(-2.75f, midY, 1.5f), new Vector3(0.1f, height, 3f), wallMat);
+            Box(shell, "RightWall", new Vector3(2.75f, midY, 1.5f), new Vector3(0.1f, height, 3f), wallMat);
+
+            var lightT = shell.Find("RoomLight");
+            if (lightT == null)
+            {
+                var go = new GameObject("RoomLight");
+                go.transform.SetParent(shell, false);
+                go.transform.localRotation = Quaternion.Euler(50f, -30f, 0f);
+                var l = go.AddComponent<Light>();
+                l.type = LightType.Directional;
+                l.intensity = 0.9f;
+                l.color = light;
+            }
+            return shell;
+        }
+
+        private static void Box(Transform parent, string name, Vector3 pos, Vector3 size, Material m)
+        {
+            var t = parent.Find(name);
+            GameObject go;
+            if (t == null)
+            {
+                go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                go.name = name;
+                Object.DestroyImmediate(go.GetComponent<Collider>());
+                go.transform.SetParent(parent, false);
+            }
+            else go = t.gameObject;
+            go.transform.localPosition = pos;
+            go.transform.localScale = size;
+            go.GetComponent<Renderer>().sharedMaterial = m;
         }
 
         private static Material Mat(string name, Color c)
