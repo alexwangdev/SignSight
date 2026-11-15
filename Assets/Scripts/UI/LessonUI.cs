@@ -54,10 +54,14 @@ namespace SignSight.UI
         private static readonly Vector3 StartTitlePosition = new Vector3(0.30f, 0.36f, 1.35f);
         private const float StartTitleScale = 0.7f;
         private static readonly Vector3 MenuCornerPosition = new Vector3(-0.42f, 0.10f, 0.75f);
-        private static readonly Vector3 StartInstructionPosition = new Vector3(0.155f, -0.17f, 0.70f);
+        private static readonly Vector3 StartInstructionPosition = new Vector3(0.155f, -0.38f, 0.70f); // v3.5: under the 2 x 2 grid
         [Header("v3.4: Finger Relax (third mode + RELAX on the lesson summary)")]
         [SerializeField] private SignSight.Relax.RelaxMode relax;
         private GameObject _relaxButton;
+
+        [Header("v3.5: Café Final Exam (4th mode + TAKE THE FINAL EXAM on the Lesson 6 summary)")]
+        [SerializeField] private SignSight.Exam.ExamMode exam;
+        private GameObject _examButton;
         private GameObject _ringLabel;
         private Vector3 _ringHome;
         private Vector3 _cardHome, _instructionHome;
@@ -82,6 +86,12 @@ namespace SignSight.UI
                 // Relax: the same ring fills toward the step's target; it pauses while no hand is tracked.
                 copying = relax.Current == SignSight.Relax.RelaxMode.State.Step || relax.Current == SignSight.Relax.RelaxMode.State.Between;
                 p = relax.Progress;
+            }
+            if (lessons.CurrentMode == LessonManager.Mode.Exam && exam != null)
+            {
+                // Exam: the v3 ring fills while the learner's sign is being recognised (same as the copy step).
+                copying = exam.Current == SignSight.Exam.ExamMode.State.Answer;
+                p = copying && recognizer != null ? recognizer.HoldProgress : 0f;
             }
             if (holdRingRoot != null)
             {
@@ -144,6 +154,8 @@ namespace SignSight.UI
             if (explore != null) explore.Changed += Refresh;
             if (relax == null) relax = FindFirstObjectByType<SignSight.Relax.RelaxMode>();
             if (relax != null) relax.Changed += Refresh;
+            if (exam == null) exam = FindFirstObjectByType<SignSight.Exam.ExamMode>();
+            if (exam != null) exam.Changed += Refresh;
             if (score != null) score.Changed += Refresh;
             Refresh(lessons.Current);
         }
@@ -197,6 +209,14 @@ namespace SignSight.UI
                 if (ri != null) ri.Set("hand");
                 _relaxButton.SetActive(false);
             }
+            if (_examButton == null && tryAgainButton != null)
+            {
+                // v3.5: TAKE THE FINAL EXAM on the Lesson 6 summary (runtime copy of a row button, like RELAX).
+                _examButton = CloneButton(tryAgainButton, "ExamButton", "EXAM", lessons.StartExamFromSummary);
+                var ei = _examButton.GetComponent<ButtonIcon>();
+                if (ei != null) ei.Set("cup");
+                _examButton.SetActive(false);
+            }
             if (speedButton != null && _speedLabel == null) _speedLabel = speedButton.GetComponentInChildren<TMP_Text>(true);
             if (faceButton != null && _faceLabel == null)
             {
@@ -217,6 +237,7 @@ namespace SignSight.UI
             if (lessons != null) lessons.ModeChanged -= OnModeChanged;
             if (explore != null) explore.Changed -= Refresh;
             if (relax != null) relax.Changed -= Refresh;
+            if (exam != null) exam.Changed -= Refresh;
             if (score != null) score.Changed -= Refresh;
         }
 
@@ -369,6 +390,9 @@ namespace SignSight.UI
             Show(practiceButton, phase == LessonManager.Phase.Complete && !lessons.IsPractice && score != null && score.Missed.Count > 0);
             // v3.4 Task B: the learner may take a 1-minute Finger Relax before the next lesson (never forced).
             Show(_relaxButton, phase == LessonManager.Phase.LessonSummary && !lessons.IsPractice);
+            // v3.5: the Café Final Exam after the last lesson (Lesson 6 · Café). Also open from the Start screen.
+            Show(_examButton, phase == LessonManager.Phase.LessonSummary && !lessons.IsPractice &&
+                              lessons.Data != null && lessons.LessonIndex == lessons.Data.lessons.Length - 1);
             bool next = phase == LessonManager.Phase.Copy || phase == LessonManager.Phase.Feedback ||
                         phase == LessonManager.Phase.LessonSummary || phase == LessonManager.Phase.Complete ||
                         phase == LessonManager.Phase.Menu; // v3.3: MENU back to Start from the lesson list
@@ -387,7 +411,8 @@ namespace SignSight.UI
                 var icon = nextButton != null ? nextButton.GetComponent<ButtonIcon>() : null;
                 if (icon != null) icon.Set(phase == LessonManager.Phase.Complete || phase == LessonManager.Phase.Menu ? "menu" : "next");
             }
-            LayOut(visible);
+            // v3.5: six lesson buttons — a tighter row on the lesson list so LESSON 1 and LESSON 6 stay in view.
+            LayOut(visible, phase == LessonManager.Phase.Menu ? LessonListSpacing : buttonSpacing);
         }
 
         /// <summary>v3.3: Start screen (two mode cards) and Explore. No score, stars or Tutor outside Learn.</summary>
@@ -403,10 +428,16 @@ namespace SignSight.UI
             Show(lesson2Button, false);
             Show(practiceButton, false);
             Show(_relaxButton, false);
+            Show(_examButton, false);
 
             if (lessons.CurrentMode == LessonManager.Mode.Relax)
             {
                 RefreshRelax(visible, Show);
+                return;
+            }
+            if (lessons.CurrentMode == LessonManager.Mode.Exam)
+            {
+                RefreshExam(visible, Show);
                 return;
             }
             // Relax relabels Try Again / Replay: restore them (Explore sets its own BACK label below).
@@ -541,12 +572,75 @@ namespace SignSight.UI
             LayOut(visible);
         }
 
+        /// <summary>
+        /// v3.5 Café Final Exam: the clerk's question as text on the word card (visual-only), the learner's task
+        /// without the answer word (HINT reveals it), feedback in the lesson wording, and the end screen with the total,
+        /// stars and one line per turn. No Tutor panel, no lesson score.
+        /// </summary>
+        private void RefreshExam(List<GameObject> visible, System.Action<GameObject, bool> Show)
+        {
+            var S = SignSight.Exam.ExamMode.State.Done;
+            var st = exam != null ? exam.Current : S;
+            int n = SignSight.Exam.ExamMode.Script.Length;
+            if (st == S)
+            {
+                var lines = new System.Text.StringBuilder();
+                for (int i = 0; i < n; i++) lines.Append(i == 0 ? "" : "\n").Append(exam.BreakdownLine(i));
+                wordCard?.Show($"Café Exam done — {exam.Total} / {SignSight.Exam.ExamMode.MaxPoints}",
+                               StarText(exam.Stars), $"<size=58%>{lines}</size>");
+                SetInstruction("RETRY EXAM, or MENU");
+            }
+            else if (exam != null && exam.CurrentTurn != null)
+            {
+                var t = exam.CurrentTurn;
+                string head = $"<color=#9DB7FF>Turn {exam.TurnIndex + 1} of {n}</color>   {exam.Total} pts";
+                string task;
+                switch (st)
+                {
+                    case SignSight.Exam.ExamMode.State.ClerkSigning: task = "Watch the clerk"; break;
+                    case SignSight.Exam.ExamMode.State.Closing: task = "The clerk signs FINISH — all done"; break;
+                    case SignSight.Exam.ExamMode.State.Answer:
+                        task = $"Your turn: {t.prompt}" + (exam.Attempts > 0 ? "  <size=80%>(second try)</size>" : ""); break;
+                    default: task = exam.Feedback; break;
+                }
+                string hint = exam.Hinted ? $"\n<color={UIStyle.Amber}>Hint: {string.Join(" or ", t.expected)} (this turn max +5)</color>" : "";
+                string q = st == SignSight.Exam.ExamMode.State.Closing ? "Thank you — come again!" : t.question;
+                wordCard?.Show(q, task, head + hint);
+                SetInstruction(t.expected.Length > 2 && exam.TurnIndex == 2
+                    ? $"Menu: {SignSight.Exam.ExamMode.MenuItems}" : "Café Final Exam");
+            }
+            bool answering = st == SignSight.Exam.ExamMode.State.Answer;
+            Show(replayButton, st == S || (answering && exam.CurrentTurn.clerkSigns.Length > 0));
+            SetLabel(replayButton, st == S ? "RETRY\nEXAM" : _replayText);
+            SetIcon(replayButton, "replay");
+            Show(tryAgainButton, (answering || st == SignSight.Exam.ExamMode.State.Feedback) && !exam.Hinted);
+            SetLabel(tryAgainButton, "HINT");
+            SetIcon(tryAgainButton, "eye");
+            if (nextButton != null)
+            {
+                nextButton.SetActive(true);
+                nextButton.transform.localPosition = MenuCornerPosition;
+            }
+            if (nextLabel != null) nextLabel.text = "MENU";
+            SetIcon(nextButton, "menu");
+            if (speedButton != null) speedButton.SetActive(false);
+            if (faceButton != null) faceButton.SetActive(false);
+            LayOut(visible);
+            // End screen: RETRY EXAM sits left of centre so it never covers the breakdown on the word card.
+            if (st == S && replayButton != null) replayButton.transform.localPosition += new Vector3(-0.12f, 0f, 0f);
+        }
+
         public void SetInstruction(string text)
         {
             if (instruction != null) instruction.text = text;
         }
 
-        private void LayOut(List<GameObject> visible)
+        /// <summary>v3.5: centre-to-centre spacing of the six lesson buttons (discs stay 0.13 m).</summary>
+        public const float LessonListSpacing = 0.145f;
+
+        private void LayOut(List<GameObject> visible) => LayOut(visible, buttonSpacing);
+
+        private void LayOut(List<GameObject> visible, float spacing)
         {
             // Each button reference is a slot holding the pinchable disc and its label.
             if (!_rowCaptured && nextButton != null)
@@ -554,11 +648,11 @@ namespace SignSight.UI
                 _buttonRowCentre = nextButton.transform.localPosition;
                 _rowCaptured = true;
             }
-            float start = -(visible.Count - 1) * buttonSpacing * 0.5f;
+            float start = -(visible.Count - 1) * spacing * 0.5f;
             for (int i = 0; i < visible.Count; i++)
             {
                 var p = _buttonRowCentre;
-                p.x = start + i * buttonSpacing;
+                p.x = start + i * spacing;
                 visible[i].transform.localPosition = p;
             }
         }

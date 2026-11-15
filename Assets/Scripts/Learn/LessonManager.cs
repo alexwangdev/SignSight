@@ -16,17 +16,17 @@ namespace SignSight.Learn
     public class LessonManager : MonoBehaviour
     {
         public const string FileName = "lessons.json";
-        /// <summary>The v3.1 word list is exactly 50 words (5 x 10); anything else is a data error.</summary>
-        public const int ExpectedWordCount = 50;
+        /// <summary>The word list is exactly 62 words (v3.1: 5 x 10; v3.5: + Lesson 6 Café, 12 words); anything else is a data error.</summary>
+        public const int ExpectedWordCount = 62;
 
         public enum Phase { Loading, Menu, Demonstrate, Copy, Feedback, LessonSummary, Complete }
 
         /// <summary>
         /// v3.3: which part of the app is open — separate from Phase. Start = the mode choice (entry point);
         /// Learn = lessons (Phase.Menu means "pick a lesson" here only); Explore = point at objects, no scoring;
-        /// Relax (v3.4) = Finger Relax stretch break, no scoring.
+        /// Relax (v3.4) = Finger Relax stretch break, no scoring; Exam (v3.5) = Café Final Exam, its own score.
         /// </summary>
-        public enum Mode { Start, Learn, Explore, Relax }
+        public enum Mode { Start, Learn, Explore, Relax, Exam }
 
         /// <summary>cue: one-line movement cue for the word card (SPEC v3 §6), e.g. "Both fists — only the top hand cranks".</summary>
         [Serializable] public class Word { public string intent; public string meaning; public string cue; }
@@ -38,6 +38,7 @@ namespace SignSight.Learn
         [SerializeField] private TutorAgent tutor;
         [SerializeField] private SignSight.Explore.ExploreMode explore;
         [SerializeField] private SignSight.Relax.RelaxMode relax;
+        [SerializeField] private SignSight.Exam.ExamMode exam;
 
         public LessonFile Data { get; private set; }
         public Phase Current { get; private set; } = Phase.Loading;
@@ -59,6 +60,7 @@ namespace SignSight.Learn
         public Mode CurrentMode { get; private set; } = Mode.Start;
         public SignSight.Explore.ExploreMode Explore => explore;
         public SignSight.Relax.RelaxMode Relax => relax;
+        public SignSight.Exam.ExamMode Exam => exam;
         /// <summary>v3.4: lesson to start when an inter-lesson Relax is finished (-1 = the Complete screen); NoPending otherwise.</summary>
         public int PendingLessonAfterRelax => _pendingLessonAfterRelax;
         public const int NoPending = -2;
@@ -94,6 +96,8 @@ namespace SignSight.Learn
                 relax.SetActive(false);
                 relax.DoneRequested += OnRelaxDone;
             }
+            if (exam == null) exam = FindFirstObjectByType<SignSight.Exam.ExamMode>();
+            if (exam != null) exam.SetActive(false);
             recognizer.Listening = false;
             recognizer.Recognized += OnRecognized;
             teacher.DemonstrationFinished += OnDemonstrationFinished;
@@ -154,6 +158,19 @@ namespace SignSight.Learn
             if (relax != null) relax.ReturnToLesson = true;
         }
 
+        /// <summary>Start card 4 (v3.5): the Café Final Exam. Open from Start — no gating.</summary>
+        public void StartExamMode() => SwitchMode(Mode.Exam);
+
+        /// <summary>
+        /// v3.5: TAKE THE FINAL EXAM on the Lesson 6 summary. Keeps the summary phase (not Menu), so the lesson score
+        /// and streak are not reset; the exam keeps its own total. MENU from the exam goes to Start.
+        /// </summary>
+        public void StartExamFromSummary()
+        {
+            if (CurrentMode != Mode.Learn || Current != Phase.LessonSummary) return;
+            SwitchMode(Mode.Exam, Phase.LessonSummary);
+        }
+
         private void OnRelaxDone()
         {
             int pending = _pendingLessonAfterRelax;
@@ -185,6 +202,12 @@ namespace SignSight.Learn
                 if (teacher != null && teacher.IsDemonstrating) teacher.Rest();
             }
             if (relax != null && (m == Mode.Relax || previous == Mode.Relax)) relax.SetActive(m == Mode.Relax);
+            if (m == Mode.Exam)
+            {
+                recognizer.Listening = false; // the exam turns listening on for the learner's turns only
+                if (teacher != null && teacher.IsDemonstrating) teacher.Rest();
+            }
+            if (exam != null && (m == Mode.Exam || previous == Mode.Exam)) exam.SetActive(m == Mode.Exam);
             if (m != Mode.Relax) _pendingLessonAfterRelax = NoPending;
             ModeChanged?.Invoke(m);
             SetPhase(phase);
@@ -244,6 +267,7 @@ namespace SignSight.Learn
         public void StartLesson3() => StartLesson(2);
         public void StartLesson4() => StartLesson(3);
         public void StartLesson5() => StartLesson(4);
+        public void StartLesson6() => StartLesson(5);
 
         public void ToggleDemoSpeed() => DemoSpeed = DemoSpeed > 0.75f ? 0.5f : 1f;
 
@@ -257,6 +281,13 @@ namespace SignSight.Learn
             if (CurrentMode == Mode.Relax)
             {
                 relax?.Done(); // the Replay slot is DONE on Relax's end screen
+                return;
+            }
+            if (CurrentMode == Mode.Exam)
+            {
+                // the Replay slot: the clerk signs the question again; RETRY EXAM on the end screen
+                if (exam != null && exam.Current == SignSight.Exam.ExamMode.State.Done) exam.Retry();
+                else exam?.ReplayQuestion();
                 return;
             }
             if (CurrentWord == null || (Current != Phase.Demonstrate && Current != Phase.Copy && Current != Phase.Feedback)) return;
@@ -318,6 +349,11 @@ namespace SignSight.Learn
             if (CurrentMode == Mode.Relax)
             {
                 relax?.Skip(); // the Try Again button is "SKIP" in Relax
+                return;
+            }
+            if (CurrentMode == Mode.Exam)
+            {
+                exam?.Hint(); // the Try Again button is "HINT" in the exam
                 return;
             }
             if (CurrentWord == null) return;

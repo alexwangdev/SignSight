@@ -190,6 +190,11 @@ namespace SignSight.UI
                     Line(23, 29, 21, 45, 5); Line(28, 31, 28, 49, 5); Line(34, 31, 35, 48, 5); Line(39, 29, 41, 43, 5);
                     Line(39, 21, 48, 29, 5);
                     break;
+                case "cup": // Café Final Exam: a cup with a handle and steam (y 14..50, like the other icons)
+                    Line(16, 38, 18, 18, 5); Line(18, 18, 38, 18, 5); Line(38, 18, 40, 38, 5); Line(16, 38, 40, 38, 5);
+                    Arc(44, 29, 6, -90, 90, 4);
+                    Line(23, 43, 25, 50, 3); Line(31, 43, 33, 50, 3);
+                    break;
                 case "check": // ✓
                     Line(12, 32, 26, 18, 8); Line(26, 18, 52, 46, 8);
                     break;

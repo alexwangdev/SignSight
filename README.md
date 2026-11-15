@@ -1,12 +1,12 @@
 # SignSight Learn
 
-Learn 50 **real ASL signs** for everyday life in mixed reality on Meta Quest 3 / 3S — greetings, people, food and
-drink, feelings and health, questions and time. A 3D teacher sitting opposite you performs each sign — handshape,
+Learn 62 **real ASL signs** for everyday life in mixed reality on Meta Quest 3 / 3S — greetings, people, food and
+drink, feelings and health, questions and time, and a café. A 3D teacher sitting opposite you performs each sign — handshape,
 location, movement, head and face — at normal or half speed; you copy it with your own hands within 3 seconds, and get
 scored on handshape, start location and movement. When you are wrong, ghost hands show the target next to yours,
 replay the movement at half speed, mark the fingers that are off, and say what to change.
 
-Three modes from the start screen: **Learn & Test** (the teacher shows a word, you copy it, it is scored) and
+Four modes from the start screen: **Learn & Test** (the teacher shows a word, you copy it, it is scored) and
 **Explore** (point at an object and hold 0.6 s; you see its English word and the teacher shows its sign — teaching only,
 no score). On a headset Explore uses three virtual objects (apple, cup, bottle). In the Unity Editor it can instead run
 on-device YOLOv9-t object detection (Unity Inference Engine, CPU, ~7 fps) on a mock camera frame and you point at the
@@ -18,6 +18,15 @@ wide, finger piano, shake it out, wiggle & rest. A ghost hand shows each pose an
 step also moves on by itself after a few seconds, so there is no score and nothing to fail. It can be started from the
 start screen or, after a lesson, with RELAX on the lesson summary (then DONE starts the next lesson). Gentle only — stop
 if it hurts; it is not medical advice.
+
+**Final Exam — Café** puts the words to use: the teacher is the clerk behind a counter, signs each question (the
+question is also on the card as text), and you answer by signing — greet him, say you want to order, pick a drink from
+the menu (COFFEE / MILK / WATER), be polite, say hot or cold, say how many, say thank you. Seven answers, 70 points,
+a fixed script — no free chat, no LLM. Each turn allows two tries (+10 / +5 / 0); HINT shows the answer but caps that
+turn at +5; after a miss the clerk shows the sign once. The exam keeps its own score and stars and never changes the
+lesson score or the Tutor's memory. Open from the start screen, or with EXAM on the Lesson 6 summary. The café is
+props in your own room (passthrough stays on): a counter, a menu board and a cup, built from Unity primitives — no
+third-party model.
 
 An on-device **Tutor Agent** decides what you practise next — a word you missed twice comes back at once, a finger you
 keep getting wrong is the only one highlighted, words you have not seen for two lessons come back for review, words you
@@ -44,8 +53,11 @@ Experience).
 | 3 Food & drink | WATER, MILK, EAT, DRINK, BREAD, APPLE, HUNGRY, THIRSTY, COFFEE, HOT |
 | 4 Feelings & health | COLD, HELP, HAPPY, SAD, TIRED, SICK, PAIN, LOVE, LIKE, WANT |
 | 5 Questions & time | NEED, WHAT, WHERE, WHEN, WHO, WHY, HOW, TODAY*, TOMORROW, GO |
+| 6 Café | ME, YOU*, ONE, TWO, THREE, BIG, PAY*, MORE, FINISH, HERE*, MONEY*, HOW-MUCH* |
 
-\* Practice only — not scored: compound signs (two beats with a handshape / location change). 47 signs are scored.
+\* Practice only — not scored: compound signs (two beats with a handshape / location change), and in Lesson 6 signs
+the recogniser cannot score fairly (directional PAY, two-handed circles of HERE, the opening hand of HOW-MUCH) or that
+collided with an existing sign in the teacher self-test (YOU with GO, MONEY with BREAD). 54 signs are scored.
 Every sign's Lifeprint source, handshape, location, movement and non-manual markers are in
 `Assets/StreamingAssets/word_sources.json`. WH-question words show "Eyebrows: furrowed — watch the teacher (not scored)":
 Quest 3 / 3S has no face tracking, so the face is never scored. ICED is not taught (fingerspelled in ASL).

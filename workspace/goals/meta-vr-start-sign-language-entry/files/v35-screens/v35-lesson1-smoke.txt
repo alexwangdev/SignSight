@@ -1,0 +1,11 @@
+1. HELLO: demo 2.8s, scored; tutor: next new word in this lesson
+2. YES: demo 2.6s, scored; tutor: next new word in this lesson
+3. NO: demo 2.0s, scored; tutor: next new word in this lesson
+4. THANK-YOU: demo 2.4s, scored; tutor: next new word in this lesson
+5. PLEASE: demo 2.9s, scored; tutor: next new word in this lesson
+6. SORRY: demo 2.9s, scored; tutor: next new word in this lesson
+7. GOOD: demo 2.4s, scored; tutor: next new word in this lesson
+8. BAD: demo 2.2s, scored; tutor: next new word in this lesson
+9. GOODBYE: demo 2.6s, scored; tutor: next new word in this lesson
+10. GOOD-MORNING: demo 3.9s, practice only; tutor: next new word in this lesson
+End: LessonSummary, words 10, score 95, errors 0, time 44s, XR True

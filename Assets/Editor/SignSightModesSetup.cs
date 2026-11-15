@@ -1,3 +1,4 @@
+using SignSight.Exam;
 using SignSight.Explore;
 using SignSight.Learn;
 using SignSight.Relax;
@@ -33,9 +34,26 @@ namespace SignSight.EditorTools
         public static readonly Vector2 Card3Panel = new Vector2(0.215f, 0.31f);
         public const float Card3PanelY = -0.06f;
         public static readonly Vector2 Card3SubRect = new Vector2(0.195f, 0.10f);
-        public static readonly string[] CardNames = { "LearnCard", "ExploreCard", "RelaxCard" };
+        public static readonly string[] CardNames = { "LearnCard", "ExploreCard", "RelaxCard", "ExamCard" };
 
-        [MenuItem("SignSight/Apply v3.3 modes (v3.4 Relax)")]
+        /// <summary>v3.5: four cards as a 2 x 2 grid on the right half (Learn + Explore on top, Relax + Exam below).</summary>
+        public static readonly Vector3[] Card4Pos =
+        {
+            new Vector3(0.06f, 0.075f, 0.9f), new Vector3(0.31f, 0.075f, 0.9f),
+            new Vector3(0.06f, -0.235f, 0.9f), new Vector3(0.31f, -0.235f, 0.9f),
+        };
+        public static readonly Vector2 Card4Panel = new Vector2(0.23f, 0.28f);
+        public const float Card4PanelY = -0.055f;
+        public static readonly Vector2 Card4SubRect = new Vector2(0.21f, 0.10f);
+
+        // v3.5 café props (LearnUI local; the teacher stands behind the counter at ExamMode.TeacherCafePosition)
+        public static readonly Vector3 CounterPos = new Vector3(-0.30f, -0.78f, 1.25f);   // top at y -0.53
+        public static readonly Vector3 CounterSize = new Vector3(0.80f, 0.50f, 0.25f);
+        public static readonly Vector3 MenuBoardPos = new Vector3(-0.95f, -0.22f, 1.45f); // lower left, clear of MENU
+        public static readonly Vector2 MenuBoardSize = new Vector2(0.34f, 0.30f);
+        public static readonly Vector3 CafeCupPos = new Vector3(-0.08f, -0.53f, 1.16f);   // on the counter
+
+        [MenuItem("SignSight/Apply v3.3 modes (v3.4 Relax, v3.5 Exam)")]
         public static string Apply()
         {
             var log = new System.Text.StringBuilder();
@@ -60,7 +78,56 @@ namespace SignSight.EditorTools
                      "Point at something · See its word · Teacher shows its sign", "3 objects to try", green, learn.StartExploreMode, instruction, log);
             MakeCard(cards, lesson1, "RelaxCard", Card3Pos[2], "hand", "Finger Relax",
                      "Stretch your fingers · Shake it out", "About 1 minute · No score", null, learn.StartRelaxMode, instruction, log);
+            MakeCard(cards, lesson1, "ExamCard", Card4Pos[3], "cup", "Final Exam",
+                     "Order a coffee · Talk to the clerk", "7 answers · 70 points", green, learn.StartExamMode, instruction, log);
             CardLayout(cards);
+            var learnSub = cards.Find("LearnCard/Subtitle")?.GetComponent<TMP_Text>();
+            if (learnSub != null) learnSub.text = learnSub.text.Replace("50 words · 5 lessons", "62 words · 6 lessons");
+
+            // ---- v3.5 café props: primitives (counter, menu board, cup), inactive outside the exam ----
+            var cafe = root.Find("CafeProps");
+            if (cafe == null)
+            {
+                cafe = new GameObject("CafeProps").transform;
+                cafe.SetParent(root, false);
+                var counter = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                counter.name = "Counter";
+                Object.DestroyImmediate(counter.GetComponent<Collider>());
+                counter.transform.SetParent(cafe, false);
+                counter.transform.localPosition = CounterPos;
+                counter.transform.localScale = CounterSize;
+                counter.GetComponent<Renderer>().sharedMaterial = Mat("CafeCounter", new Color(0.36f, 0.25f, 0.17f));
+
+                var board = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                board.name = "MenuBoard";
+                Object.DestroyImmediate(board.GetComponent<Collider>());
+                board.transform.SetParent(cafe, false);
+                board.transform.localPosition = MenuBoardPos;
+                board.transform.localScale = new Vector3(MenuBoardSize.x, MenuBoardSize.y, 1f);
+                board.GetComponent<Renderer>().sharedMaterial = UIStyle.PanelMaterial != null
+                    ? UIStyle.PanelMaterial : AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/UI/UIPanel.mat");
+                board.AddComponent<RoundedPanel>();
+                var menuText = NewText(cafe, "MenuText", instruction, 0.30f, new Vector2(MenuBoardSize.x - 0.02f, MenuBoardSize.y - 0.02f));
+                menuText.transform.localPosition = MenuBoardPos + new Vector3(0f, 0f, -0.003f);
+                menuText.alignment = TextAlignmentOptions.Center;
+                menuText.text = "<color=#9DB7FF><size=70%>MENU</size></color>\nCOFFEE\nMILK\nWATER";
+
+                var cupGo = new GameObject("CafeCup");
+                cupGo.transform.SetParent(cafe, false);
+                cupGo.transform.localPosition = CafeCupPos;
+                Part(cupGo, PrimitiveType.Cylinder, new Vector3(0, 0.045f, 0), new Vector3(0.075f, 0.045f, 0.075f), Mat("ExploreCup", new Color(0.92f, 0.92f, 0.9f)));
+                Part(cupGo, PrimitiveType.Cylinder, new Vector3(0, 0.091f, 0), new Vector3(0.062f, 0.002f, 0.062f), Mat("CafeCoffee", new Color(0.23f, 0.13f, 0.07f)));
+                foreach (var c in cupGo.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(c);
+                cupGo.SetActive(false);
+                cafe.gameObject.SetActive(false);
+                log.AppendLine("created CafeProps");
+            }
+            // re-applied on every run, so tuned positions reach the scene
+            cafe.Find("Counter").localPosition = CounterPos;
+            cafe.Find("Counter").localScale = CounterSize;
+            cafe.Find("MenuBoard").localPosition = MenuBoardPos;
+            cafe.Find("MenuText").localPosition = MenuBoardPos + new Vector3(0f, 0f, -0.003f);
+            cafe.Find("CafeCup").localPosition = CafeCupPos;
 
             // ---- Explore table + objects (primitives only; no floating labels) ----
             var objs = root.Find("ExploreObjects");
@@ -107,14 +174,23 @@ namespace SignSight.EditorTools
                 if (g.name == "TargetHand") target = g;
             rso.FindProperty("ghostTemplate").objectReferenceValue = target;
             rso.ApplyModifiedPropertiesWithoutUndo();
+            var exam = learn.GetComponent<ExamMode>();
+            if (exam == null) exam = learn.gameObject.AddComponent<ExamMode>();
+            var xso = new SerializedObject(exam);
+            xso.FindProperty("lessons").objectReferenceValue = learn;
+            xso.FindProperty("cafeRoot").objectReferenceValue = cafe.gameObject;
+            xso.FindProperty("cup").objectReferenceValue = cafe.Find("CafeCup").gameObject;
+            xso.ApplyModifiedPropertiesWithoutUndo();
             var lso = new SerializedObject(learn);
             lso.FindProperty("explore").objectReferenceValue = explore;
             lso.FindProperty("relax").objectReferenceValue = relax;
+            lso.FindProperty("exam").objectReferenceValue = exam;
             lso.ApplyModifiedPropertiesWithoutUndo();
             var uso = new SerializedObject(ui);
             uso.FindProperty("startCards").objectReferenceValue = cards.gameObject;
             uso.FindProperty("explore").objectReferenceValue = explore;
             uso.FindProperty("relax").objectReferenceValue = relax;
+            uso.FindProperty("exam").objectReferenceValue = exam;
             uso.ApplyModifiedPropertiesWithoutUndo();
 
             EditorSceneManager.MarkSceneDirty(root.gameObject.scene);
@@ -177,7 +253,7 @@ namespace SignSight.EditorTools
             {
                 var go = cards.Find(CardNames[i]);
                 if (go == null) continue;
-                go.localPosition = Card3Pos[i];
+                go.localPosition = Card4Pos[i];
                 var d = go.Find("Disc");
                 if (d != null) d.localScale = new Vector3(Card3Disc, d.localScale.y, Card3Disc);
                 var label = go.Find("Label")?.GetComponent<TMP_Text>();
@@ -196,14 +272,14 @@ namespace SignSight.EditorTools
                 var panel = go.Find("Panel");
                 if (panel != null)
                 {
-                    panel.localScale = new Vector3(Card3Panel.x, Card3Panel.y, 1f);
-                    panel.localPosition = new Vector3(0f, Card3PanelY, panel.localPosition.z);
+                    panel.localScale = new Vector3(Card4Panel.x, Card4Panel.y, 1f);
+                    panel.localPosition = new Vector3(0f, Card4PanelY, panel.localPosition.z);
                 }
                 var sub = go.Find("Subtitle")?.GetComponent<TMP_Text>();
                 if (sub != null)
                 {
                     sub.fontSize = Card3Sub;
-                    sub.rectTransform.sizeDelta = Card3SubRect;
+                    sub.rectTransform.sizeDelta = Card4SubRect;
                 }
             }
         }

@@ -230,16 +230,16 @@ namespace SignSight.DevTools
                 Check("a later standalone Relax still returns to Start", lm.CurrentMode == LessonManager.Mode.Start);
 
                 // ---- last lesson ----
-                ForceSummary(lm, 4);
+                ForceSummary(lm, lm.Data.lessons.Length - 1); // the last lesson (v3.5: Lesson 6)
                 yield return null;
                 var lbl = nextLabel != null ? nextLabel.text.Replace("\n", " ") : "";
                 lm.StartRelaxThenNextLesson();
                 yield return null;
-                Check("Lesson 5 summary -> RELAX (pending = Complete)", lm.CurrentMode == LessonManager.Mode.Relax && lm.PendingLessonAfterRelax == -1, $"summary next label '{lbl}'");
+                Check($"Last lesson (Lesson {lm.Data.lessons.Length}) summary -> RELAX (pending = Complete)", lm.CurrentMode == LessonManager.Mode.Relax && lm.PendingLessonAfterRelax == -1, $"summary next label '{lbl}'");
                 yield return RunThroughBySkip(lm, relax);
                 lm.Replay();
                 yield return null;
-                Check("finish Relax after Lesson 5 -> Complete screen", lm.CurrentMode == LessonManager.Mode.Learn && lm.Current == LessonManager.Phase.Complete, $"{lm.CurrentMode} / {lm.Current}");
+                Check("finish Relax after the last lesson -> Complete screen", lm.CurrentMode == LessonManager.Mode.Learn && lm.Current == LessonManager.Phase.Complete, $"{lm.CurrentMode} / {lm.Current}");
                 lm.Next(); // MENU at the end -> Start
                 yield return null;
                 Check("Complete -> MENU -> Start", lm.CurrentMode == LessonManager.Mode.Start);
