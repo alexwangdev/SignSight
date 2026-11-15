@@ -1,0 +1,5 @@
+CHECK passing ray selects nothing: PASS (selections 0 -> 0)
+CHECK hold 0.6 s on cup -> COFFEE: PASS (state Demonstrating, word COFFEE, meaning Cup — COFFEE)
+  teacher finished COFFEE demo after 2.6 s, state Shown
+CHECK no hit for 3 s shows nothing: PASS
+CHECK MENU from Explore -> Start: PASS

@@ -20,7 +20,7 @@ namespace SignSight.DevTools
         public bool Done { get; private set; }
         public readonly StringBuilder Log = new StringBuilder();
         private int _errors;
-        private const string ScreenDir = "../workspace/goals/meta-vr-start-sign-language-entry/files/v38-screens";
+        private const string ScreenDir = "../workspace/goals/meta-vr-start-sign-language-entry/files/v39-screens";
 
         public static EnvCheck Begin()
         {
@@ -45,8 +45,11 @@ namespace SignSight.DevTools
             Log.AppendLine($"CHECK {name}: {(ok ? "PASS" : "FAIL")}{(detail != "" ? " (" + detail + ")" : "")}");
 
         private IEnumerator Step(string name, LessonManager lm, EnvironmentMode env, OVRPassthroughLayer pt, Camera eye,
-                                 Transform room, Transform cafe, System.Action act, LessonManager.Mode to, bool expectFade, string shot)
+                                 Transform room, Transform cafe, System.Action act, LessonManager.Mode to, string shot)
         {
+            // v3.9: a fade is expected exactly when the ROOM changes (Start↔Learn: no fade; Start→Exam: fade)
+            var from = lm.CurrentMode;
+            bool expectFade = EnvironmentMode.RoomFor(from) != EnvironmentMode.RoomFor(to);
             bool wasOn = pt.enabled;
             act();
             yield return new WaitForSecondsRealtime(0.1f);
@@ -56,12 +59,14 @@ namespace SignSight.DevTools
             while (env.Fading && Time.realtimeSinceStartup - t0 < 5f) yield return null;
             yield return new WaitForSecondsRealtime(0.1f);
 
-            bool wantVirtual = EnvironmentMode.Wants(to);
+            var want = EnvironmentMode.RoomFor(to);
+            bool wantVirtual = want != Room.None;
             bool bgOk = Mathf.Approximately(eye.backgroundColor.a, wantVirtual ? 1f : 0f);
-            bool ok = lm.CurrentMode == to && pt.enabled == !wantVirtual && bgOk && env.VirtualRoom == wantVirtual &&
-                      room.gameObject.activeSelf == (to == LessonManager.Mode.Learn) &&
-                      cafe.gameObject.activeSelf == (to == LessonManager.Mode.Exam);
-            bool noCut = !expectFade || (fadingEarly && ptStillOn);
+            bool ok = lm.CurrentMode == to && pt.enabled == !wantVirtual && bgOk && env.CurrentRoom == want &&
+                      room.gameObject.activeSelf == (want == Room.Classroom) &&
+                      cafe.gameObject.activeSelf == (want == Room.Cafe);
+            // a fade must start 0.1 s after the switch and passthrough must not change yet; no fade = nothing moves at all
+            bool noCut = expectFade ? (fadingEarly && ptStillOn) : (!fadingEarly && ptStillOn);
             Check($"{name}: passthrough {(pt.enabled ? "on" : "off")}, room {(wantVirtual ? "virtual" : "real")}",
                   ok && noCut,
                   $"mode {lm.CurrentMode}, passthrough {pt.enabled}, bg a={eye.backgroundColor.a:0.0}, classroom {room.gameObject.activeSelf}, café {cafe.gameObject.activeSelf}, fade-at-0.1s {fadingEarly}, no-hard-cut {noCut}");
@@ -106,17 +111,18 @@ namespace SignSight.DevTools
 
             lm.GoStart();
             yield return new WaitForSecondsRealtime(1f);
-            Check("boot: Start shows the real room", pt.enabled && !env.VirtualRoom && !env.Fading && eye.backgroundColor.a == 0f,
-                  $"passthrough {pt.enabled}, bg a={eye.backgroundColor.a:0.0}");
-            yield return Step("Start->Learn", lm, env, pt, eye, room, cafe, () => lm.StartLearnMode(), LessonManager.Mode.Learn, true, "v38-classroom.png");
-            yield return Step("Learn->Start", lm, env, pt, eye, room, cafe, () => lm.GoStart(), LessonManager.Mode.Start, true, "v38-start-passthrough.png");
-            yield return Step("Start->Exam", lm, env, pt, eye, room, cafe, () => lm.StartExamMode(), LessonManager.Mode.Exam, true, "v38-cafe.png");
-            yield return Step("Exam->Start", lm, env, pt, eye, room, cafe, () => lm.GoStart(), LessonManager.Mode.Start, true, "");
-            yield return Step("Start->Explore", lm, env, pt, eye, room, cafe, () => lm.StartExploreMode(), LessonManager.Mode.Explore, false, "v38-explore-passthrough.png");
-            yield return Step("Explore->Learn", lm, env, pt, eye, room, cafe, () => lm.StartLearnMode(), LessonManager.Mode.Learn, true, "");
-            yield return Step("Learn->Relax", lm, env, pt, eye, room, cafe, () => lm.StartRelaxMode(), LessonManager.Mode.Relax, true, "");
-            yield return Step("Relax->Learn", lm, env, pt, eye, room, cafe, () => lm.StartLearnMode(), LessonManager.Mode.Learn, true, "");
-            yield return Step("Learn->Start (exit)", lm, env, pt, eye, room, cafe, () => lm.GoStart(), LessonManager.Mode.Start, true, "");
+            Check("boot: Start shows the virtual classroom (passthrough off, classroom props on)",
+                  !pt.enabled && env.CurrentRoom == Room.Classroom && !env.Fading && eye.backgroundColor.a == 1f && room.gameObject.activeSelf,
+                  $"passthrough {pt.enabled}, room {env.CurrentRoom}, bg a={eye.backgroundColor.a:0.0}, classroom {room.gameObject.activeSelf}");
+            yield return Step("Start->Learn", lm, env, pt, eye, room, cafe, () => lm.StartLearnMode(), LessonManager.Mode.Learn, "v39-learn-classroom.png");
+            yield return Step("Learn->Start", lm, env, pt, eye, room, cafe, () => lm.GoStart(), LessonManager.Mode.Start, "v39-start-classroom.png");
+            yield return Step("Start->Exam", lm, env, pt, eye, room, cafe, () => lm.StartExamMode(), LessonManager.Mode.Exam, "v39-cafe-shoes-fixed.png");
+            yield return Step("Exam->Start", lm, env, pt, eye, room, cafe, () => lm.GoStart(), LessonManager.Mode.Start, "");
+            yield return Step("Start->Explore", lm, env, pt, eye, room, cafe, () => lm.StartExploreMode(), LessonManager.Mode.Explore, "v39-explore-passthrough.png");
+            yield return Step("Explore->Learn", lm, env, pt, eye, room, cafe, () => lm.StartLearnMode(), LessonManager.Mode.Learn, "");
+            yield return Step("Learn->Relax", lm, env, pt, eye, room, cafe, () => lm.StartRelaxMode(), LessonManager.Mode.Relax, "");
+            yield return Step("Relax->Learn", lm, env, pt, eye, room, cafe, () => lm.StartLearnMode(), LessonManager.Mode.Learn, "");
+            yield return Step("Learn->Start (exit)", lm, env, pt, eye, room, cafe, () => lm.GoStart(), LessonManager.Mode.Start, "");
 
             // room budgets (shell + v3.6 props, excluding teacher and UI)
             var (cTris, cDraws) = Budget(cafe);
@@ -130,7 +136,7 @@ namespace SignSight.DevTools
 
             Check("no errors during the matrix", _errors == 0, $"{_errors} errors");
             Directory.CreateDirectory(Path.Combine(Application.dataPath, ScreenDir));
-            File.WriteAllText(Path.GetFullPath(Path.Combine(Application.dataPath, ScreenDir, "v38-mode-matrix.txt")), Log + $"Errors during the check: {_errors}\n");
+            File.WriteAllText(Path.GetFullPath(Path.Combine(Application.dataPath, ScreenDir, "v39-mode-matrix.txt")), Log + $"Errors during the check: {_errors}\n");
             Done = true;
         }
     }

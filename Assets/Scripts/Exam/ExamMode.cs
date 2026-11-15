@@ -70,7 +70,7 @@ namespace SignSight.Exam
         [SerializeField] private GameObject cup;
 
         /// <summary>Teacher position while the exam runs (LearnUI local): behind the counter.</summary>
-        public static readonly Vector3 TeacherCafePosition = new Vector3(-0.30f, -1.67f, 1.60f);
+        public static readonly Vector3 TeacherCafePosition = new Vector3(-0.30f, -1.67f, 1.85f); // v3.9: feet behind the counter (z > 1.375)
 
         public State Current { get; private set; } = State.Off;
         public int TurnIndex { get; private set; }

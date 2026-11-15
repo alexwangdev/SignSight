@@ -1,0 +1,16 @@
+CHECK boot: Start shows the virtual classroom (passthrough off, classroom props on): PASS (passthrough False, room Classroom, bg a=1.0, classroom True)
+CHECK Start->Learn: passthrough off, room virtual: PASS (mode Learn, passthrough False, bg a=1.0, classroom True, café False, fade-at-0.1s False, no-hard-cut True)
+CHECK Learn->Start: passthrough off, room virtual: PASS (mode Start, passthrough False, bg a=1.0, classroom True, café False, fade-at-0.1s False, no-hard-cut True)
+CHECK Start->Exam: passthrough off, room virtual: PASS (mode Exam, passthrough False, bg a=1.0, classroom False, café True, fade-at-0.1s True, no-hard-cut True)
+CHECK Exam->Start: passthrough off, room virtual: PASS (mode Start, passthrough False, bg a=1.0, classroom True, café False, fade-at-0.1s True, no-hard-cut True)
+CHECK Start->Explore: passthrough on, room real: PASS (mode Explore, passthrough True, bg a=0.0, classroom False, café False, fade-at-0.1s True, no-hard-cut True)
+CHECK Explore->Learn: passthrough off, room virtual: PASS (mode Learn, passthrough False, bg a=1.0, classroom True, café False, fade-at-0.1s True, no-hard-cut True)
+CHECK Learn->Relax: passthrough on, room real: PASS (mode Relax, passthrough True, bg a=0.0, classroom False, café False, fade-at-0.1s True, no-hard-cut True)
+CHECK Relax->Learn: passthrough off, room virtual: PASS (mode Learn, passthrough False, bg a=1.0, classroom True, café False, fade-at-0.1s True, no-hard-cut True)
+CHECK Learn->Start (exit): passthrough off, room virtual: PASS (mode Start, passthrough False, bg a=1.0, classroom True, café False, fade-at-0.1s False, no-hard-cut True)
+BUDGET café room: 1584 tris, 13 draw calls (shell 60 tris / 5 draws)
+BUDGET classroom room: 1616 tris, 13 draw calls (shell 60 tris / 5 draws)
+CHECK budget: shell < 2k tris and < 6 draw calls (both rooms): PASS
+CHECK budget: whole room < 22k tris and < 26 draw calls (both rooms): PASS
+CHECK no errors during the matrix: PASS (0 errors)
+Errors during the check: 0

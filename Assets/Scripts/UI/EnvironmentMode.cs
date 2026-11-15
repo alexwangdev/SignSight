@@ -4,10 +4,14 @@ using UnityEngine;
 
 namespace SignSight.UI
 {
+    /// <summary>Which room the learner sees: the real room (passthrough on), the virtual classroom or the virtual café.</summary>
+    public enum Room { None, Classroom, Cafe }
+
     /// <summary>
-    /// v3.8 Task 0: passthrough per mode. Learn and Exam are virtual rooms (passthrough off, solid warm background);
-    /// Start, Explore and Relax keep the real room (passthrough on). Hooked to LessonManager.ModeChanged only.
-    /// Never hard-cuts: a black fade (0.3 s out, switch at black, 0.3 s in) on the learner's eye camera.
+    /// v3.8 Task 0, v3.9 Task B: the room per mode. Start and Learn show the virtual classroom, Exam the virtual café,
+    /// Explore and Relax the real room (passthrough on). Hooked to LessonManager.ModeChanged only.
+    /// A fade (0.3 s out, switch at black, 0.3 s in) runs whenever the ROOM changes, never when it stays the same:
+    /// Start ↔ Learn and Learn → Start do not fade; Start → Exam (classroom → café) does, although passthrough stays off.
     /// </summary>
     public class EnvironmentMode : MonoBehaviour
     {
@@ -20,13 +24,27 @@ namespace SignSight.UI
         private Camera _eye;
         private Transform _fade;
         private Material _fadeMat;
-        private bool _virtual;
+        private Room _room = Room.None;
         private Coroutine _run;
 
+        /// <summary>The room now on screen.</summary>
+        public Room CurrentRoom => _room;
         /// <summary>True while a virtual room is shown (passthrough off).</summary>
-        public bool VirtualRoom => _virtual;
-        /// <summary>Set by the checks; false only while a fade is running.</summary>
+        public bool VirtualRoom => _room != Room.None;
+        /// <summary>True only while a fade is running.</summary>
         public bool Fading { get; private set; }
+
+        /// <summary>The room a mode shows.</summary>
+        public static Room RoomFor(LessonManager.Mode m)
+        {
+            switch (m)
+            {
+                case LessonManager.Mode.Start:
+                case LessonManager.Mode.Learn: return Room.Classroom;
+                case LessonManager.Mode.Exam: return Room.Cafe;
+                default: return Room.None; // Explore, Relax
+            }
+        }
 
         private void Awake()
         {
@@ -34,8 +52,15 @@ namespace SignSight.UI
             _passthrough = FindFirstObjectByType<OVRPassthroughLayer>();
             var anchor = GameObject.Find("CenterEyeAnchor");
             _eye = anchor != null ? anchor.GetComponent<Camera>() : Camera.main;
-            _virtual = false;
             BuildFade();
+        }
+
+        private void Start()
+        {
+            // the boot screen is Start: show its room straight away, without a fade
+            if (_lessons == null) return;
+            _room = RoomFor(_lessons.CurrentMode);
+            ApplyRoom(_room);
         }
 
         private void OnEnable()
@@ -55,14 +80,11 @@ namespace SignSight.UI
 
         private void OnModeChanged(LessonManager.Mode m)
         {
-            bool wantVirtual = Wants(m);
-            if (wantVirtual == _virtual && _run == null) return; // Start/Explore/Relax etc: nothing to change
+            // same room before and after (e.g. Start → Learn, Learn → Start): nothing changes on screen, so no fade
+            if (RoomFor(m) == _room && _run == null) return;
             if (_run != null) StopCoroutine(_run);
             _run = StartCoroutine(Transition());
         }
-
-        /// <summary>Learn and Exam are virtual rooms; everything else shows the real room.</summary>
-        public static bool Wants(LessonManager.Mode m) => m == LessonManager.Mode.Learn || m == LessonManager.Mode.Exam;
 
         private IEnumerator Transition()
         {
@@ -71,19 +93,23 @@ namespace SignSight.UI
             yield return Fade(0f, 1f);
 
             // at black: switch to whatever the current mode needs (read again in case the mode moved on)
-            bool wantVirtual = Wants(_lessons.CurrentMode);
-            if (_passthrough != null) _passthrough.enabled = !wantVirtual;
-            if (_eye != null)
-            {
-                _eye.clearFlags = CameraClearFlags.SolidColor;
-                _eye.backgroundColor = wantVirtual ? RoomBackground : PassthroughBackground;
-            }
-            _virtual = wantVirtual;
+            _room = RoomFor(_lessons.CurrentMode);
+            ApplyRoom(_room);
 
             yield return Fade(1f, 0f);
             _fade.gameObject.SetActive(false);
             Fading = false;
             _run = null;
+        }
+
+        private void ApplyRoom(Room r)
+        {
+            if (_passthrough != null) _passthrough.enabled = r == Room.None;
+            if (_eye != null)
+            {
+                _eye.clearFlags = CameraClearFlags.SolidColor;
+                _eye.backgroundColor = r == Room.None ? PassthroughBackground : RoomBackground;
+            }
         }
 
         private IEnumerator Fade(float from, float to)

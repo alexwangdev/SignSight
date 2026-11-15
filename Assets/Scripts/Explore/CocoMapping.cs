@@ -21,7 +21,7 @@ namespace SignSight.Explore
             new Entry { Label = "bottle", Intent = "WATER", Word = "WATER", Meaning = "Bottle — WATER" },
         };
 
-        public const string NotInWords = "Not in my 50 words yet";
+        public const string NotInWords = "Not in my 62 words yet";
 
         /// <summary>Mapped entry, or an entry with Intent = null (show NotInWords, no teacher demo).</summary>
         public static Entry Lookup(string label)

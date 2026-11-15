@@ -72,9 +72,9 @@ namespace SignSight.EditorTools
         public static readonly Vector3 TeacherDeskSize = new Vector3(1.10f, 0.75f, 0.55f);
         public static readonly Vector3 BooksPos = new Vector3(-1.15f, -0.92f, 2.05f);   // on the teacher desk
         public const float BooksWidth = 0.30f;
-        public static readonly Vector3[] StudentDeskPos = { new Vector3(1.55f, -1.67f, 2.70f), new Vector3(2.20f, -1.67f, 2.70f) };
+        public static readonly Vector3[] StudentDeskPos = { new Vector3(1.70f, -1.67f, 2.70f), new Vector3(2.35f, -1.67f, 2.70f) }; // v3.9: 0.15 m right, clear of the Final Exam card
         public static readonly Vector3 StudentDeskSize = new Vector3(0.60f, 0.72f, 0.45f);
-        public static readonly Vector3[] StudentChairPos = { new Vector3(1.55f, -1.67f, 2.35f), new Vector3(2.20f, -1.67f, 2.35f) };
+        public static readonly Vector3[] StudentChairPos = { new Vector3(1.70f, -1.67f, 2.35f), new Vector3(2.35f, -1.67f, 2.35f) };
         public static readonly Vector3 ShelfPos = new Vector3(-1.55f, -0.45f, 2.30f);
         public const float ShelfWidth = 0.70f;
         public static readonly Vector3 BlackboardPos = new Vector3(-2.05f, 0.70f, 2.60f); // above the Tutor panel
@@ -123,7 +123,6 @@ namespace SignSight.EditorTools
                 counter.transform.SetParent(cafe, false);
                 counter.transform.localPosition = CounterPos;
                 counter.transform.localScale = CounterSize;
-                counter.GetComponent<Renderer>().sharedMaterial = Mat("CafeCounter", new Color(0.36f, 0.25f, 0.17f));
 
                 var board = GameObject.CreatePrimitive(PrimitiveType.Quad);
                 board.name = "MenuBoard";
@@ -492,7 +491,7 @@ namespace SignSight.EditorTools
         public const float RoomWallTop = 1.60f;
         public static readonly Color CafeWall = new Color(0.86f, 0.74f, 0.58f);
         public static readonly Color CafeFloor = new Color(0.45f, 0.30f, 0.20f);
-        public static readonly Color ClassWall = new Color(0.84f, 0.88f, 0.76f);
+        public static readonly Color ClassWall = new Color(0.56f, 0.62f, 0.52f); // v3.9: mid-tone, so the white card text reads on the wall
         public static readonly Color ClassFloor = new Color(0.60f, 0.45f, 0.32f);
 
         /// <summary>

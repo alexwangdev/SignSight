@@ -8,7 +8,7 @@ namespace SignSight.Explore
     /// <summary>
     /// Explore mode (v3.3 Task A): point at an object with the index finger (other fingers curled), hold 0.6 s on it,
     /// see its English word, and the teacher shows its sign — the same Demonstrate() as in Learn mode. Teaching only:
-    /// no score, no stars, no Tutor, no "wrong". Objects with no template show "Not in my 50 words yet" and the teacher
+    /// no score, no stars, no Tutor, no "wrong". Objects with no template show "Not in my 62 words yet" and the teacher
     /// does nothing. The hand data comes from the existing XRHandsProvider; nothing reads the learner's face.
     /// </summary>
     public class ExploreMode : MonoBehaviour
@@ -242,7 +242,7 @@ namespace SignSight.Explore
                 Current = State.Demonstrating;
                 teacher.Demonstrate(SelectedTemplate);
             }
-            else Current = State.Shown; // not one of the 50 words: the word and "Not in my 50 words yet", no demo
+            else Current = State.Shown; // not one of the 62 words: the word and "Not in my 62 words yet", no demo
             Changed?.Invoke();
         }
 

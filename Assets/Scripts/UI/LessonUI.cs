@@ -271,8 +271,9 @@ namespace SignSight.UI
             }
             bool start = lessons.CurrentMode == LessonManager.Mode.Start;
             // v3.6: the classroom (teacher desk, books, shelf, blackboard, two student desks) belongs to Learn only.
+            // v3.9: and to Start, which shows the same virtual classroom.
             if (classroomProps != null)
-                classroomProps.SetActive(lessons.CurrentMode == LessonManager.Mode.Learn && phase != LessonManager.Phase.Loading);
+                classroomProps.SetActive((lessons.CurrentMode == LessonManager.Mode.Learn || start) && phase != LessonManager.Phase.Loading);
             if (startCards != null) startCards.SetActive(start && phase != LessonManager.Phase.Loading);
             if (wordCard != null)
             {
