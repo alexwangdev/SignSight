@@ -17,14 +17,14 @@ namespace SignSight.DevTools
         public bool Done { get; private set; }
         private const int W = 900, H = 945;
 
-        public static VisualShots Begin(string[] words, string folder, bool allMoments)
+        public static VisualShots Begin(string[] words, string folder, bool allMoments, string prefix = "v312b")
         {
             var c = new GameObject("VisualShots").AddComponent<VisualShots>();
-            c.StartCoroutine(c.Run(words, folder, allMoments));
+            c.StartCoroutine(c.Run(words, folder, allMoments, prefix));
             return c;
         }
 
-        private IEnumerator Run(string[] words, string folder, bool allMoments)
+        private IEnumerator Run(string[] words, string folder, bool allMoments, string prefix)
         {
             var lm = FindFirstObjectByType<LessonManager>();
             while (lm.Current == LessonManager.Phase.Loading) yield return null;
@@ -50,7 +50,7 @@ namespace SignSight.DevTools
                 {
                     while (Time.time - t0 < when) yield return null;
                     yield return new WaitForEndOfFrame();
-                    Save(eye, Path.Combine(folder, $"v312b-{word}-{name}.png"));
+                    Save(eye, Path.Combine(folder, $"{prefix}-{word}-{name}.png"));
                 }
                 while (teacher.IsDemonstrating && Time.time - t0 < 14f) yield return null;
                 yield return new WaitForSecondsRealtime(0.4f);

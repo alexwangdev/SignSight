@@ -13537,6 +13537,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3362038296222486589}
     - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
+      propertyPath: armFixPolePrior
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
       propertyPath: wristTwistMaxDeg
       value: 15
       objectReference: {fileID: 0}

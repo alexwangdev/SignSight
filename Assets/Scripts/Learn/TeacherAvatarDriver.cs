@@ -247,6 +247,7 @@ namespace SignSight.Learn
             if (!_ready || template == null) return;
             if (_routine != null) StopCoroutine(_routine);
             WristClampedMaxDeg = 0f;
+            SetWord(template);
             _routine = StartCoroutine(Run(template));
         }
 
@@ -261,12 +262,54 @@ namespace SignSight.Learn
             if (_routine != null) StopCoroutine(_routine);
             _routine = null;
             IsDemonstrating = false;
+            SetWord(template);
             var plan = Plan(template);
             float m = Mathf.Clamp01(u);
             ApplyMovement(template, plan, m, 1f);
             float dur = Mathf.Max(0.01f, template.movement.durationSec);
             ApplyHead(template, u < 0f ? 0f : m * dur / Mathf.Max(dur, minHeadSeconds));
             if (face != null) face.SetExpression(template.face, immediate: true);
+        }
+
+        /// <summary>Editor checks: the settled hold pose (u = 1) of a sign and its wrist deviation report.</summary>
+        public string MeasureHold(SignTemplate template, float u = 1f, float w = 1f)
+        {
+            PoseAt(template, 1f);
+            var plan = Plan(template);
+            // the elbow pole and the forearm roll are damped: repeat the end pose until they have settled
+            for (int i = 0; i < 400; i++) ApplyMovement(template, plan, u, w);
+            RecordHold();
+            return HoldReport;
+        }
+
+        [Header("v3.14 arm fixes (YES, BAD, HOW only; the other words keep the v3.13 arm)")]
+        [Tooltip("Words that use the v3.14 arm fixes: roll-aware swivel, carried end finger direction, mirrored left hand.")]
+        [SerializeField] private string[] armFixWords = { "YES", "BAD", "HOW" };
+        [Tooltip("Swivel objective for those words. 0 = v3.11 (total wrist deviation, before the forearm roll). " +
+                 "1 = wrist swing left after the forearm roll has taken the twist. 2 = same, pitch and yaw each as a share of its range.")]
+        [SerializeField] private int armFixObjective = 1;
+        [Tooltip("Where the right hand's fingers end (teacher space) when the shortest turn to the end palm would leave them pointing back at the signer.")]
+        [SerializeField] private Vector3 endFingerTarget = new Vector3(-1f, 0f, 0.6f);
+        [Tooltip("Elbow prior for those words: cost in wrist degrees per degree the elbow turns away from the down-and-out / back-and-out pole. Keeps the elbow out of the body and below the head while the hand travels.")]
+        [SerializeField] private float armFixPolePrior = 0.3f;
+        private bool _fix;
+        private float _blendW = 1f; // weight of the sign pose over the rest pose in the frame being posed (1 = the sign itself)
+
+        /// <summary>
+        /// v3.14: while the hand travels between rest and the sign, it first follows the forearm and only turns into the
+        /// sign's orientation over the last part of the travel. Half-way between two unrelated orientations there is no arm
+        /// that carries the hand, and the wrist took the whole difference.
+        /// </summary>
+        private float WristWeight() => _blendW >= 1f ? 1f : Smooth((_blendW - 0.4f) / 0.6f);
+
+        private void SetWord(SignTemplate t)
+        {
+            _fix = false;
+            if (t == null || string.IsNullOrEmpty(t.intent) || armFixWords == null) return;
+            string w = t.intent;
+            int hash = w.IndexOf('#');
+            if (hash >= 0) w = w.Substring(0, hash);
+            foreach (var x in armFixWords) if (x == w) { _fix = true; break; }
         }
 
         /// <summary>Back to the rest pose, neutral face.</summary>
@@ -418,6 +461,8 @@ namespace SignSight.Learn
         {
             public HandPose RightStart, LeftStart;
             public bool LeftActive;
+            public float EndYaw;      // v3.14: turn of the right hand about the end palm normal over the movement (degrees)
+            public Vector3 EndAxis;
         }
 
         /// <summary>Hand pose from a finger direction and palm normal (teacher space).</summary>
@@ -554,6 +599,28 @@ namespace SignSight.Learn
                 : AnchorPoint(t.anchor, t.anchorOffset);
             r.Pos = PlaceContact(_right, r, t.contact, rTarget);
             plan.RightStart = r;
+            if (_fix && plan.LeftActive && t.leftAnchor == "mirror")
+            {
+                // v3.14: "mirror" = the left hand is the mirror image of the right hand, whatever contact point each one names
+                plan.LeftStart.Pos = Mirror(r.Pos - _eyes) + _eyes;
+            }
+            if (_fix && t.movement.type == MovementTypes.Stroke && t.endPalm.sqrMagnitude > 1e-4f && t.palm.sqrMagnitude > 1e-4f)
+            {
+                // v3.14: the template fixes the END PALM, not the end finger direction. The shortest turn from the start
+                // palm to the end palm can leave the fingers pointing back at the signer, which no arm can carry.
+                // Then the hand also turns about the end palm normal, so the fingers end pointing away and across the body.
+                Vector3 n = t.endPalm.normalized;
+                Vector3 fd = FingerDirOf(Quaternion.FromToRotation(t.palm, t.endPalm) * r.BoneRot, _right);
+                if (fd.z < -0.5f)
+                {
+                    Vector3 from = Vector3.ProjectOnPlane(fd, n), to = Vector3.ProjectOnPlane(new Vector3(endFingerTarget.x * _right.Side, endFingerTarget.y, endFingerTarget.z), n);
+                    if (from.sqrMagnitude > 1e-6f && to.sqrMagnitude > 1e-6f)
+                    {
+                        plan.EndYaw = Vector3.SignedAngle(from, to, n);
+                        plan.EndAxis = n;
+                    }
+                }
+            }
             if (!plan.LeftActive) plan.LeftStart = RestPose(_left);
             return plan;
         }
@@ -619,8 +686,10 @@ namespace SignSight.Learn
         private void ApplyMovement(SignTemplate t, SignPlan plan, float u, float w)
         {
             Poses(t, plan, u, out var r, out var l);
+            _blendW = w;
             ApplyArm(_right, Blend(RestPose(_right), r, w));
             ApplyArm(_left, plan.LeftActive ? Blend(RestPose(_left), l, w) : RestPose(_left));
+            _blendW = 1f;
         }
 
         private void Poses(SignTemplate t, SignPlan plan, float u, out HandPose r, out HandPose l)
@@ -631,6 +700,7 @@ namespace SignSight.Learn
             var s = SignMotion.Sample(t, u, FingerDirOf(r.BoneRot, _right));
             r.Pos += s.RightOffset;
             r.BoneRot = s.RightRotation * r.BoneRot;
+            if (plan.EndYaw != 0f) r.BoneRot = Quaternion.AngleAxis(plan.EndYaw * Smooth(u), plan.EndAxis) * r.BoneRot;
             if (s.RightCurl != null) r.Curl = s.RightCurl;
             if (!plan.LeftActive) return;
             l.Pos += s.LeftOffset;
@@ -694,7 +764,9 @@ namespace SignSight.Learn
             a.Hand.localRotation = a.HandRest;
             Quaternion desired = transform.rotation * p.BoneRot;
             SolveTwoBone(a, transform.TransformPoint(p.Pos), desired);
-            a.Hand.rotation = ClampWrist(a, desired);
+            Quaternion hand = ClampWrist(a, desired);
+            if (_fix && _blendW < 1f) hand = Quaternion.Slerp(a.Lower.rotation * a.HandRest, hand, WristWeight());
+            a.Hand.rotation = hand;
 
             for (int f = 0; f < 5; f++)
             {
@@ -845,7 +917,9 @@ namespace SignSight.Learn
                 {
                     Vector3 cand = Quaternion.AngleAxis(k * 360f / swivelSteps, dir) * pole;
                     ApplyTwoBone(arm, a, dir, d, cosA, sinA, lenA, cand);
-                    float err = Quaternion.Angle(arm.Lower.rotation * arm.HandRest, desired);
+                    float err = _fix && armFixObjective > 0
+                        ? WristWeight() * SwingAfterRoll(arm, desired) + armFixPolePrior * Vector3.Angle(cand, pole)
+                        : Quaternion.Angle(arm.Lower.rotation * arm.HandRest, desired);
                     if (err < bestErr) { bestErr = err; best = cand; }
                 }
                 // damp the winner, so a change of winner moves the elbow instead of snapping it
@@ -874,6 +948,33 @@ namespace SignSight.Learn
                 else arm.Roll = Mathf.Lerp(arm.Roll, bestRoll, 1f - Mathf.Exp(-poleDamping * Time.deltaTime));
                 arm.Lower.rotation = Quaternion.AngleAxis(arm.Roll, axis) * baseRot;
             }
+        }
+
+        /// <summary>
+        /// v3.14: what the wrist still has to bend once the forearm roll (up to rollLimitDeg) has taken the twist. The v3.11
+        /// objective counted the twist against a swivel although the roll search removes it afterwards, so it picked elbows
+        /// that traded twist for a sideways wrist bend.
+        /// </summary>
+        private float SwingAfterRoll(Arm arm, Quaternion desired)
+        {
+            Quaternion neutral = arm.Lower.rotation * arm.HandRest;
+            Vector3 f = (arm.Hand.position - arm.Lower.position).normalized;
+            Quaternion d = desired * Quaternion.Inverse(neutral);
+            if (d.w < 0f) d = new Quaternion(-d.x, -d.y, -d.z, -d.w);
+            float tw = 2f * Mathf.Atan2(Vector3.Dot(new Vector3(d.x, d.y, d.z), f), d.w) * Mathf.Rad2Deg;
+            float lim = forearmRoll ? rollLimitDeg : 0f;
+            Quaternion rolled = Quaternion.AngleAxis(Mathf.Clamp(tw, -lim, lim), f) * neutral;
+            if (armFixObjective < 2) return Quaternion.Angle(rolled, desired);
+            Quaternion inv = Quaternion.Inverse(arm.FrameToBone);
+            Vector3 pn = rolled * inv * Vector3.up;
+            Vector3 lat = Vector3.Cross(f, pn).normalized;
+            Vector3 fd = desired * inv * Vector3.forward;
+            float pitch = Mathf.Atan2(Vector3.Dot(fd, pn), Vector3.Dot(fd, f)) * Mathf.Rad2Deg;
+            float yaw = Mathf.Atan2(Vector3.Dot(fd, lat), Vector3.Dot(fd, f)) * Mathf.Rad2Deg;
+            float a = pitch / wristPitchMaxDeg, b = yaw / wristYawMaxDeg;
+            // the residual twist beyond the roll limit still counts, as plain degrees over a pitch range
+            float rest = Quaternion.Angle(rolled, desired) / wristPitchMaxDeg;
+            return Mathf.Sqrt(a * a + b * b) + 0.25f * rest;
         }
 
         [Tooltip("v3.11: search the forearm's roll (pronation / supination) so the palm can turn without the wrist doing it.")]

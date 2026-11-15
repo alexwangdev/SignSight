@@ -1,0 +1,4 @@
+YES hold: R pitch -57.8 yaw -13.3 twist 26.2 total 63.5 | L pitch -1.0 yaw -3.4 twist 0.0 total 3.5
+BAD hold: R pitch 13.7 yaw 15.0 twist 18.2 total 27.0 | L pitch -1.0 yaw -3.4 twist 0.0 total 3.5
+HOW hold: R pitch 15.6 yaw 32.3 twist 1.9 total 34.2 | L pitch 15.6 yaw -32.3 twist 1.9 total 34.2
+HELLO hold: R pitch 12.6 yaw 43.3 twist 1.7 total 43.8 | L pitch 3.4 yaw 0.9 twist 0.0 total 3.5
