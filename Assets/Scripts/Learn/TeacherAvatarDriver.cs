@@ -297,6 +297,8 @@ namespace SignSight.Learn
         [Tooltip("v3.15: the swivel objective and the travel rule apply to every word, except the words listed in armFixRevertWords (kept on the v3.13 arm because the new one measured worse for them).")]
         [SerializeField] private bool armFixAllWords = true;
         [SerializeField] private string[] armFixRevertWords = { }; // v3.16: empty. The v3.15 list was chosen by wrist bend alone, which rewarded impossible elbows
+        [Tooltip("v3.17: when the wrists are crossed, the right wrist sits this far in front of the left one (metres), so the forearms do not pass through each other. 0 = off.")]
+        [SerializeField] private float crossedHandsGap = 0.05f;
         private bool _fix;        // v3.14 swivel objective at the sign itself (and the travel rule)
         private bool _travel;     // v3.15: travel rule only (every word): between rest and the sign the hand follows the forearm
         private bool _fixLayout;  // v3.14 layout rules (mirrored left hand, carried end finger direction): armFixWords only
@@ -702,6 +704,13 @@ namespace SignSight.Learn
                 ? LeftHandPoint(plan.LeftStart, t.anchor)
                 : AnchorPoint(t.anchor, t.anchorOffset);
             r.Pos = PlaceContact(_right, r, t.contact, rTarget);
+            if (plan.LeftActive && crossedHandsGap > 0f && r.Pos.x < plan.LeftStart.Pos.x - 0.02f
+                && Mathf.Abs(r.Pos.y - plan.LeftStart.Pos.y) < 0.08f && Mathf.Abs(r.Pos.z - plan.LeftStart.Pos.z) < crossedHandsGap)
+            {
+                // v3.17: the wrists are crossed (right wrist on the left side) at the same depth, so the two forearms pass
+                // through each other. The right arm goes in front, by about one forearm thickness.
+                r.Pos.z = plan.LeftStart.Pos.z + crossedHandsGap;
+            }
             plan.RightStart = r;
             if (_fixLayout && plan.LeftActive && t.leftAnchor == "mirror")
             {
