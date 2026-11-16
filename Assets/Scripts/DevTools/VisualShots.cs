@@ -52,6 +52,14 @@ namespace SignSight.DevTools
             closeGo.transform.position = tt.TransformPoint(new Vector3(0f, 1.38f, 1.3f));
             closeGo.transform.LookAt(tt.TransformPoint(new Vector3(0f, 1.38f, 0f)), tt.up);
 
+            // hold-only runs also save review sheets: 6 words per sheet (3 x 2, half size), listed in sheets/index.txt
+            string sheets = Path.Combine(folder, "sheets");
+            if (!allMoments) Directory.CreateDirectory(sheets);
+            Texture2D sheet = null;
+            int cell = 0, sheetNo = 0;
+            var index = new System.Text.StringBuilder();
+            var names = new System.Collections.Generic.List<string>();
+
             foreach (var word in words)
             {
                 var t = TemplateStore.Canonical(word);
@@ -85,6 +93,19 @@ namespace SignSight.DevTools
                                 dst[y * (W / 2) + x] = src[(2 * y) * W + 2 * x];
                         strip.SetPixels32(k * (W / 2), 0, W / 2, H / 2, dst);
                     }
+                    if (!allMoments)
+                    {
+                        if (sheet == null) { sheet = new Texture2D(3 * (W / 2), 2 * (H / 2), TextureFormat.RGB24, false); sheet.SetPixels32(new Color32[sheet.width * sheet.height]); }
+                        var src2 = tex.GetPixels32();
+                        var dst2 = new Color32[(W / 2) * (H / 2)];
+                        for (int y = 0; y < H / 2; y++)
+                            for (int x = 0; x < W / 2; x++)
+                                dst2[y * (W / 2) + x] = src2[(2 * y) * W + 2 * x];
+                        sheet.SetPixels32((cell % 3) * (W / 2), (1 - cell / 3) * (H / 2), W / 2, H / 2, dst2);
+                        names.Add(word);
+                        cell++;
+                        if (cell == 6) { FlushSheet(ref sheet, sheets, prefix, ref sheetNo, names, index); cell = 0; }
+                    }
                     Destroy(tex);
                     k++;
                 }
@@ -96,9 +117,25 @@ namespace SignSight.DevTools
                 while (teacher.IsDemonstrating && Time.time - t0 < 14f) yield return null;
                 yield return new WaitForSecondsRealtime(0.3f);
             }
+            if (!allMoments)
+            {
+                if (cell > 0) FlushSheet(ref sheet, sheets, prefix, ref sheetNo, names, index);
+                File.WriteAllText(Path.Combine(sheets, "index.txt"), index.ToString());
+            }
             Destroy(closeGo);
             Current = "";
             Done = true;
+        }
+
+        private static void FlushSheet(ref Texture2D sheet, string dir, string prefix, ref int no, System.Collections.Generic.List<string> names, System.Text.StringBuilder index)
+        {
+            no++;
+            string file = $"{prefix}-sheet-{no:00}.png";
+            File.WriteAllBytes(Path.Combine(dir, file), UnityEngine.ImageConversion.EncodeToPNG(sheet));
+            index.AppendLine(file + ": " + string.Join(", ", names) + "  (left to right, top row first)");
+            names.Clear();
+            Destroy(sheet);
+            sheet = null;
         }
 
         private static Texture2D Save(Camera cam, string path)

@@ -296,12 +296,7 @@ namespace SignSight.Learn
         [SerializeField] private float armFixPolePrior = 0.3f;
         [Tooltip("v3.15: the swivel objective and the travel rule apply to every word, except the words listed in armFixRevertWords (kept on the v3.13 arm because the new one measured worse for them).")]
         [SerializeField] private bool armFixAllWords = true;
-        [SerializeField] private string[] armFixRevertWords =
-        {
-            "THANK-YOU", "PLEASE", "SORRY", "GOOD", "GOOD-MORNING", "MAN", "GIRL", "DOCTOR", "WATER", "MILK", "EAT", "BREAD", "APPLE",
-            "HUNGRY", "HOT", "COLD", "HAPPY", "SAD", "TIRED", "SICK", "LOVE", "WANT", "WHERE", "WHEN", "WHY", "TODAY", "TOMORROW",
-            "ME", "YOU", "ONE", "TWO", "THREE", "BIG", "MORE", "FINISH", "HERE", "HOW-MUCH",
-        };
+        [SerializeField] private string[] armFixRevertWords = { }; // v3.16: empty. The v3.15 list was chosen by wrist bend alone, which rewarded impossible elbows
         private bool _fix;        // v3.14 swivel objective at the sign itself (and the travel rule)
         private bool _travel;     // v3.15: travel rule only (every word): between rest and the sign the hand follows the forearm
         private bool _fixLayout;  // v3.14 layout rules (mirrored left hand, carried end finger direction): armFixWords only
@@ -872,7 +867,7 @@ namespace SignSight.Learn
             a.Lower.localRotation = a.LowerRest;
             a.Hand.localRotation = a.HandRest;
             Quaternion desired = transform.rotation * p.BoneRot;
-            SolveTwoBone(a, transform.TransformPoint(p.Pos), desired);
+            SolveTwoBone(a, transform.TransformPoint(KeepOutOfTorso(a, p.Pos)), desired);
             Quaternion hand = ClampWrist(a, desired);
             if (_travel && _blendW < 1f)
             {
@@ -1044,7 +1039,6 @@ namespace SignSight.Learn
                     if (_fix && armFixObjective > 0)
                     {
                         err = WristWeight() * SwingAfterRoll(arm, desired) + armFixPolePrior * Vector3.Angle(cand, pole);
-                        if (ElbowInBody(arm)) err += 1000f; // v3.15: never through the chest
                     }
                     else
                     {
@@ -1055,9 +1049,13 @@ namespace SignSight.Learn
                             // v3.15: on the way between rest and the sign the elbow keeps to its pole and out of the body;
                             // the v3.11 objective takes over as the hand arrives, so the sign's own pose is unchanged
                             float ww = WristWeight();
-                            err = ww * err + (1f - ww) * (Vector3.Angle(cand, pole) + (ElbowInBody(arm) ? 1000f : 0f));
+                            err = ww * err + (1f - ww) * Vector3.Angle(cand, pole);
                         }
                     }
+                    // v3.16: where the shoulder can put the elbow comes first, for every word and at every moment; the wrist
+                    // bend is only compared between elbows a person could have. (Before, the lowest wrist bend won even
+                    // with the elbow behind the head or inside the chest.)
+                    err += elbowPenaltyPerMetre * ElbowViolation(arm);
                     if (err < bestErr) { bestErr = err; best = cand; }
                 }
                 // damp the winner, so a change of winner moves the elbow instead of snapping it
@@ -1088,18 +1086,56 @@ namespace SignSight.Learn
             }
         }
 
-        /// <summary>v3.15: the elbow is inside the torso (between the shoulders, behind the chest front, below the shoulder line).</summary>
-        [Tooltip("v3.15: how far the chest front is ahead of the shoulder joints, plus half an arm (metres).")]
+        [Header("v3.16 elbow limits (teacher space, metres): where a shoulder can put the elbow")]
+        [Tooltip("How far the chest front is ahead of the shoulder joints, plus half an arm.")]
         [SerializeField] private float torsoFrontFromShoulder = 0.14f;
-        [Tooltip("v3.15: the elbow stays at least this far out from the mid-line, on its own side (metres). The shoulder joint is at about 0.21.")]
+        [Tooltip("The elbow stays at least this far out from the mid-line, on its own side. The shoulder joint is at about 0.21.")]
         [SerializeField] private float minElbowLateral = 0.11f;
-        private bool ElbowInBody(Arm arm)
+        [Tooltip("The elbow rises at most this far above the shoulder joint (not beside or behind the head).")]
+        [SerializeField] private float maxElbowAboveShoulder = 0.05f;
+        [Tooltip("The elbow goes at most this far behind the shoulder joint.")]
+        [SerializeField] private float maxElbowBehindShoulder = 0.12f;
+        [Tooltip("Cost of breaking an elbow limit, in wrist degrees per metre. 3000 = 30 degrees per centimetre: in effect a hard limit, but graded, so the nearest allowed elbow wins when no candidate is inside.")]
+        [SerializeField] private float elbowPenaltyPerMetre = 3000f;
+
+        [Tooltip("v3.16: the wrist stays at least this far in front of the eyes plane when it is below the neck and between the shoulders (the chest surface; the 'chest' anchor is at 0.08).")]
+        [SerializeField] private float chestFrontFromEyes = 0.08f;
+
+        /// <summary>
+        /// v3.16: a wrist target inside the torso is moved straight forward to the chest surface. Some signs stroke down from
+        /// the throat along a line that is inside this avatar's chest; the hand then disappeared into the body.
+        /// </summary>
+        private Vector3 KeepOutOfTorso(Arm a, Vector3 pos)
+        {
+            float halfWidth = Mathf.Abs(a.Shoulder.x) - 0.03f;
+            float front = _eyes.z + chestFrontFromEyes;
+            if (pos.z >= front || Mathf.Abs(pos.x) >= halfWidth) return pos;
+            // full push below the shoulder line, fading out over the 8 cm above it (the neck is further back)
+            float k = Mathf.Clamp01((a.Shoulder.y + 0.04f - pos.y) / 0.08f);
+            pos.z = Mathf.Lerp(pos.z, front, k);
+            return pos;
+        }
+
+        /// <summary>
+        /// v3.16: how far (metres) the elbow is outside what a shoulder allows: crossed in toward the mid-line, inside the
+        /// torso, above the shoulder line, or behind the body. 0 = a place a person's elbow can be.
+        /// </summary>
+        private float ElbowViolation(Arm arm)
         {
             Vector3 e = Local(arm.Lower.position);
+            float v = 0f;
+            float lateral = e.x * arm.Side;
+            if (lateral < minElbowLateral) v += minElbowLateral - lateral;
+            float up = e.y - (arm.Shoulder.y + maxElbowAboveShoulder);
+            if (up > 0f) v += up;
+            float back = (arm.Shoulder.z - maxElbowBehindShoulder) - e.z;
+            if (back > 0f) v += back;
+            // torso box: between the shoulders, behind the chest front, below the shoulder line
             float halfWidth = Mathf.Abs(arm.Shoulder.x) - 0.03f;
             float front = arm.Shoulder.z + torsoFrontFromShoulder;
-            if (e.x * arm.Side < minElbowLateral) return true; // the elbow has crossed in toward the mid-line (chest, neck, face)
-            return Mathf.Abs(e.x) < halfWidth && e.z < front && e.y < arm.Shoulder.y + 0.05f;
+            if (Mathf.Abs(e.x) < halfWidth && e.z < front && e.y < arm.Shoulder.y + 0.05f)
+                v += Mathf.Min(halfWidth - Mathf.Abs(e.x), front - e.z); // the shortest way out
+            return v;
         }
 
         /// <summary>

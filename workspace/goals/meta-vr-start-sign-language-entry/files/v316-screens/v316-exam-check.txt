@@ -1,0 +1,34 @@
+CHECK Start card 'Final Exam' -> Exam mode, turn 1, café props on, teacher behind the counter: PASS (Exam, ClerkSigning, teacher (-0.30, -1.67, 1.85))
+CHECK no top bar / Tutor panel in the exam: PASS
+CHECK happy path: 7 first-try answers -> 70 / 70, 3 stars, end screen: PASS (70 / 70, 3 stars, 36 s, card 'Café Exam done — 70 / 70')
+CHECK the answer word is not shown before HINT (turns 2-6): PASS
+CHECK cup on the counter after the drink order: PASS
+  1. HELLO: 1st try +10
+  2. WANT: 1st try +10
+  3. COFFEE/MILK/WATER: 1st try COFFEE +10
+  4. PLEASE: 1st try +10
+  5. HOT/COLD: 1st try HOT +10
+  6. ONE/TWO/THREE: 1st try ONE +10
+  7. THANK-YOU: 1st try +10
+CHECK RETRY EXAM -> turn 1, fresh total: PASS
+CHECK wrong attempt shows a 'Looks more like' line: PASS (Looks more like GOODBYE — try again)
+CHECK two wrong tries -> 0, the clerk shows the sign: PASS (ClerkShows, shown COFFEE)
+CHECK HINT shows the answer on the card: PASS (Your turn: Be polite | Turn 4 of 7   15 pts | Hint: PLEASE (this turn max +5))
+CHECK 10 s without a recognition -> 0, the clerk shows the sign: PASS (after 10.0 s, shown HOT)
+CHECK realistic path: total matches the arithmetic (10+5+0+5+0+10+10 = 40) and stars = ScoreManager.Stars(40): PASS (40, 1 stars)
+CHECK breakdown: second try, missed, hinted, timed out listed correctly: PASS
+  1. HELLO: 1st try +10
+  2. WANT: 2nd try +5
+  3. COFFEE/MILK/WATER: missed · clerk showed COFFEE
+  4. PLEASE: 1st try +5 (hint)
+  5. HOT/COLD: missed (time) · clerk showed HOT
+  6. ONE/TWO/THREE: 1st try ONE +10
+  7. THANK-YOU: 1st try +10
+CHECK a sign outside the set (WATER for HOT? COLD?) is a wrong attempt with a 'Looks more like' line: PASS (Looks more like WATER — try again)
+CHECK choice turns: WATER (drink), COLD, THREE accepted with the same points as COFFEE / HOT / ONE: PASS (WATER +10, COLD +5 (second try), THREE +10)
+CHECK choice turns: MILK, HOT, TWO first try +10 each: PASS
+CHECK MENU -> Start; teacher back at his place; café props hidden: PASS (Start, teacher (-0.32, -1.67, 1.50))
+CHECK Lesson 6 summary shows the FINAL EXAM button: PASS
+CHECK FINAL EXAM from the summary -> Exam mode, lesson score unchanged: PASS (Exam, lesson score 0 -> 0)
+CHECK Lesson 5 summary has no FINAL EXAM button: PASS
+Errors during the check: 0

@@ -13562,7 +13562,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
       propertyPath: armFixRevertWords.Array.size
-      value: 37
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3326879624944821943, guid: a19cda3c73919604f9d937e0f304d926, type: 3}
       propertyPath: 'armFixRevertWords.Array.data[0]'
