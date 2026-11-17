@@ -1,0 +1,6 @@
+v318-move-sheet-01.png: HELLO, YES, NO, THANK-YOU, PLEASE, SORRY, GOOD, BAD, GOODBYE, GOOD-MORNING, MOTHER, FATHER, (left to right, top row first; frame at 0.25 s, mid move to start)
+v318-move-sheet-02.png: FRIEND, BABY, MAN, WOMAN, BOY, GIRL, TEACHER, DOCTOR, WATER, MILK, EAT, DRINK, (left to right, top row first; frame at 0.25 s, mid move to start)
+v318-move-sheet-03.png: BREAD, APPLE, HUNGRY, THIRSTY, COFFEE, HOT, COLD, HELP, HAPPY, SAD, TIRED, SICK, (left to right, top row first; frame at 0.25 s, mid move to start)
+v318-move-sheet-04.png: PAIN, LOVE, LIKE, WANT, NEED, WHAT, WHERE, WHEN, WHO, WHY, HOW, TODAY, (left to right, top row first; frame at 0.25 s, mid move to start)
+v318-move-sheet-05.png: TOMORROW, GO, ME, YOU, ONE, TWO, THREE, BIG, PAY, MORE, FINISH, HERE, (left to right, top row first; frame at 0.25 s, mid move to start)
+v318-move-sheet-06.png: MONEY, HOW-MUCH, (left to right, top row first; frame at 0.25 s, mid move to start)

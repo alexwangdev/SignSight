@@ -422,8 +422,8 @@ namespace SignSight.Learn
                 float k = x / tl.ToStart;
                 w = phaseEasing > 0f ? EaseOut(k) : Smooth(k);
                 Poses(tl.T, tl.Plan, 0f, out r, out l);
-                r = Blend(RestPose(_right), r, w);
-                l = tl.Plan.LeftActive ? Blend(RestPose(_left), l, w) : RestPose(_left);
+                r = Travel(_right, r, w);
+                l = tl.Plan.LeftActive ? Travel(_left, l, w) : RestPose(_left);
                 return;
             }
             if (x < tl.TBeat) // 2) the movement, 3) the hold
@@ -459,8 +459,8 @@ namespace SignSight.Learn
             // 4) back to rest
             w = 1f - Smooth((x - tl.TReturn) / tl.Return);
             Poses(last, lastPlan, 1f, out r, out l);
-            r = Blend(RestPose(_right), r, w);
-            l = lastPlan.LeftActive ? Blend(RestPose(_left), l, w) : RestPose(_left);
+            r = Travel(_right, r, w);
+            l = lastPlan.LeftActive ? Travel(_left, l, w) : RestPose(_left);
         }
 
         /// <summary>Step 4: the pose follows its target through an exponential damp, so a phase change has no velocity jump.</summary>
@@ -800,8 +800,8 @@ namespace SignSight.Learn
         {
             Poses(t, plan, u, out var r, out var l);
             _blendW = w;
-            ApplyArm(_right, Blend(RestPose(_right), r, w));
-            ApplyArm(_left, plan.LeftActive ? Blend(RestPose(_left), l, w) : RestPose(_left));
+            ApplyArm(_right, Travel(_right, r, w));
+            ApplyArm(_left, plan.LeftActive ? Travel(_left, l, w) : RestPose(_left));
             _blendW = 1f;
         }
 
@@ -828,6 +828,39 @@ namespace SignSight.Learn
             var c = new float[5];
             for (int i = 0; i < 5; i++) c[i] = Mathf.Lerp(a[i], b[i], s);
             return c;
+        }
+
+        /// <summary>
+        /// v3.18: the pose on the way between rest and the sign. The wrist does not cut straight through: a straight line
+        /// from the hanging hand to a hand at the head passes right beside the shoulder, the arm has to fold up and the
+        /// elbow swings far out. The wrist keeps its reach from the shoulder instead (the reach blends from the rest reach
+        /// to the sign's reach), so the hand travels on an arc in front of the body.
+        /// </summary>
+        [Tooltip("v3.18: on the way between rest and the sign the wrist keeps at least this share of its reach from the shoulder (1 = a straight arm stays straight, 0 = off).")]
+        [SerializeField] private float travelReachShare = 0.65f;
+        [SerializeField] private float travelForwardLean = 0.35f;
+        [Tooltip("v3.18: how far the elbow may go behind the shoulder joint while the hand travels (metres).")]
+        [SerializeField] private float travelElbowBehindShoulder = 0.24f;
+        [Tooltip("v3.18: elbow damping while the hand travels (per second). The travel takes 0.4 s; at the hold value (8) the elbow lagged far behind.")]
+        [SerializeField] private float travelPoleDamping = 40f;
+        private float PoleDamp => _travel && _blendW < 1f ? Mathf.Lerp(travelPoleDamping, poleDamping, WristWeight()) : poleDamping;
+        [Tooltip("v3.18: how strongly the elbow hangs under the shoulder during the travel (0 = off, 1 = fully).")]
+        [SerializeField] private float travelPoleWeight = 1f;
+        private HandPose Travel(Arm a, HandPose sign, float w)
+        {
+            HandPose rest = RestPose(a);
+            HandPose p = Blend(rest, sign, w);
+            if (w <= 0f || w >= 1f) return p;
+            Vector3 d = p.Pos - a.Shoulder;
+            float reach = travelReachShare * Mathf.Lerp((rest.Pos - a.Shoulder).magnitude, (sign.Pos - a.Shoulder).magnitude, w);
+            if (d.magnitude < reach)
+            {
+                // a line that passes almost through the shoulder has no usable direction there: lean it forward
+                Vector3 dir = d.magnitude > 0.02f ? d.normalized : Vector3.forward;
+                dir = (dir + Vector3.forward * travelForwardLean * Mathf.Sin(Mathf.PI * w)).normalized;
+                p.Pos = a.Shoulder + dir * reach;
+            }
+            return p;
         }
 
         private static HandPose Blend(HandPose a, HandPose b, float w) => new HandPose
@@ -984,8 +1017,15 @@ namespace SignSight.Learn
             Vector3 hi = -transform.up + transform.right * (arm.Side * 0.4f);            // down and out
             Vector3 lo = -transform.forward * 0.8f - transform.up * 0.2f + transform.right * (arm.Side * 0.2f); // back and out
             Vector3 want = Vector3.Lerp(lo, hi, high);
+            if (_travel && _blendW < 1f && travelPoleWeight > 0f)
+            {
+                // v3.18: on the way between rest and the sign the elbow hangs under the shoulder (down, a little out and
+                // back). The hold poles above point back or out; used during the travel they swung the elbow out sideways.
+                Vector3 hang = -transform.up + transform.right * (arm.Side * 0.2f) - transform.forward * 0.15f;
+                want = Vector3.Lerp(want, hang, travelPoleWeight * (1f - WristWeight()));
+            }
             if (arm.Pole == Vector3.zero) arm.Pole = want;
-            else arm.Pole = Vector3.Lerp(arm.Pole, want, 1f - Mathf.Exp(-poleDamping * Time.deltaTime));
+            else arm.Pole = Vector3.Lerp(arm.Pole, want, 1f - Mathf.Exp(-PoleDamp * Time.deltaTime));
             Vector3 p = Vector3.ProjectOnPlane(arm.Pole, dir);
             return p.sqrMagnitude > 1e-6f ? p.normalized : Vector3.ProjectOnPlane(hi, dir).normalized;
         }
@@ -1069,7 +1109,7 @@ namespace SignSight.Learn
                 }
                 // damp the winner, so a change of winner moves the elbow instead of snapping it
                 if (arm.Chosen == Vector3.zero) arm.Chosen = best;
-                else arm.Chosen = Vector3.Lerp(arm.Chosen, best, 1f - Mathf.Exp(-poleDamping * Time.deltaTime));
+                else arm.Chosen = Vector3.Lerp(arm.Chosen, best, 1f - Mathf.Exp(-PoleDamp * Time.deltaTime));
                 Vector3 p = Vector3.ProjectOnPlane(arm.Chosen, dir);
                 pole = p.sqrMagnitude > 1e-6f ? p.normalized : Vector3.ProjectOnPlane(best, dir).normalized;
             }
@@ -1090,7 +1130,7 @@ namespace SignSight.Learn
                     if (err < bestErr) { bestErr = err; bestRoll = r; }
                 }
                 if (!arm.RollInit) { arm.Roll = bestRoll; arm.RollInit = true; }
-                else arm.Roll = Mathf.Lerp(arm.Roll, bestRoll, 1f - Mathf.Exp(-poleDamping * Time.deltaTime));
+                else arm.Roll = Mathf.Lerp(arm.Roll, bestRoll, 1f - Mathf.Exp(-PoleDamp * Time.deltaTime));
                 arm.Lower.rotation = Quaternion.AngleAxis(arm.Roll, axis) * baseRot;
             }
         }
@@ -1137,7 +1177,10 @@ namespace SignSight.Learn
             if (lateral < minElbowLateral) v += minElbowLateral - lateral;
             float up = e.y - (arm.Shoulder.y + maxElbowAboveShoulder);
             if (up > 0f) v += up;
-            float back = (arm.Shoulder.z - maxElbowBehindShoulder) - e.z;
+            // v3.18: while the hand travels the elbow may swing further back, as a hanging arm does when the forearm lifts;
+            // the tight limit returns as the hand arrives. With the tight limit all the way, the elbow was pushed out sideways.
+            float backLimit = _travel && _blendW < 1f ? Mathf.Lerp(travelElbowBehindShoulder, maxElbowBehindShoulder, WristWeight()) : maxElbowBehindShoulder;
+            float back = (arm.Shoulder.z - backLimit) - e.z;
             if (back > 0f) v += back;
             // torso box: between the shoulders, behind the chest front, below the shoulder line
             float halfWidth = Mathf.Abs(arm.Shoulder.x) - 0.03f;
