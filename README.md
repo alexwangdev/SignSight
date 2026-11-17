@@ -1,17 +1,61 @@
 # SignSight Learn
 
+![The teacher in the virtual classroom, with the six lessons](docs/images/classroom.png)
+
 Learn 62 **real ASL signs** for everyday life in mixed reality on Meta Quest 3 / 3S — greetings, people, food and
 drink, feelings and health, questions and time, and a café. A 3D teacher sitting opposite you performs each sign — handshape,
 location, movement, head and face — at normal or half speed; you copy it with your own hands within 3 seconds, and get
 scored on handshape, start location and movement. When you are wrong, ghost hands show the target next to yours,
 replay the movement at half speed, mark the fingers that are off, and say what to change.
 
+## Why this matters
+
+- **Most deaf children have hearing families.** About 9 in 10 deaf children are born to hearing parents
+  (Mitchell & Karchmer, 2004). Parents, siblings, teachers and co-workers usually have to learn sign language as
+  adults, often with nobody nearby to learn it from.
+- **Sign language is 3D, and video is flat.** A sign is a handshape, a place on the body, a movement and a facial
+  expression, all at once. From a flat video it is hard to see how deep a hand is, which way the palm faces, or which
+  finger is bent. Here the teacher sits opposite you in 3D, and you can watch the sign from your own seat at half speed.
+- **Self-study gives no feedback.** With a book or a video you cannot tell whether your own sign is right. Quest's
+  hand tracking reads your hands, scores handshape, location and movement, and shows exactly what to change, such as
+  "Index: straighten more" or "Move only the top hand".
+- **Built so a Deaf or hard-of-hearing learner can use it.** Every instruction is a caption and nothing depends on
+  sound. It is hands only, seated, with no controllers. No account and no network: the Tutor's memory stays on the
+  headset.
+- **Real signs, not a made-up alphabet drill.** All 62 words come from Lifeprint (ASL University) and are useful in
+  everyday life. The café exam puts them together in a short real conversation.
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Wrong answer: target hand vs your hand, with what to change](docs/images/feedback.png) | ![Café final exam: the teacher is the clerk](docs/images/cafe-exam.png) |
+| **Feedback.** Your hand next to the target, the fingers that are off in red, and one clear hint. | **Café Final Exam.** The teacher is the clerk; you answer each question by signing. |
+| ![Explore: point at an object to see its sign](docs/images/explore.png) | ![Finger Relax: a gentle stretch break](docs/images/finger-relax.png) |
+| **Explore.** Point at an object to see its word, and the teacher shows the sign. | **Finger Relax.** A one-minute stretch break, with no score. |
+
+The first six signs of Lesson 1 at the end pose (HELLO, YES, NO, THANK-YOU, PLEASE, SORRY):
+
+![HELLO, YES, NO, THANK-YOU, PLEASE, SORRY](docs/images/signs-lesson1.png)
+
+A sign from rest to the end pose (BOY: move, mid, hold):
+
+![BOY: move, mid, hold](docs/images/boy-move-mid-hold.png)
+
+The teacher's face is part of the sign (ASL is not hands only):
+
+![Facial expressions in signs](docs/images/faces.png)
+
+Screenshots are from the Unity Editor with Meta XR Simulator, not from a headset.
+
+## What's in it
+
 Four modes from the start screen: **Learn & Test** (the teacher shows a word, you copy it, it is scored) and
 **Explore** (point at an object and hold 0.6 s; you see its English word and the teacher shows its sign — teaching only,
 no score). On a headset Explore uses three virtual objects (apple, cup, bottle). In the Unity Editor it can instead run
 on-device YOLOv9-t object detection (Unity Inference Engine, CPU, ~7 fps) on a mock camera frame and you point at the
-detected boxes; the Quest passthrough camera path is a stub and its alignment is not validated. Objects outside the 50
-words show "Not in my 50 words yet" and are never signed.
+detected boxes; the Quest passthrough camera path is a stub and its alignment is not validated. Objects outside the 62
+words show "Not in my 62 words yet" and are never signed.
 
 **Finger Relax** is a gentle ~1 minute stretch break for fingers that feel stiff after signing: open & close, spread
 wide, finger piano, shake it out, wiggle & rest. A ghost hand shows each pose and a ring fills as you hold it; every
@@ -39,7 +83,7 @@ keep getting wrong is the only one highlighted, words you have not seen for two 
 get right first time twice are shown less often — and shows its reason on screen ("Next: YES — because you missed it
 twice / Focus: your index finger"). Rule-based, no network, no account.
 
-The teacher also shows the face, because ASL is not hands-only: 22 of the 50 signs have a facial expression (WH-question
+The teacher also shows the face, because ASL is not hands-only: 23 of the 62 signs have a facial expression (WH-question
 furrowed brows with a head tilt, SAD, HAPPY, PAIN, THANK-YOU's smile, ...), sourced from Lifeprint where it describes
 one. The word card names what the brows, eyes and mouth do, and a FACE button replays just the face at half speed.
 **The learner's face is never read or scored** — Quest 3 / 3S has no face tracking; every face line says
@@ -50,7 +94,7 @@ Visual only, by design: the learner may be Deaf or hard of hearing. Every instru
 sound. Hands only, seated, no controllers. Built for the Meta VR Start Developer Competition 2026 (Productivity, New
 Experience).
 
-## The 50 signs (definitions from Lifeprint / ASL University)
+## The 62 signs (definitions from Lifeprint / ASL University)
 
 | Lesson | Signs |
 |---|---|
@@ -79,7 +123,7 @@ corrections welcome.
 | Recognition: 0.4 handshape + 0.2 start location + 0.4 movement, 3 s attempt window, settle, 1 s lockout, Top1 / Top2 | `Assets/Scripts/Hand/SignRecognizer.cs` |
 | Sign definitions (v2 schema: hands, curls, palm, movement, head, face) and the recorder that tunes them from your own hands | `Assets/Resources/templates.json`, `TemplateStore.cs`, `TemplateRecorder.cs`, `Assets/Scenes/TemplateRecorder.unity` |
 | Teacher: both arms, fingers, head nod / shake and face (smile, blink) driven from the same definitions | `Assets/Scripts/Learn/TeacherAvatarDriver.cs`, `SignMotion.cs`, `FaceDriver.cs` |
-| Lessons (5 × 10 signs), scoring (+10 / +5 / streaks / stars), ghost-hand + movement feedback | `Assets/Scripts/Learn/` |
+| Lessons (6 lessons, 62 signs), scoring (+10 / +5 / streaks / stars), ghost-hand + movement feedback | `Assets/Scripts/Learn/` |
 | Tutor Agent: perceive each attempt, remember per-word history on the headset (JSON), decide the next word, act with a specific hint and a visible reason | `Assets/Scripts/Learn/TutorAgent.cs`, `LearnerProfile.cs` |
 | Lesson data, Lifeprint sources | `Assets/StreamingAssets/lessons.json`, `word_sources.json` |
 | Offline teacher check against a sign-recognition model (dev machine only, nothing ships) | `workspace/goals/meta-vr-start-sign-language-entry/files/teacher-verification/` |
@@ -108,9 +152,12 @@ No image-recognition model and no third-party sign-language API: recognition is 
   signs suffer most from a single webcam (touching fists merge into one hand; ~30 cm depth jitter), so the editor uses
   a jitter allowance for COFFEE's "bottom hand still" check; device builds use the spec values.
 - Quest 3 / 3S has no face tracking: the learner's face is never scored. The teacher's face is display only.
-- **The 42 signs added in v3.1 have not been tried with real hands yet.** They pass a self-test (the teacher's own hands
-  through the recogniser: 47 / 47 scored signs recognised, all 8 v3 signs included), which shows the teacher and the
-  definitions agree — not that a learner's hands will be judged well.
+- **The 54 signs added after v3 have not been tried with real hands yet.** They pass a self-test (the teacher's own
+  hands through the recogniser: 54 / 54 scored signs recognised, all 8 v3 signs included), which shows the teacher and
+  the definitions agree — not that a learner's hands will be judged well.
+- **The teacher's arm is computed, not motion-captured.** Elbow, forearm and wrist come from inverse kinematics with
+  limits on where an elbow can go. The poses were judged by eye from still close-ups, not by a signer. Where Lifeprint
+  gives no finger direction (BOY, APPLE), the direction was chosen so a human arm can reach it.
 - **Replay of real human videos** (143 WLASL clips -> MediaPipe 3D hands -> the recogniser): 15 % of clips recognised.
   Video depth is 8-20 cm off and finger curls are rough, so this is a lower bound, not a headset prediction; it was used
   to fix four detector problems. Details: `teacher-verification/human_replay.md`.
